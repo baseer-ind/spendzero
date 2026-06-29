@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugin-dependencies
+build/
+*.iml
+.idea/
