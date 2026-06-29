@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/local/food_seed_data.dart';
-import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
 
 /// Bottom sheet shown when tapping a menu item row — description, spice
