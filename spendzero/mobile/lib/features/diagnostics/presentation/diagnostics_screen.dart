@@ -21,8 +21,8 @@ class DiagnosticsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _Row(label: 'App version', value: appVersion),
-          _Row(label: 'Environment', value: Env.envName),
+          const _Row(label: 'App version', value: appVersion),
+          const _Row(label: 'Environment', value: Env.envName),
           _Row(label: 'API base URL', value: Env.apiBaseUrl),
           deviceId.when(
             data: (id) => _Row(label: 'Device ID', value: id),
