@@ -78,7 +78,34 @@ retention-first roadmap (per explicit instruction) so the app could be
 installed and used on a real phone like an early beta tester. Resuming the
 roadmap below at item 1.
 
-## Immediately next (priority order, retention-first)
+## Founder QA Mode (current phase — supersedes the feature roadmap below)
+
+Per explicit instruction, new feature work is paused. Focus is on making
+the existing app feel polished and ready for real human testers:
+self-test every screen/state, a 5-persona founder walkthrough, a UX
+audit, App Store/Play readiness, a performance review, and a living Bug
+Bash. See `docs/21-bug-bash.md` (issue log) and `docs/22-release-readiness.md`
+(store readiness, performance notes, first-beta package).
+
+Fixed this pass:
+- **Critical**: double-checkout possible via Android back button from the
+  Craving Completed screen (stale in-memory cart quantities weren't
+  cleared after a successful checkout) — `mobile/lib/features/checkout/presentation/checkout_screen.dart`.
+- **High**: `formatPaise` used Western 3-digit comma grouping instead of
+  Indian lakh/crore grouping (e.g. showed "₹150,000" instead of
+  "₹1,50,000") — `mobile/lib/core/utils/money.dart`, affects every money
+  display in the app.
+
+Open, not yet fixed (tracked in the Bug Bash doc): confetti/haptic firing
+on screen-load rather than on the "I Saved It" decision; no app-wide
+offline banner or request timeout; no crash reporting/analytics; no app
+icon/native splash/privacy policy/legal disclaimer yet.
+
+Will resume the feature roadmap (shareable savings card, monthly recap,
+cart customization, Supabase auth, analytics/admin) once no Critical/High
+items remain open and the app is beta-ready.
+
+## Roadmap (paused — see Founder QA Mode above)
 
 1. Shareable savings/achievement card (screenshot-ready "I saved ₹X toward
    my Goa Trip 🔥 7-day streak" card) — virality hook, lets a delight

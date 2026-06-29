@@ -222,6 +222,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
       _saveDebounce?.cancel();
       ref.invalidate(cartProvider(widget.category.id));
+      setState(() => _quantities.clear());
       if (!mounted) return;
       context.push('/craving-completed', extra: result);
     } catch (_) {
