@@ -42,6 +42,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final categories = ref.watch(categoriesProvider);
     final stats = ref.watch(statsProvider);
+    final isDemoMode = ref.watch(demoModeProvider);
+    // Keeps the background retry-and-switch-back-to-live-data loop alive
+    // for as long as the home screen exists.
+    ref.watch(demoModeRetryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -68,6 +72,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (isDemoMode) ...[
+              const _DemoModeBanner(),
+              const SizedBox(height: 16),
+            ],
             if (_showHint == true) ...[
               _FirstLaunchHint(onDismiss: _dismissHint),
               const SizedBox(height: 16),
@@ -131,6 +139,39 @@ class _FirstLaunchHint extends StatelessWidget {
             icon: const Icon(Icons.close, size: 18),
             tooltip: 'Dismiss',
             onPressed: onDismiss,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shown whenever the app couldn't reach the backend and fell back to
+/// bundled demo data. [demoModeRetryProvider] keeps retrying in the
+/// background and this banner disappears automatically once live data
+/// loads again — no user action required.
+class _DemoModeBanner extends StatelessWidget {
+  const _DemoModeBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Text('📡', style: TextStyle(fontSize: 16)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              "Demo Mode — can't reach the server, showing sample data. "
+              'Retrying automatically.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ),
         ],
       ),
