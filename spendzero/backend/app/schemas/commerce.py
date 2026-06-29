@@ -9,6 +9,19 @@ class CartItemIn(BaseModel):
     options: dict | None = None
 
 
+class CartItemOut(BaseModel):
+    listing_id: uuid.UUID
+    quantity: int
+    options: dict | None = None
+    unit_price_paise: int
+
+
+class CartOut(BaseModel):
+    id: uuid.UUID
+    category_id: uuid.UUID
+    items: list[CartItemOut]
+
+
 class CheckoutRequest(BaseModel):
     category_id: uuid.UUID
     brand_id: uuid.UUID | None = None

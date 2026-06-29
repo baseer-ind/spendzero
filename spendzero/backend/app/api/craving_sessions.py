@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.deps import get_or_create_guest_user
 from app.db.session import get_db
 from app.models.catalog import Listing
-from app.models.commerce import CravingSession, CravingSessionItem
+from app.models.commerce import Cart, CravingSession, CravingSessionItem
 from app.models.goals import GoalContribution
 from app.models.user import User, UserStats
 from app.schemas.commerce import CheckoutRequest, CravingCompletedOut, SaveOutcomeRequest
@@ -69,6 +69,17 @@ async def checkout(
 
     today_total = await _sum_amount_not_spent(db, user.id, since=now.date())
     month_total = await _sum_amount_not_spent(db, user.id, since=now.replace(day=1).date())
+
+    open_cart = await db.execute(
+        select(Cart).where(
+            Cart.user_id == user.id,
+            Cart.category_id == payload.category_id,
+            Cart.status == "open",
+        )
+    )
+    cart = open_cart.scalar_one_or_none()
+    if cart is not None:
+        cart.status = "converted"
 
     await db.commit()
     return CravingCompletedOut(

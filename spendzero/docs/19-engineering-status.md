@@ -18,7 +18,8 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Guest-device auth | ✅ | header-based, `app/core/deps.py`; Supabase account linking still ⬜ |
 | Categories/brands/listings API | ✅ | read-only, no pagination/search yet ⬜ |
 | Goals API | ✅ | create/list; update/delete/archive ⬜ |
-| Checkout → Craving Completed → outcome API | ✅ | prices from real listings; cart persistence (`carts`/`cart_items`) not yet wired ⬜ |
+| Checkout → Craving Completed → outcome API | ✅ | prices from real listings |
+| Cart persistence (`carts`/`cart_items`) | ✅ | `GET /carts/{category_id}` resumes the open cart, `PUT /carts/{category_id}/items` upserts it; checkout marks the cart `converted` and a fresh open cart is created on next visit |
 | Stats aggregation | ✅ | total saved, cravings completed; streaks ⬜ |
 | Tests | 🚧 | smoke tests only (`tests/test_smoke.py`); needs a Postgres-backed integration suite in CI |
 | Rate limiting / Redis caching | ⬜ | |
@@ -35,7 +36,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Home screen (categories + savings banner) | ✅ | loading/error/empty states wired |
 | Goals screen | ✅ | loading/error/empty states + create-goal bottom sheet (presets + custom) |
 | Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings`, multi-select cart |
-| Cart / customization | 🚧 | quantity-1 multi-select only; options/customization, persisted `carts` table ⬜ |
+| Cart / customization | 🚧 | quantity-1 multi-select, persisted server-side and resumable across restarts; per-item quantity controls and options/customization UI ⬜ |
 | Real checkout wired to `/craving-sessions/checkout` | ✅ | |
 | Craving Completed screen wired to outcome API | ✅ | goal picker chips call `/outcome` with `saved`/`maybe_later` |
 | Account creation / Supabase auth | ⬜ | |
@@ -44,13 +45,11 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 
 ## Immediately next (priority order)
 
-1. Persist the cart (`carts`/`cart_items`) instead of building the
-   checkout payload client-side only, so an abandoned cart can be
-   resumed.
-2. Replace per-listing `CheckboxListTile` with a real product card +
+1. Replace per-listing `CheckboxListTile` with a real product card +
    image, matching `docs/07-design-system.md` / `08-component-library.md`.
-3. Supabase auth: promote a guest device identity to a full account
+2. Supabase auth: promote a guest device identity to a full account
    without losing saved progress.
-4. Streak/achievement logic in `user_stats`, surfaced in the UI.
-5. Rate limiting (Redis) on write endpoints; pagination/search on
+3. Streak/achievement logic in `user_stats`, surfaced in the UI.
+4. Rate limiting (Redis) on write endpoints; pagination/search on
    `/categories/{id}/listings`.
+5. Per-item quantity controls and cart options/customization UI.

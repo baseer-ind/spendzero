@@ -47,6 +47,17 @@ class ApiClient {
     return _decode(response);
   }
 
+  Future<dynamic> put(String path, {Object? body}) async {
+    final response = await _client
+        .put(
+          Uri.parse('${Env.apiBaseUrl}$path'),
+          headers: _headers,
+          body: body == null ? null : jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 10));
+    return _decode(response);
+  }
+
   dynamic _decode(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return null;

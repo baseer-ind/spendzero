@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/cart_repository.dart';
 import '../data/category_repository.dart';
 import '../data/craving_repository.dart';
 import '../data/goal_repository.dart';
+import '../models/cart.dart';
 import '../models/category.dart';
 import '../models/goal.dart';
 import '../models/listing.dart';
@@ -45,4 +47,14 @@ final categoryListingsProvider =
     FutureProvider.family<List<Listing>, String>((ref, categoryId) async {
   final repo = await ref.watch(categoryRepositoryProvider.future);
   return repo.fetchListings(categoryId);
+});
+
+final cartRepositoryProvider = FutureProvider<CartRepository>((ref) async {
+  final client = await ref.watch(apiClientProvider.future);
+  return CartRepository(client);
+});
+
+final cartProvider = FutureProvider.family<Cart, String>((ref, categoryId) async {
+  final repo = await ref.watch(cartRepositoryProvider.future);
+  return repo.fetchCart(categoryId);
 });

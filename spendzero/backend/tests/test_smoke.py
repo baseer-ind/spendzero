@@ -19,6 +19,8 @@ def test_all_routes_registered() -> None:
         "/api/v1/categories",
         "/api/v1/goals",
         "/api/v1/craving-sessions/checkout",
+        "/api/v1/carts/{category_id}",
+        "/api/v1/carts/{category_id}/items",
     }
     assert expected.issubset(paths)
 

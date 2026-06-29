@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,10 +25,45 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final Set<String> _selectedListingIds = {};
   bool _isCheckingOut = false;
   String? _checkoutError;
+  bool _cartRestored = false;
+  Timer? _saveDebounce;
+
+  @override
+  void dispose() {
+    _saveDebounce?.cancel();
+    super.dispose();
+  }
+
+  void _restoreCartOnce(AsyncValue<dynamic> cartAsync) {
+    if (_cartRestored) return;
+    final cart = cartAsync.value;
+    if (cart == null) return;
+    _cartRestored = true;
+    final ids = cart.items.map<String>((item) => item.listingId as String);
+    if (ids.isNotEmpty) {
+      setState(() => _selectedListingIds.addAll(ids));
+    }
+  }
+
+  void _scheduleCartSave() {
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final repo = await ref.read(cartRepositoryProvider.future);
+        await repo.saveItems(
+          widget.category.id,
+          _selectedListingIds.map((id) => {'listing_id': id, 'quantity': 1}).toList(),
+        );
+      } catch (_) {
+        // Best-effort persistence; the in-memory selection still drives checkout.
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final listingsAsync = ref.watch(categoryListingsProvider(widget.category.id));
+    _restoreCartOnce(ref.watch(cartProvider(widget.category.id)));
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.category.name)),
@@ -76,13 +113,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           value: selected,
           title: Text(listing.title),
           subtitle: Text(formatPaise(listing.pricePaise)),
-          onChanged: (value) => setState(() {
-            if (value == true) {
-              _selectedListingIds.add(listing.id);
-            } else {
-              _selectedListingIds.remove(listing.id);
-            }
-          }),
+          onChanged: (value) {
+            setState(() {
+              if (value == true) {
+                _selectedListingIds.add(listing.id);
+              } else {
+                _selectedListingIds.remove(listing.id);
+              }
+            });
+            _scheduleCartSave();
+          },
         );
       },
     );
@@ -133,6 +173,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         categoryId: widget.category.id,
         items: selected.map((l) => {'listing_id': l.id, 'quantity': 1}).toList(),
       );
+      _saveDebounce?.cancel();
+      ref.invalidate(cartProvider(widget.category.id));
       if (!mounted) return;
       context.push('/craving-completed', extra: result);
     } catch (_) {
