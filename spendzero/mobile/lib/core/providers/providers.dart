@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/contracts.dart';
+import '../data/contracts_food.dart';
+import '../data/local/food_seed_data.dart';
 import '../data/local/local_cart_repository.dart';
 import '../data/local/local_category_repository.dart';
 import '../data/local/local_craving_repository.dart';
 import '../data/local/local_feedback_repository.dart';
+import '../data/local/local_food_repository.dart';
 import '../data/local/local_goal_repository.dart';
 import '../data/local/local_stats_repository.dart';
 import '../data/local/local_store.dart';
@@ -120,6 +123,49 @@ final feedbackRepositoryProvider = FutureProvider<FeedbackRepository>((ref) asyn
   final client = await ref.watch(apiClientProvider.future);
   final deviceId = await ref.watch(deviceIdProvider.future);
   return ApiFeedbackRepository(client, deviceId);
+});
+
+/// The "Food Delivery" vertical is local-only for now — no `Api*` backend
+/// counterpart exists yet, so this provider always returns [LocalFoodRepository]
+/// regardless of [useLocalBackend].
+final foodRepositoryProvider = Provider<FoodRepository>((ref) => LocalFoodRepository());
+
+final foodRestaurantsProvider = FutureProvider<List<Restaurant>>((ref) async {
+  final repo = ref.watch(foodRepositoryProvider);
+  return repo.fetchRestaurants();
+});
+
+final foodTrendingProvider = FutureProvider<List<Restaurant>>((ref) async {
+  final repo = ref.watch(foodRepositoryProvider);
+  return repo.fetchTrending();
+});
+
+final foodTodaysOffersProvider = FutureProvider<List<MenuItem>>((ref) async {
+  final repo = ref.watch(foodRepositoryProvider);
+  return repo.fetchTodaysOffers();
+});
+
+final foodBestSellersProvider = FutureProvider<List<MenuItem>>((ref) async {
+  final repo = ref.watch(foodRepositoryProvider);
+  return repo.fetchBestSellers();
+});
+
+final menuItemsForRestaurantProvider =
+    FutureProvider.family<List<MenuItem>, String>((ref, restaurantId) async {
+  final repo = ref.watch(foodRepositoryProvider);
+  return repo.fetchMenuItems(restaurantId);
+});
+
+final reviewsForProvider =
+    FutureProvider.family<List<Review>, String>((ref, targetId) async {
+  final repo = ref.watch(foodRepositoryProvider);
+  return repo.fetchReviews(targetId);
+});
+
+final foodSearchProvider =
+    FutureProvider.family<List<dynamic>, String>((ref, query) async {
+  final repo = ref.watch(foodRepositoryProvider);
+  return repo.searchFood(query);
 });
 
 /// Pings `/health` so the diagnostics screen can show a live API status

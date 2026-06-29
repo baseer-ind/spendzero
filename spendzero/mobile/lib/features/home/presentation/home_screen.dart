@@ -243,7 +243,9 @@ class _CategoryGrid extends StatelessWidget {
         return _CategoryTile(
           emoji: category.emoji,
           name: category.name,
-          onTap: () => context.push('/checkout/${category.id}', extra: category),
+          onTap: () => category.id == 'demo-food'
+              ? context.push('/food/${category.id}', extra: category)
+              : context.push('/checkout/${category.id}', extra: category),
         );
       },
     );
