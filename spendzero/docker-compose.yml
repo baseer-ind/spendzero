@@ -1,0 +1,30 @@
+services:
+  api:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      SPENDZERO_DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/spendzero
+      SPENDZERO_REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: spendzero
+    ports:
+      - "5432:5432"
+    volumes:
+      - spendzero_db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  spendzero_db_data:
