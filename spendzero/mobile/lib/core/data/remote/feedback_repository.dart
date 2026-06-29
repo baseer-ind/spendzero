@@ -24,8 +24,3 @@ class ApiFeedbackRepository implements FeedbackRepository {
     });
   }
 }
-
-/// Kept in one place so it's easy to bump per release without chasing
-/// every call site. No `package_info_plus` dependency yet — see
-/// docs/22-release-readiness.md.
-const appVersion = '0.1.0';

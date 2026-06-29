@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/env.dart';
-import '../../../core/data/feedback_repository.dart';
 import '../../../core/providers/providers.dart';
 
 /// Beta-tester support screen: surfaces exactly what we'd need to ask a
