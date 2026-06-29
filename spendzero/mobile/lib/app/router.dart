@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import '../core/models/category.dart';
+import '../core/models/craving_completed.dart';
 import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/checkout/presentation/craving_completed_screen.dart';
 import '../features/goals/presentation/goals_screen.dart';
@@ -13,14 +15,13 @@ final appRouter = GoRouter(
     GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
     GoRoute(path: '/goals', builder: (context, state) => const GoalsScreen()),
     GoRoute(
-      path: '/checkout/:categorySlug',
-      builder: (context, state) =>
-          CheckoutScreen(categorySlug: state.pathParameters['categorySlug']!),
+      path: '/checkout/:categoryId',
+      builder: (context, state) => CheckoutScreen(category: state.extra as SpendCategory),
     ),
     GoRoute(
       path: '/craving-completed',
       builder: (context, state) =>
-          CravingCompletedScreen(amountPaise: state.extra as int? ?? 0),
+          CravingCompletedScreen(result: state.extra as CravingCompleted),
     ),
   ],
 );

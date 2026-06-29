@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/data/mock_categories.dart';
-import '../../../core/data/mock_goals.dart';
+import '../../../core/models/category.dart';
+import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final totalSavedPaise =
-        mockGoals.fold<int>(0, (sum, goal) => sum + goal.savedPaise);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final categories = ref.watch(categoriesProvider);
+    final goals = ref.watch(goalsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -24,33 +25,34 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _SavingsBanner(totalSavedPaise: totalSavedPaise),
-          const SizedBox(height: 20),
-          Text('Browse a category', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: mockCategories.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.9,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(categoriesProvider);
+          ref.invalidate(goalsProvider);
+        },
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            goals.when(
+              data: (list) => _SavingsBanner(
+                totalSavedPaise: list.fold<int>(0, (sum, goal) => sum + goal.savedPaise),
+              ),
+              loading: () => const _SavingsBannerSkeleton(),
+              error: (error, _) => const _SavingsBannerSkeleton(),
             ),
-            itemBuilder: (context, index) {
-              final category = mockCategories[index];
-              return _CategoryTile(
-                emoji: category.emoji,
-                name: category.name,
-                onTap: () => context.push('/checkout/${category.slug}'),
-              );
-            },
-          ),
-        ],
+            const SizedBox(height: 20),
+            Text('Browse a category', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            categories.when(
+              data: (list) => _CategoryGrid(categories: list),
+              loading: () => const _CategoryGridSkeleton(),
+              error: (error, _) => _ErrorState(
+                message: 'Couldn\'t load categories. Pull down to retry.',
+                onRetry: () => ref.invalidate(categoriesProvider),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -88,6 +90,78 @@ class _SavingsBanner extends StatelessWidget {
   }
 }
 
+class _SavingsBannerSkeleton extends StatelessWidget {
+  const _SavingsBannerSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 96,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+    );
+  }
+}
+
+class _CategoryGrid extends StatelessWidget {
+  const _CategoryGrid({required this.categories});
+
+  final List<SpendCategory> categories;
+
+  @override
+  Widget build(BuildContext context) {
+    if (categories.isEmpty) {
+      return const _EmptyState(message: 'No categories yet — check back soon.');
+    }
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: categories.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.9,
+      ),
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        return _CategoryTile(
+          emoji: category.emoji,
+          name: category.name,
+          onTap: () => context.push('/checkout/${category.id}', extra: category),
+        );
+      },
+    );
+  }
+}
+
+class _CategoryGridSkeleton extends StatelessWidget {
+  const _CategoryGridSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 6,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.9,
+      ),
+      itemBuilder: (context, index) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
+}
+
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({required this.emoji, required this.name, required this.onTap});
 
@@ -105,14 +179,53 @@ class _CategoryTile extends StatelessWidget {
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 28)),
-            const SizedBox(height: 6),
-            Text(name, style: Theme.of(context).textTheme.labelMedium),
-          ],
+        child: Semantics(
+          button: true,
+          label: name,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 28)),
+              const SizedBox(height: 6),
+              Text(name, style: Theme.of(context).textTheme.labelMedium),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Center(child: Text(message, style: Theme.of(context).textTheme.bodyMedium)),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  const _ErrorState({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Column(
+        children: [
+          Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+          const SizedBox(height: 12),
+          OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+        ],
       ),
     );
   }

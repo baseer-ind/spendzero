@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -44,8 +44,8 @@ class CravingSession(TimestampedBase):
     goal_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("goals.id"), nullable=True
     )
-    placed_at: Mapped[datetime | None] = mapped_column(nullable=True)
-    completed_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    placed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class CravingSessionItem(TimestampedBase):
