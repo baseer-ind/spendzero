@@ -102,7 +102,7 @@ class _BrandScreenState extends ConsumerState<BrandScreen> {
       context: context,
       isScrollControlled: true,
       builder: (context) => ProductDetailSheet(
-        item: item,
+        product: item,
         initialQuantity: _quantities[item.id] ?? 0,
         onQuantityChanged: (qty) => _setQuantity(item, qty),
       ),
