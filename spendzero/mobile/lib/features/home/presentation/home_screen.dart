@@ -185,12 +185,17 @@ class _SavingsBanner extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            formatPaise(totalSavedPaise),
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
+          TweenAnimationBuilder<int>(
+            tween: IntTween(begin: 0, end: totalSavedPaise),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) => Text(
+              formatPaise(value),
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -270,7 +275,7 @@ class _CategoryGridSkeleton extends StatelessWidget {
   }
 }
 
-class _CategoryTile extends StatelessWidget {
+class _CategoryTile extends StatefulWidget {
   const _CategoryTile({required this.emoji, required this.name, required this.onTap});
 
   final String emoji;
@@ -278,25 +283,41 @@ class _CategoryTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_CategoryTile> createState() => _CategoryTileState();
+}
+
+class _CategoryTileState extends State<_CategoryTile> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTapUp: (_) => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.94 : 1,
+        duration: const Duration(milliseconds: 100),
+        child: InkWell(
           borderRadius: BorderRadius.circular(16),
-        ),
-        child: Semantics(
-          button: true,
-          label: name,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 28)),
-              const SizedBox(height: 6),
-              Text(name, style: Theme.of(context).textTheme.labelMedium),
-            ],
+          onTap: widget.onTap,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Semantics(
+              button: true,
+              label: widget.name,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(widget.emoji, style: const TextStyle(fontSize: 28)),
+                  const SizedBox(height: 6),
+                  Text(widget.name, style: Theme.of(context).textTheme.labelMedium),
+                ],
+              ),
+            ),
           ),
         ),
       ),
