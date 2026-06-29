@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/contracts.dart';
 import '../data/contracts_food.dart';
 import '../data/contracts_grocery.dart';
+import '../data/contracts_shopping.dart';
 import '../data/local/food_seed_data.dart';
 import '../data/local/grocery_seed_data.dart' hide Review;
 import '../data/local/grocery_seed_data.dart' as grocery_seed show Review;
+import '../data/local/shopping_seed_data.dart' hide Review;
+import '../data/local/shopping_seed_data.dart' as shopping_seed show Review;
 import '../data/local/local_cart_repository.dart';
 import '../data/local/local_category_repository.dart';
 import '../data/local/local_craving_repository.dart';
@@ -13,6 +16,7 @@ import '../data/local/local_feedback_repository.dart';
 import '../data/local/local_food_repository.dart';
 import '../data/local/local_goal_repository.dart';
 import '../data/local/local_grocery_repository.dart';
+import '../data/local/local_shopping_repository.dart';
 import '../data/local/local_stats_repository.dart';
 import '../data/local/local_store.dart';
 import '../data/remote/cart_repository.dart';
@@ -225,6 +229,62 @@ final groceryStoreByIdProvider =
 final groceryProductByIdProvider =
     FutureProvider.family<GroceryProduct?, String>((ref, productId) async {
   final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchProduct(productId);
+});
+
+/// The "Shopping" vertical (Fashion + Electronics) is local-only for now —
+/// no `Api*` backend counterpart exists yet, so this provider always
+/// returns [LocalShoppingRepository] regardless of [useLocalBackend].
+final shoppingRepositoryProvider =
+    Provider<ShoppingRepository>((ref) => LocalShoppingRepository());
+
+final shoppingBrandsProvider = FutureProvider<List<ShoppingBrand>>((ref) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchBrands();
+});
+
+final shoppingTrendingProvider = FutureProvider<List<ShoppingBrand>>((ref) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchTrending();
+});
+
+final shoppingTodaysOffersProvider = FutureProvider<List<ShoppingProduct>>((ref) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchTodaysOffers();
+});
+
+final shoppingBestSellersProvider = FutureProvider<List<ShoppingProduct>>((ref) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchBestSellers();
+});
+
+final productsForBrandProvider =
+    FutureProvider.family<List<ShoppingProduct>, String>((ref, brandId) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchProducts(brandId);
+});
+
+final shoppingReviewsForProvider =
+    FutureProvider.family<List<shopping_seed.Review>, String>((ref, targetId) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchReviews(targetId);
+});
+
+final shoppingSearchProvider =
+    FutureProvider.family<List<dynamic>, String>((ref, query) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.searchShopping(query);
+});
+
+final shoppingBrandByIdProvider =
+    FutureProvider.family<ShoppingBrand?, String>((ref, brandId) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchBrand(brandId);
+});
+
+final shoppingProductByIdProvider =
+    FutureProvider.family<ShoppingProduct?, String>((ref, productId) async {
+  final repo = ref.watch(shoppingRepositoryProvider);
   return repo.fetchProduct(productId);
 });
 

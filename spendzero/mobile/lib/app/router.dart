@@ -11,6 +11,8 @@ import '../features/goals/presentation/goals_screen.dart';
 import '../features/grocery/presentation/grocery_home_screen.dart';
 import '../features/grocery/presentation/store_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/shopping/presentation/brand_screen.dart';
+import '../features/shopping/presentation/shopping_home_screen.dart';
 import '../features/onboarding/presentation/splash_screen.dart';
 
 final appRouter = GoRouter(
@@ -43,6 +45,17 @@ final appRouter = GoRouter(
       builder: (context, state) => StoreScreen(
         categoryId: state.pathParameters['categoryId']!,
         storeId: state.pathParameters['storeId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/shopping/:categoryId',
+      builder: (context, state) => ShoppingHomeScreen(category: state.extra as SpendCategory),
+    ),
+    GoRoute(
+      path: '/shopping/:categoryId/brand/:brandId',
+      builder: (context, state) => BrandScreen(
+        categoryId: state.pathParameters['categoryId']!,
+        brandId: state.pathParameters['brandId']!,
       ),
     ),
     GoRoute(

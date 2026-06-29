@@ -248,6 +248,8 @@ class _CategoryGrid extends StatelessWidget {
               context.push('/food/${category.id}', extra: category);
             } else if (category.id == 'demo-groceries') {
               context.push('/grocery/${category.id}', extra: category);
+            } else if (category.id == 'demo-fashion') {
+              context.push('/shopping/${category.id}', extra: category);
             } else {
               context.push('/checkout/${category.id}', extra: category);
             }
