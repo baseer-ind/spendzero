@@ -8,10 +8,11 @@ import '../../../core/models/category.dart';
 import '../../../core/models/listing.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
+import 'product_card.dart';
 
 /// Browse a category's simulated listings, build a cart, and run the fake
-/// checkout. Customization/options and multi-quantity carts are a later
-/// milestone — this covers the end-to-end craving -> savings loop.
+/// checkout. Customization/options are a later milestone — this covers the
+/// end-to-end craving -> savings loop with real per-item quantities.
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key, required this.category});
 
@@ -22,7 +23,7 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 }
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
-  final Set<String> _selectedListingIds = {};
+  final Map<String, int> _quantities = {};
   bool _isCheckingOut = false;
   String? _checkoutError;
   bool _cartRestored = false;
@@ -39,10 +40,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final cart = cartAsync.value;
     if (cart == null) return;
     _cartRestored = true;
-    final ids = cart.items.map<String>((item) => item.listingId as String);
-    if (ids.isNotEmpty) {
-      setState(() => _selectedListingIds.addAll(ids));
+    final restored = {
+      for (final item in cart.items) item.listingId as String: item.quantity as int,
+    };
+    if (restored.isNotEmpty) {
+      setState(() => _quantities.addAll(restored));
     }
+  }
+
+  void _setQuantity(String listingId, int quantity) {
+    setState(() {
+      if (quantity <= 0) {
+        _quantities.remove(listingId);
+      } else {
+        _quantities[listingId] = quantity;
+      }
+    });
+    _scheduleCartSave();
   }
 
   void _scheduleCartSave() {
@@ -52,7 +66,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         final repo = await ref.read(cartRepositoryProvider.future);
         await repo.saveItems(
           widget.category.id,
-          _selectedListingIds.map((id) => {'listing_id': id, 'quantity': 1}).toList(),
+          _quantities.entries
+              .map((e) => {'listing_id': e.key, 'quantity': e.value})
+              .toList(),
         );
       } catch (_) {
         // Best-effort persistence; the in-memory selection still drives checkout.
@@ -87,7 +103,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _selectedListingIds.isEmpty
+      bottomNavigationBar: _quantities.isEmpty
           ? null
           : _buildCheckoutBar(context, listingsAsync.value ?? const []),
     );
@@ -105,32 +121,24 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: listings.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final listing = listings[index];
-        final selected = _selectedListingIds.contains(listing.id);
-        return CheckboxListTile(
-          value: selected,
-          title: Text(listing.title),
-          subtitle: Text(formatPaise(listing.pricePaise)),
-          onChanged: (value) {
-            setState(() {
-              if (value == true) {
-                _selectedListingIds.add(listing.id);
-              } else {
-                _selectedListingIds.remove(listing.id);
-              }
-            });
-            _scheduleCartSave();
-          },
+        return ProductCard(
+          listing: listing,
+          quantity: _quantities[listing.id] ?? 0,
+          onQuantityChanged: (qty) => _setQuantity(listing.id, qty),
         );
       },
     );
   }
 
   Widget _buildCheckoutBar(BuildContext context, List<Listing> listings) {
-    final selected = listings.where((l) => _selectedListingIds.contains(l.id));
-    final total = selected.fold<int>(0, (sum, l) => sum + l.pricePaise);
+    final listingsById = {for (final l in listings) l.id: l};
+    final total = _quantities.entries.fold<int>(0, (sum, e) {
+      final listing = listingsById[e.key];
+      return listing == null ? sum : sum + listing.pricePaise * e.value;
+    });
 
     return SafeArea(
       child: Padding(
@@ -147,7 +155,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
               ),
             FilledButton(
-              onPressed: _isCheckingOut ? null : () => _checkout(selected.toList()),
+              onPressed: _isCheckingOut ? null : () => _checkout(listingsById),
               child: _isCheckingOut
                   ? const SizedBox(
                       height: 20,
@@ -162,7 +170,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Future<void> _checkout(List<Listing> selected) async {
+  Future<void> _checkout(Map<String, Listing> listingsById) async {
     setState(() {
       _isCheckingOut = true;
       _checkoutError = null;
@@ -171,7 +179,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final repo = await ref.read(cravingRepositoryProvider.future);
       final result = await repo.checkout(
         categoryId: widget.category.id,
-        items: selected.map((l) => {'listing_id': l.id, 'quantity': 1}).toList(),
+        items: _quantities.entries
+            .where((e) => listingsById.containsKey(e.key))
+            .map((e) => {'listing_id': e.key, 'quantity': e.value})
+            .toList(),
       );
       _saveDebounce?.cancel();
       ref.invalidate(cartProvider(widget.category.id));

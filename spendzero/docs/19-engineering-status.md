@@ -35,8 +35,8 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Networking layer (http client, device id, repositories) | ✅ | `lib/core/network/`, `lib/core/data/` |
 | Home screen (categories + savings banner) | ✅ | loading/error/empty states wired |
 | Goals screen | ✅ | loading/error/empty states + create-goal bottom sheet (presets + custom) |
-| Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings`, multi-select cart |
-| Cart / customization | 🚧 | quantity-1 multi-select, persisted server-side and resumable across restarts; per-item quantity controls and options/customization UI ⬜ |
+| Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings` via real `ProductCard`s (rating, MRP/discount, quantity stepper) |
+| Cart / customization | 🚧 | per-item quantity stepper, persisted server-side and resumable across restarts; options/customization UI ⬜ |
 | Real checkout wired to `/craving-sessions/checkout` | ✅ | |
 | Craving Completed screen wired to outcome API | ✅ | goal picker chips call `/outcome` with `saved`/`maybe_later` |
 | Account creation / Supabase auth | ⬜ | |
@@ -45,11 +45,9 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 
 ## Immediately next (priority order)
 
-1. Replace per-listing `CheckboxListTile` with a real product card +
-   image, matching `docs/07-design-system.md` / `08-component-library.md`.
-2. Supabase auth: promote a guest device identity to a full account
+1. Supabase auth: promote a guest device identity to a full account
    without losing saved progress.
-3. Streak/achievement logic in `user_stats`, surfaced in the UI.
-4. Rate limiting (Redis) on write endpoints; pagination/search on
+2. Streak/achievement logic in `user_stats`, surfaced in the UI.
+3. Rate limiting (Redis) on write endpoints; pagination/search on
    `/categories/{id}/listings`.
-5. Per-item quantity controls and cart options/customization UI.
+4. Cart item options/customization UI (size/variant pickers).
