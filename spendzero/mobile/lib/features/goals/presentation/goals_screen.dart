@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
+import 'create_goal_sheet.dart';
 
 class GoalsScreen extends ConsumerWidget {
   const GoalsScreen({super.key});
@@ -14,6 +15,11 @@ class GoalsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Your goals')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showCreateGoalSheet(context, ref),
+        tooltip: 'New goal',
+        child: const Icon(Icons.add),
+      ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(goalsProvider),
         child: goals.when(

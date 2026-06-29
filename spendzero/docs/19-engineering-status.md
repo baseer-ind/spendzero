@@ -33,7 +33,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | App shell, theme, go_router | ✅ | |
 | Networking layer (http client, device id, repositories) | ✅ | `lib/core/network/`, `lib/core/data/` |
 | Home screen (categories + savings banner) | ✅ | loading/error/empty states wired |
-| Goals screen | ✅ | loading/error/empty states wired; create-goal UI ⬜ |
+| Goals screen | ✅ | loading/error/empty states + create-goal bottom sheet (presets + custom) |
 | Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings`, multi-select cart |
 | Cart / customization | 🚧 | quantity-1 multi-select only; options/customization, persisted `carts` table ⬜ |
 | Real checkout wired to `/craving-sessions/checkout` | ✅ | |
@@ -44,11 +44,13 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 
 ## Immediately next (priority order)
 
-1. GitHub Actions CI: backend pytest + ruff, mobile `flutter analyze`
-   + `flutter test`.
-2. Goal creation UI (bottom sheet) calling `POST /goals`.
-3. Persist the cart (`carts`/`cart_items`) instead of building the
+1. Persist the cart (`carts`/`cart_items`) instead of building the
    checkout payload client-side only, so an abandoned cart can be
    resumed.
-4. Replace per-listing `CheckboxListTile` with a real product card +
+2. Replace per-listing `CheckboxListTile` with a real product card +
    image, matching `docs/07-design-system.md` / `08-component-library.md`.
+3. Supabase auth: promote a guest device identity to a full account
+   without losing saved progress.
+4. Streak/achievement logic in `user_stats`, surfaced in the UI.
+5. Rate limiting (Redis) on write endpoints; pagination/search on
+   `/categories/{id}/listings`.
