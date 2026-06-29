@@ -1,6 +1,7 @@
 import uuid
+from datetime import date
 
-from sqlalchemy import ARRAY, Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import ARRAY, Boolean, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -48,3 +49,4 @@ class UserStats(TimestampedBase):
     current_streak_days: Mapped[int] = mapped_column(Integer, default=0)
     longest_streak_days: Mapped[int] = mapped_column(Integer, default=0)
     categories_explored: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
+    last_saved_date: Mapped[date | None] = mapped_column(Date, nullable=True)

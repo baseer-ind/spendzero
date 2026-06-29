@@ -12,7 +12,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoriesProvider);
-    final goals = ref.watch(goalsProvider);
+    final stats = ref.watch(statsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -29,13 +29,15 @@ class HomeScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(categoriesProvider);
           ref.invalidate(goalsProvider);
+          ref.invalidate(statsProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            goals.when(
-              data: (list) => _SavingsBanner(
-                totalSavedPaise: list.fold<int>(0, (sum, goal) => sum + goal.savedPaise),
+            stats.when(
+              data: (s) => _SavingsBanner(
+                totalSavedPaise: s.totalAmountNotSpentPaise,
+                streakDays: s.currentStreakDays,
               ),
               loading: () => const _SavingsBannerSkeleton(),
               error: (error, _) => const _SavingsBannerSkeleton(),
@@ -59,9 +61,10 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _SavingsBanner extends StatelessWidget {
-  const _SavingsBanner({required this.totalSavedPaise});
+  const _SavingsBanner({required this.totalSavedPaise, required this.streakDays});
 
   final int totalSavedPaise;
+  final int streakDays;
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +78,34 @@ class _SavingsBanner extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Total saved so far', style: Theme.of(context).textTheme.bodyMedium),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Total saved so far', style: Theme.of(context).textTheme.bodyMedium),
+              if (streakDays > 0)
+                Semantics(
+                  label: '$streakDays day saving streak',
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: colors.secondaryContainer,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('🔥', style: TextStyle(fontSize: 14)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$streakDays day streak',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 4),
           Text(
             formatPaise(totalSavedPaise),

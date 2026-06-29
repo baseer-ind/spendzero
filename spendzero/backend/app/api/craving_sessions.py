@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
@@ -120,7 +120,7 @@ async def record_outcome(
                     amount_paise=session.total_price_paise,
                 )
             )
-        await _increment_stats(db, user.id, session.total_price_paise)
+        await _increment_stats(db, user.id, session.total_price_paise, session.category_id)
 
     await db.commit()
 
@@ -136,7 +136,9 @@ async def _sum_amount_not_spent(db: AsyncSession, user_id: uuid.UUID, since) -> 
     return int(result.scalar_one())
 
 
-async def _increment_stats(db: AsyncSession, user_id: uuid.UUID, amount_paise: int) -> None:
+async def _increment_stats(
+    db: AsyncSession, user_id: uuid.UUID, amount_paise: int, category_id: uuid.UUID
+) -> None:
     result = await db.execute(select(UserStats).where(UserStats.user_id == user_id))
     stats = result.scalar_one_or_none()
     if stats is None:
@@ -145,3 +147,17 @@ async def _increment_stats(db: AsyncSession, user_id: uuid.UUID, amount_paise: i
         await db.flush()
     stats.total_amount_not_spent_paise += amount_paise
     stats.cravings_completed += 1
+
+    today = datetime.now(timezone.utc).date()
+    last_saved = stats.last_saved_date
+    if last_saved is None or last_saved < today - timedelta(days=1):
+        stats.current_streak_days = 1
+    elif last_saved == today - timedelta(days=1):
+        stats.current_streak_days += 1
+    # else last_saved == today: already counted today, streak unchanged.
+    stats.longest_streak_days = max(stats.longest_streak_days, stats.current_streak_days)
+    stats.last_saved_date = today
+
+    explored = set(stats.categories_explored or [])
+    explored.add(str(category_id))
+    stats.categories_explored = list(explored)

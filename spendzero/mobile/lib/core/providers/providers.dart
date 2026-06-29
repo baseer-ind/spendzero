@@ -4,10 +4,12 @@ import '../data/cart_repository.dart';
 import '../data/category_repository.dart';
 import '../data/craving_repository.dart';
 import '../data/goal_repository.dart';
+import '../data/stats_repository.dart';
 import '../models/cart.dart';
 import '../models/category.dart';
 import '../models/goal.dart';
 import '../models/listing.dart';
+import '../models/user_stats.dart';
 import '../network/api_client.dart';
 import '../network/device_id.dart';
 
@@ -57,4 +59,14 @@ final cartRepositoryProvider = FutureProvider<CartRepository>((ref) async {
 final cartProvider = FutureProvider.family<Cart, String>((ref, categoryId) async {
   final repo = await ref.watch(cartRepositoryProvider.future);
   return repo.fetchCart(categoryId);
+});
+
+final statsRepositoryProvider = FutureProvider<StatsRepository>((ref) async {
+  final client = await ref.watch(apiClientProvider.future);
+  return StatsRepository(client);
+});
+
+final statsProvider = FutureProvider<UserStats>((ref) async {
+  final repo = await ref.watch(statsRepositoryProvider.future);
+  return repo.fetchStats();
 });

@@ -20,12 +20,12 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Goals API | ✅ | create/list; update/delete/archive ⬜ |
 | Checkout → Craving Completed → outcome API | ✅ | prices from real listings |
 | Cart persistence (`carts`/`cart_items`) | ✅ | `GET /carts/{category_id}` resumes the open cart, `PUT /carts/{category_id}/items` upserts it; checkout marks the cart `converted` and a fresh open cart is created on next visit |
-| Stats aggregation | ✅ | total saved, cravings completed; streaks ⬜ |
+| Stats aggregation + streaks | ✅ | `GET /me/stats`; `current_streak_days`/`longest_streak_days` computed from `last_saved_date` on each "I Saved It", verified end-to-end (increment on consecutive days, reset after a gap) against a live Postgres instance |
 | Tests | 🚧 | smoke tests only (`tests/test_smoke.py`); needs a Postgres-backed integration suite in CI |
 | Rate limiting / Redis caching | ⬜ | |
 | Analytics events table + ingestion | ⬜ | |
 | Admin dashboard API | ⬜ | |
-| CI (GitHub Actions) | ⬜ | |
+| CI (GitHub Actions) | ✅ | `.github/workflows/ci.yml` — backend (Postgres service, ruff, alembic upgrade, pytest) + mobile (flutter analyze/test) jobs |
 
 ## Mobile (Flutter)
 
@@ -33,7 +33,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 |---|---|---|
 | App shell, theme, go_router | ✅ | |
 | Networking layer (http client, device id, repositories) | ✅ | `lib/core/network/`, `lib/core/data/` |
-| Home screen (categories + savings banner) | ✅ | loading/error/empty states wired |
+| Home screen (categories + savings banner) | ✅ | banner now reads `/me/stats` (true self-reported total, not just goal-allocated savings) and shows a 🔥 streak badge; loading/error/empty states wired |
 | Goals screen | ✅ | loading/error/empty states + create-goal bottom sheet (presets + custom) |
 | Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings` via real `ProductCard`s (rating, MRP/discount, quantity stepper) |
 | Cart / customization | 🚧 | per-item quantity stepper, persisted server-side and resumable across restarts; options/customization UI ⬜ |
@@ -47,7 +47,9 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 
 1. Supabase auth: promote a guest device identity to a full account
    without losing saved progress.
-2. Streak/achievement logic in `user_stats`, surfaced in the UI.
-3. Rate limiting (Redis) on write endpoints; pagination/search on
+2. Rate limiting (Redis) on write endpoints; pagination/search on
    `/categories/{id}/listings`.
-4. Cart item options/customization UI (size/variant pickers).
+3. Cart item options/customization UI (size/variant pickers).
+4. Streak/achievement *celebration* moments (e.g. milestone toasts at
+   3/7/30-day streaks) — the underlying counters are done, this is the
+   UX polish layer.

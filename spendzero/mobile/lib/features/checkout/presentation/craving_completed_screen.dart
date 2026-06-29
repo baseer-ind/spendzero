@@ -103,6 +103,7 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
         goalId: outcome == 'saved' ? _selectedGoalId : null,
       );
       ref.invalidate(goalsProvider);
+      ref.invalidate(statsProvider);
     } catch (_) {
       // Best-effort: the celebration already happened locally, so a failed
       // network write shouldn't block the user from returning home.
