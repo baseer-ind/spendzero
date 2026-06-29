@@ -101,20 +101,43 @@ on screen-load rather than on the "I Saved It" decision; no app-wide
 offline banner or request timeout; no crash reporting/analytics; no app
 icon/native splash/privacy policy/legal disclaimer yet.
 
-Will resume the feature roadmap (shareable savings card, monthly recap,
-cart customization, Supabase auth, analytics/admin) once no Critical/High
-items remain open and the app is beta-ready.
+Second QA pass added: 5-persona real-user simulation, "first five
+minutes" journey audit, an honest App Store gut-check, and final
+validation — see `docs/23-validation-review.md`. Shipped this pass:
+- A one-time, dismissible first-launch hint on Home explaining the
+  concept before the first checkout (closed the biggest "what do I even
+  do here" gap found across personas).
+- In-app feedback flow: "Send feedback" sheet (star rating + free text)
+  posting to a new `POST /api/v1/feedback` backend endpoint, plus a
+  `/diagnostics` screen (app version, env, API base URL, device id, live
+  API health) reachable from it — both aimed at the first 20 beta testers.
+- A crash-hook placeholder (`FlutterError.onError` in `main.dart`) marking
+  exactly where a real reporter (Sentry/Crashlytics) plugs in once that
+  account exists.
 
-## Roadmap (paused — see Founder QA Mode above)
+Will resume the feature roadmap once no Critical/High items remain open
+and the app is beta-ready.
 
-1. Shareable savings/achievement card (screenshot-ready "I saved ₹X toward
+## Roadmap (paused — see Founder QA Mode above; reprioritized per validation review)
+
+1. **Push notifications** — promoted to #1. Validated across personas as
+   the single biggest retention risk: nothing currently brings a user
+   back if they don't remember to open the app on their own.
+2. **Minimal craving history view** — promoted to #2. The data already
+   exists server-side (`CravingSession` rows); surfacing a simple
+   reverse-chronological list closes the "what did I resist last week"
+   gap identified for the budget-conscious persona, for a small build.
+3. Shareable savings/achievement card (screenshot-ready "I saved ₹X toward
    my Goa Trip 🔥 7-day streak" card) — virality hook, lets a delight
-   moment turn into word-of-mouth.
-2. Monthly/weekly savings recap (Spotify-Wrapped-style) to re-engage users
+   moment turn into word-of-mouth. Still high-value, now behind the two
+   retention items above.
+4. Monthly/weekly savings recap (Spotify-Wrapped-style) to re-engage users
    who haven't opened the app in a few days.
-3. Cart item options/customization UI (size/variant pickers) — still
+5. Cart item options/customization UI (size/variant pickers) — still
    useful, lower emotional leverage than the above.
-4. Supabase auth: promote a guest device identity to a full account
+6. Goal editing/deletion — currently a permanent typo if mistyped; small
+   fix, not yet done.
+7. Supabase auth: promote a guest device identity to a full account
    without losing saved progress — needed for durability, not urgent for
    delight, so behind the above.
-5. Analytics event ingestion; admin dashboard API.
+8. Analytics event ingestion; admin dashboard API.

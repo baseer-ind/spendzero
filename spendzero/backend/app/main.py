@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.carts import router as carts_router
 from app.api.categories import router as categories_router
 from app.api.craving_sessions import router as craving_sessions_router
+from app.api.feedback import router as feedback_router
 from app.api.goals import router as goals_router
 from app.api.stats import router as stats_router
 from app.api.health import router as health_router
@@ -37,3 +38,4 @@ app.include_router(goals_router, prefix="/api/v1")
 app.include_router(craving_sessions_router, prefix="/api/v1")
 app.include_router(carts_router, prefix="/api/v1")
 app.include_router(stats_router, prefix="/api/v1")
+app.include_router(feedback_router, prefix="/api/v1")

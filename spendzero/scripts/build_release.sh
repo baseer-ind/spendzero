@@ -3,20 +3,26 @@
 # testing, TestFlight, or direct APK install).
 #
 # Usage:
+#   ./scripts/build_release.sh debug [development|staging|production]
 #   ./scripts/build_release.sh apk [development|staging|production]
 #   ./scripts/build_release.sh appbundle [development|staging|production]
 #   ./scripts/build_release.sh ios-archive [development|staging|production]   # macOS + Xcode only
 #
-# Defaults to the "production" env config if none given.
+# Defaults to the "production" env config if none given ("debug" defaults
+# to "development", since a debug build's whole point is local testing).
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 TARGET="${1:-}"
-ENV_NAME="${2:-production}"
+DEFAULT_ENV="production"
+if [ "$TARGET" = "debug" ]; then
+  DEFAULT_ENV="development"
+fi
+ENV_NAME="${2:-$DEFAULT_ENV}"
 
 if [ -z "$TARGET" ]; then
-  echo "Usage: $0 [apk|appbundle|ios-archive] [development|staging|production]" >&2
+  echo "Usage: $0 [debug|apk|appbundle|ios-archive] [development|staging|production]" >&2
   exit 1
 fi
 
@@ -28,6 +34,10 @@ fi
 cd mobile
 
 case "$TARGET" in
+  debug)
+    flutter build apk --debug --dart-define-from-file="env/${ENV_NAME}.json"
+    echo "Debug APK: mobile/build/app/outputs/flutter-apk/app-debug.apk"
+    ;;
   apk)
     flutter build apk --release --dart-define-from-file="env/${ENV_NAME}.json"
     echo "APK: mobile/build/app/outputs/flutter-apk/app-release.apk"
@@ -42,7 +52,7 @@ case "$TARGET" in
     echo "IPA (if exported): mobile/build/ios/ipa/"
     ;;
   *)
-    echo "Unknown target '$TARGET' — expected apk, appbundle, or ios-archive." >&2
+    echo "Unknown target '$TARGET' — expected debug, apk, appbundle, or ios-archive." >&2
     exit 1
     ;;
 esac

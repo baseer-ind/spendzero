@@ -4,6 +4,7 @@ import '../core/models/category.dart';
 import '../core/models/craving_completed.dart';
 import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/checkout/presentation/craving_completed_screen.dart';
+import '../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../features/goals/presentation/goals_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/splash_screen.dart';
@@ -23,5 +24,6 @@ final appRouter = GoRouter(
       builder: (context, state) =>
           CravingCompletedScreen(result: state.extra as CravingCompleted),
     ),
+    GoRoute(path: '/diagnostics', builder: (context, state) => const DiagnosticsScreen()),
   ],
 );

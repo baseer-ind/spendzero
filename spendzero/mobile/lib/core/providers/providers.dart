@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/cart_repository.dart';
 import '../data/category_repository.dart';
 import '../data/craving_repository.dart';
+import '../data/feedback_repository.dart';
 import '../data/goal_repository.dart';
 import '../data/stats_repository.dart';
 import '../models/cart.dart';
@@ -78,4 +79,22 @@ final statsRepositoryProvider = FutureProvider<StatsRepository>((ref) async {
 final statsProvider = FutureProvider<UserStats>((ref) async {
   final repo = await ref.watch(statsRepositoryProvider.future);
   return repo.fetchStats();
+});
+
+final feedbackRepositoryProvider = FutureProvider<FeedbackRepository>((ref) async {
+  final client = await ref.watch(apiClientProvider.future);
+  final deviceId = await ref.watch(deviceIdProvider.future);
+  return FeedbackRepository(client, deviceId);
+});
+
+/// Pings `/health` so the diagnostics screen can show a live API status
+/// instead of just the configured base URL.
+final apiHealthProvider = FutureProvider<bool>((ref) async {
+  final client = await ref.watch(apiClientProvider.future);
+  try {
+    final result = await client.get('/health') as Map<String, dynamic>;
+    return result['status'] == 'ok';
+  } catch (_) {
+    return false;
+  }
 });
