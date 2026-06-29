@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_or_create_guest_user
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.commerce import Cart, CartItem
 from app.models.user import User
@@ -56,7 +57,11 @@ async def get_cart(
     return await _cart_out(db, cart)
 
 
-@router.put("/{category_id}/items", response_model=CartOut)
+@router.put(
+    "/{category_id}/items",
+    response_model=CartOut,
+    dependencies=[Depends(rate_limit("save_cart", times=60, seconds=60))],
+)
 async def replace_cart_items(
     category_id: uuid.UUID,
     items: list[CartItemIn],

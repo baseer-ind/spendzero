@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_or_create_guest_user
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.catalog import Listing
 from app.models.commerce import Cart, CravingSession, CravingSessionItem
@@ -16,7 +17,11 @@ from app.schemas.commerce import CheckoutRequest, CravingCompletedOut, SaveOutco
 router = APIRouter(prefix="/craving-sessions", tags=["craving-sessions"])
 
 
-@router.post("/checkout", response_model=CravingCompletedOut)
+@router.post(
+    "/checkout",
+    response_model=CravingCompletedOut,
+    dependencies=[Depends(rate_limit("checkout", times=30, seconds=60))],
+)
 async def checkout(
     payload: CheckoutRequest,
     db: AsyncSession = Depends(get_db),
@@ -90,7 +95,11 @@ async def checkout(
     )
 
 
-@router.post("/{session_id}/outcome", status_code=204)
+@router.post(
+    "/{session_id}/outcome",
+    status_code=204,
+    dependencies=[Depends(rate_limit("record_outcome", times=30, seconds=60))],
+)
 async def record_outcome(
     session_id: uuid.UUID,
     payload: SaveOutcomeRequest,

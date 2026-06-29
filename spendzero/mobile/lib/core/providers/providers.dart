@@ -51,6 +51,15 @@ final categoryListingsProvider =
   return repo.fetchListings(categoryId);
 });
 
+/// (categoryId, search query) — kept separate from [categoryListingsProvider]
+/// so the unfiltered list stays cached while the user types a search term.
+final categoryListingsSearchProvider =
+    FutureProvider.family<List<Listing>, (String, String)>((ref, args) async {
+  final (categoryId, query) = args;
+  final repo = await ref.watch(categoryRepositoryProvider.future);
+  return repo.fetchListings(categoryId, query: query);
+});
+
 final cartRepositoryProvider = FutureProvider<CartRepository>((ref) async {
   final client = await ref.watch(apiClientProvider.future);
   return CartRepository(client);

@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_or_create_guest_user
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.goals import Goal, GoalContribution
 from app.models.user import User
@@ -38,7 +39,12 @@ async def list_goals(
     return out
 
 
-@router.post("", response_model=GoalOut, status_code=201)
+@router.post(
+    "",
+    response_model=GoalOut,
+    status_code=201,
+    dependencies=[Depends(rate_limit("create_goal", times=20, seconds=60))],
+)
 async def create_goal(
     payload: GoalCreate,
     db: AsyncSession = Depends(get_db),

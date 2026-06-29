@@ -14,8 +14,11 @@ class CategoryRepository {
         .toList();
   }
 
-  Future<List<Listing>> fetchListings(String categoryId) async {
-    final json = await _client.get('/categories/$categoryId/listings') as List<dynamic>;
+  Future<List<Listing>> fetchListings(String categoryId, {String? query}) async {
+    final path = query == null || query.isEmpty
+        ? '/categories/$categoryId/listings'
+        : '/categories/$categoryId/listings?q=${Uri.encodeQueryComponent(query)}';
+    final json = await _client.get(path) as List<dynamic>;
     return json.map((item) => Listing.fromJson(item as Map<String, dynamic>)).toList();
   }
 }

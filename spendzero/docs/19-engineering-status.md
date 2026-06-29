@@ -16,13 +16,13 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Alembic migrations | ✅ | `migrations/versions/0001_initial_schema.py` — hand-written, needs a live Postgres to verify `upgrade`/`downgrade` round-trip |
 | Seed data (fictional categories/brands/listings) | ✅ | `app/db/seed.py` |
 | Guest-device auth | ✅ | header-based, `app/core/deps.py`; Supabase account linking still ⬜ |
-| Categories/brands/listings API | ✅ | read-only, no pagination/search yet ⬜ |
+| Categories/brands/listings API | ✅ | `/categories/{id}/listings` supports `q` (title search via `ilike`/trgm index), `limit`/`offset` pagination |
 | Goals API | ✅ | create/list; update/delete/archive ⬜ |
 | Checkout → Craving Completed → outcome API | ✅ | prices from real listings |
 | Cart persistence (`carts`/`cart_items`) | ✅ | `GET /carts/{category_id}` resumes the open cart, `PUT /carts/{category_id}/items` upserts it; checkout marks the cart `converted` and a fresh open cart is created on next visit |
 | Stats aggregation + streaks | ✅ | `GET /me/stats`; `current_streak_days`/`longest_streak_days` computed from `last_saved_date` on each "I Saved It", verified end-to-end (increment on consecutive days, reset after a gap) against a live Postgres instance |
 | Tests | 🚧 | smoke tests only (`tests/test_smoke.py`); needs a Postgres-backed integration suite in CI |
-| Rate limiting / Redis caching | ⬜ | |
+| Rate limiting / Redis caching | ✅ | fixed-window limiter (`app/core/rate_limit.py`) on goal creation, checkout, outcome, cart save; fails open if Redis is unreachable; verified live (20-req limit on goal creation → 21st request gets 429) |
 | Analytics events table + ingestion | ⬜ | |
 | Admin dashboard API | ⬜ | |
 | CI (GitHub Actions) | ✅ | `.github/workflows/ci.yml` — backend (Postgres service, ruff, alembic upgrade, pytest) + mobile (flutter analyze/test) jobs |
@@ -35,7 +35,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Networking layer (http client, device id, repositories) | ✅ | `lib/core/network/`, `lib/core/data/` |
 | Home screen (categories + savings banner) | ✅ | banner now reads `/me/stats` (true self-reported total, not just goal-allocated savings) and shows a 🔥 streak badge; loading/error/empty states wired |
 | Goals screen | ✅ | loading/error/empty states + create-goal bottom sheet (presets + custom) |
-| Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings` via real `ProductCard`s (rating, MRP/discount, quantity stepper) |
+| Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings` via real `ProductCard`s (rating, MRP/discount, quantity stepper) with a debounced search box wired to the backend `q` param |
 | Cart / customization | 🚧 | per-item quantity stepper, persisted server-side and resumable across restarts; options/customization UI ⬜ |
 | Real checkout wired to `/craving-sessions/checkout` | ✅ | |
 | Craving Completed screen wired to outcome API | ✅ | goal picker chips call `/outcome` with `saved`/`maybe_later` |
@@ -47,9 +47,8 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 
 1. Supabase auth: promote a guest device identity to a full account
    without losing saved progress.
-2. Rate limiting (Redis) on write endpoints; pagination/search on
-   `/categories/{id}/listings`.
-3. Cart item options/customization UI (size/variant pickers).
-4. Streak/achievement *celebration* moments (e.g. milestone toasts at
+2. Cart item options/customization UI (size/variant pickers).
+3. Streak/achievement *celebration* moments (e.g. milestone toasts at
    3/7/30-day streaks) — the underlying counters are done, this is the
    UX polish layer.
+4. Analytics event ingestion; admin dashboard API.

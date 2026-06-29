@@ -24,15 +24,27 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final Map<String, int> _quantities = {};
+  final TextEditingController _searchController = TextEditingController();
   bool _isCheckingOut = false;
   String? _checkoutError;
   bool _cartRestored = false;
   Timer? _saveDebounce;
+  Timer? _searchDebounce;
+  String _searchQuery = '';
 
   @override
   void dispose() {
     _saveDebounce?.cancel();
+    _searchDebounce?.cancel();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() => _searchQuery = value.trim());
+    });
   }
 
   void _restoreCartOnce(AsyncValue<dynamic> cartAsync) {
@@ -78,30 +90,52 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final listingsAsync = ref.watch(categoryListingsProvider(widget.category.id));
+    final listingsAsync = _searchQuery.isEmpty
+        ? ref.watch(categoryListingsProvider(widget.category.id))
+        : ref.watch(categoryListingsSearchProvider((widget.category.id, _searchQuery)));
     _restoreCartOnce(ref.watch(cartProvider(widget.category.id)));
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.category.name)),
-      body: listingsAsync.when(
-        data: (listings) => _buildListings(context, listings),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Couldn\'t load ${widget.category.name} listings.',
-                style: Theme.of(context).textTheme.bodyMedium,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+              decoration: InputDecoration(
+                hintText: 'Search ${widget.category.name.toLowerCase()}',
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => ref.invalidate(categoryListingsProvider(widget.category.id)),
-                child: const Text('Retry'),
-              ),
-            ],
+            ),
           ),
-        ),
+          Expanded(
+            child: listingsAsync.when(
+              data: (listings) => _buildListings(context, listings),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Couldn\'t load ${widget.category.name} listings.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () =>
+                          ref.invalidate(categoryListingsProvider(widget.category.id)),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: _quantities.isEmpty
           ? null
@@ -113,7 +147,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (listings.isEmpty) {
       return Center(
         child: Text(
-          'No ${widget.category.name} listings yet — check back soon.',
+          _searchQuery.isEmpty
+              ? 'No ${widget.category.name} listings yet — check back soon.'
+              : 'No results for "$_searchQuery".',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       );

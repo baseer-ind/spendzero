@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,8 +24,18 @@ async def list_brands(category_id: str, db: AsyncSession = Depends(get_db)) -> l
 
 
 @router.get("/{category_id}/listings", response_model=list[ListingOut])
-async def list_listings(category_id: str, db: AsyncSession = Depends(get_db)) -> list[Listing]:
-    result = await db.execute(
-        select(Listing).where(Listing.category_id == category_id, Listing.is_active.is_(True))
+async def list_listings(
+    category_id: str,
+    q: str | None = Query(default=None, description="Search listing titles"),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    db: AsyncSession = Depends(get_db),
+) -> list[Listing]:
+    stmt = select(Listing).where(
+        Listing.category_id == category_id, Listing.is_active.is_(True)
     )
+    if q:
+        stmt = stmt.where(Listing.title.ilike(f"%{q}%"))
+    stmt = stmt.order_by(Listing.created_at).offset(offset).limit(limit)
+    result = await db.execute(stmt)
     return list(result.scalars().all())
