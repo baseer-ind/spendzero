@@ -1,12 +1,13 @@
-import '../models/category.dart';
-import '../models/goal.dart';
-import '../models/listing.dart';
-import '../models/user_stats.dart';
+import '../../models/category.dart';
+import '../../models/goal.dart';
+import '../../models/listing.dart';
+import '../../models/user_stats.dart';
 
-/// Bundled, fully offline fallback data. Used whenever the backend is
-/// unreachable so the app never shows a broken home screen — see
-/// `demoModeProvider` in `providers.dart` for how/when this kicks in.
-const demoCategories = <SpendCategory>[
+/// Bundled, fully offline starter data. This is the V1 MVP default content
+/// — see [providers.useLocalBackend] — shown immediately on first launch
+/// before any local activity exists, so the app never shows an empty home
+/// screen with no setup required.
+const seedCategories = <SpendCategory>[
   SpendCategory(id: 'demo-food', slug: 'food', name: 'Food Delivery', emoji: '🍔'),
   SpendCategory(id: 'demo-groceries', slug: 'groceries', name: 'Groceries', emoji: '🛒'),
   SpendCategory(id: 'demo-fashion', slug: 'fashion', name: 'Fashion', emoji: '👕'),
@@ -15,7 +16,7 @@ const demoCategories = <SpendCategory>[
   SpendCategory(id: 'demo-entertainment', slug: 'entertainment', name: 'Movies', emoji: '🎬'),
 ];
 
-const _demoListingsByCategory = <String, List<Listing>>{
+const _seedListingsByCategory = <String, List<Listing>>{
   'demo-food': [
     Listing(
       id: 'demo-food-1',
@@ -90,10 +91,22 @@ const _demoListingsByCategory = <String, List<Listing>>{
   ],
 };
 
-List<Listing> demoListingsFor(String categoryId) =>
-    _demoListingsByCategory[categoryId] ?? const [];
+List<Listing> seedListingsFor(String categoryId) =>
+    _seedListingsByCategory[categoryId] ?? const [];
 
-const demoGoals = <SavingsGoal>[
+/// Searches across every category's seed listings for [id]. Used by the
+/// cart/craving local repositories to resolve a listing's price/title from
+/// just its id (the only thing the checkout screen sends over the wire).
+Listing? findSeedListingById(String id) {
+  for (final listings in _seedListingsByCategory.values) {
+    for (final listing in listings) {
+      if (listing.id == id) return listing;
+    }
+  }
+  return null;
+}
+
+const seedGoals = <SavingsGoal>[
   SavingsGoal(
     id: 'demo-goal-1',
     title: 'New Headphones',
@@ -110,7 +123,7 @@ const demoGoals = <SavingsGoal>[
   ),
 ];
 
-const demoStats = UserStats(
+const seedStats = UserStats(
   totalAmountNotSpentPaise: 530000,
   cravingsCompleted: 7,
   goalsCompleted: 0,

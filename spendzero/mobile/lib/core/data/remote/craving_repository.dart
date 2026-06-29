@@ -1,11 +1,13 @@
-import '../models/craving_completed.dart';
-import '../network/api_client.dart';
+import '../../models/craving_completed.dart';
+import '../../network/api_client.dart';
+import '../contracts.dart';
 
-class CravingRepository {
-  CravingRepository(this._client);
+class ApiCravingRepository implements CravingRepository {
+  ApiCravingRepository(this._client);
 
   final ApiClient _client;
 
+  @override
   Future<CravingCompleted> checkout({
     required String categoryId,
     String? brandId,
@@ -19,6 +21,7 @@ class CravingRepository {
     return CravingCompleted.fromJson(json);
   }
 
+  @override
   Future<void> recordOutcome({
     required String cravingSessionId,
     required String outcome,

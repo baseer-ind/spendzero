@@ -1,11 +1,13 @@
-import '../models/goal.dart';
-import '../network/api_client.dart';
+import '../../models/goal.dart';
+import '../../network/api_client.dart';
+import '../contracts.dart';
 
-class GoalRepository {
-  GoalRepository(this._client);
+class ApiGoalRepository implements GoalRepository {
+  ApiGoalRepository(this._client);
 
   final ApiClient _client;
 
+  @override
   Future<List<SavingsGoal>> fetchGoals() async {
     final json = await _client.get('/goals') as List<dynamic>;
     return json
@@ -13,6 +15,7 @@ class GoalRepository {
         .toList();
   }
 
+  @override
   Future<SavingsGoal> createGoal({
     required String title,
     required String emoji,

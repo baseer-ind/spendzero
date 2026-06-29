@@ -1,12 +1,14 @@
-import '../models/category.dart';
-import '../models/listing.dart';
-import '../network/api_client.dart';
+import '../../models/category.dart';
+import '../../models/listing.dart';
+import '../../network/api_client.dart';
+import '../contracts.dart';
 
-class CategoryRepository {
-  CategoryRepository(this._client);
+class ApiCategoryRepository implements CategoryRepository {
+  ApiCategoryRepository(this._client);
 
   final ApiClient _client;
 
+  @override
   Future<List<SpendCategory>> fetchCategories() async {
     final json = await _client.get('/categories') as List<dynamic>;
     return json
@@ -14,6 +16,7 @@ class CategoryRepository {
         .toList();
   }
 
+  @override
   Future<List<Listing>> fetchListings(String categoryId, {String? query}) async {
     final path = query == null || query.isEmpty
         ? '/categories/$categoryId/listings'

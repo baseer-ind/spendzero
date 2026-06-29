@@ -22,4 +22,20 @@ class SavingsGoal {
         targetPaise: json['target_amount_paise'] as int,
         savedPaise: json['saved_amount_paise'] as int? ?? 0,
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'icon_key': emoji,
+        'target_amount_paise': targetPaise,
+        'saved_amount_paise': savedPaise,
+      };
+
+  SavingsGoal copyWith({int? savedPaise}) => SavingsGoal(
+        id: id,
+        title: title,
+        emoji: emoji,
+        targetPaise: targetPaise,
+        savedPaise: savedPaise ?? this.savedPaise,
+      );
 }

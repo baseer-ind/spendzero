@@ -1,12 +1,14 @@
-import '../config/env.dart';
-import '../network/api_client.dart';
+import '../../config/env.dart';
+import '../../network/api_client.dart';
+import '../contracts.dart';
 
-class FeedbackRepository {
-  FeedbackRepository(this._client, this._deviceId);
+class ApiFeedbackRepository implements FeedbackRepository {
+  ApiFeedbackRepository(this._client, this._deviceId);
 
   final ApiClient _client;
   final String _deviceId;
 
+  @override
   Future<void> submit({
     required String message,
     String category = 'general',

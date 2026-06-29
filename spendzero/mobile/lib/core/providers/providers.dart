@@ -1,14 +1,19 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/cart_repository.dart';
-import '../data/category_repository.dart';
-import '../data/craving_repository.dart';
-import '../data/demo_data.dart';
-import '../data/feedback_repository.dart';
-import '../data/goal_repository.dart';
-import '../data/stats_repository.dart';
+import '../data/contracts.dart';
+import '../data/local/local_cart_repository.dart';
+import '../data/local/local_category_repository.dart';
+import '../data/local/local_craving_repository.dart';
+import '../data/local/local_feedback_repository.dart';
+import '../data/local/local_goal_repository.dart';
+import '../data/local/local_stats_repository.dart';
+import '../data/local/local_store.dart';
+import '../data/remote/cart_repository.dart';
+import '../data/remote/category_repository.dart';
+import '../data/remote/craving_repository.dart';
+import '../data/remote/feedback_repository.dart';
+import '../data/remote/goal_repository.dart';
+import '../data/remote/stats_repository.dart';
 import '../models/cart.dart';
 import '../models/category.dart';
 import '../models/goal.dart';
@@ -17,32 +22,13 @@ import '../models/user_stats.dart';
 import '../network/api_client.dart';
 import '../network/device_id.dart';
 
-/// True whenever the backend was unreachable and the app fell back to
-/// bundled demo data instead of showing a broken screen. Watched by
-/// [demoModeRetryProvider] to periodically retry the live API in the
-/// background, and by the UI to show a "Demo Mode" hint.
-final demoModeProvider = StateProvider<bool>((ref) => false);
+/// Single switch point: true uses on-device SharedPreferences-backed
+/// repositories (the V1 MVP default — no backend required), false uses
+/// the FastAPI-backed `Api*Repository` implementations kept in `remote/`
+/// for when a backend is wired back in.
+const useLocalBackend = true;
 
-/// Kept alive for the lifetime of the app (watched once in `app.dart`).
-/// While [demoModeProvider] is true, periodically re-invalidates the
-/// data providers so the app seamlessly switches back to live data the
-/// moment the backend becomes reachable again.
-final demoModeRetryProvider = Provider<void>((ref) {
-  Timer? timer;
-  ref.listen<bool>(demoModeProvider, (previous, isDemo) {
-    if (isDemo) {
-      timer ??= Timer.periodic(const Duration(seconds: 15), (_) {
-        ref.invalidate(categoriesProvider);
-        ref.invalidate(goalsProvider);
-        ref.invalidate(statsProvider);
-      });
-    } else {
-      timer?.cancel();
-      timer = null;
-    }
-  }, fireImmediately: true);
-  ref.onDispose(() => timer?.cancel());
-});
+final localStoreProvider = Provider<LocalStore>((ref) => LocalStore());
 
 final deviceIdProvider = FutureProvider<String>((ref) => getOrCreateDeviceId());
 
@@ -52,51 +38,44 @@ final apiClientProvider = FutureProvider<ApiClient>((ref) async {
 });
 
 final categoryRepositoryProvider = FutureProvider<CategoryRepository>((ref) async {
+  if (useLocalBackend) {
+    return LocalCategoryRepository();
+  }
   final client = await ref.watch(apiClientProvider.future);
-  return CategoryRepository(client);
+  return ApiCategoryRepository(client);
 });
 
 final goalRepositoryProvider = FutureProvider<GoalRepository>((ref) async {
+  if (useLocalBackend) {
+    return LocalGoalRepository(ref.watch(localStoreProvider));
+  }
   final client = await ref.watch(apiClientProvider.future);
-  return GoalRepository(client);
+  return ApiGoalRepository(client);
 });
 
 final cravingRepositoryProvider = FutureProvider<CravingRepository>((ref) async {
+  if (useLocalBackend) {
+    final store = ref.watch(localStoreProvider);
+    return LocalCravingRepository(LocalGoalRepository(store), store);
+  }
   final client = await ref.watch(apiClientProvider.future);
-  return CravingRepository(client);
+  return ApiCravingRepository(client);
 });
 
 final categoriesProvider = FutureProvider<List<SpendCategory>>((ref) async {
-  try {
-    final repo = await ref.watch(categoryRepositoryProvider.future);
-    final result = await repo.fetchCategories();
-    ref.read(demoModeProvider.notifier).state = false;
-    return result;
-  } catch (_) {
-    ref.read(demoModeProvider.notifier).state = true;
-    return demoCategories;
-  }
+  final repo = await ref.watch(categoryRepositoryProvider.future);
+  return repo.fetchCategories();
 });
 
 final goalsProvider = FutureProvider<List<SavingsGoal>>((ref) async {
-  try {
-    final repo = await ref.watch(goalRepositoryProvider.future);
-    return await repo.fetchGoals();
-  } catch (_) {
-    ref.read(demoModeProvider.notifier).state = true;
-    return demoGoals;
-  }
+  final repo = await ref.watch(goalRepositoryProvider.future);
+  return repo.fetchGoals();
 });
 
 final categoryListingsProvider =
     FutureProvider.family<List<Listing>, String>((ref, categoryId) async {
-  try {
-    final repo = await ref.watch(categoryRepositoryProvider.future);
-    return await repo.fetchListings(categoryId);
-  } catch (_) {
-    ref.read(demoModeProvider.notifier).state = true;
-    return demoListingsFor(categoryId);
-  }
+  final repo = await ref.watch(categoryRepositoryProvider.future);
+  return repo.fetchListings(categoryId);
 });
 
 /// (categoryId, search query) — kept separate from [categoryListingsProvider]
@@ -104,21 +83,16 @@ final categoryListingsProvider =
 final categoryListingsSearchProvider =
     FutureProvider.family<List<Listing>, (String, String)>((ref, args) async {
   final (categoryId, query) = args;
-  try {
-    final repo = await ref.watch(categoryRepositoryProvider.future);
-    return await repo.fetchListings(categoryId, query: query);
-  } catch (_) {
-    ref.read(demoModeProvider.notifier).state = true;
-    final lowerQuery = query.toLowerCase();
-    return demoListingsFor(categoryId)
-        .where((listing) => listing.title.toLowerCase().contains(lowerQuery))
-        .toList();
-  }
+  final repo = await ref.watch(categoryRepositoryProvider.future);
+  return repo.fetchListings(categoryId, query: query);
 });
 
 final cartRepositoryProvider = FutureProvider<CartRepository>((ref) async {
+  if (useLocalBackend) {
+    return LocalCartRepository(ref.watch(localStoreProvider));
+  }
   final client = await ref.watch(apiClientProvider.future);
-  return CartRepository(client);
+  return ApiCartRepository(client);
 });
 
 final cartProvider = FutureProvider.family<Cart, String>((ref, categoryId) async {
@@ -127,28 +101,30 @@ final cartProvider = FutureProvider.family<Cart, String>((ref, categoryId) async
 });
 
 final statsRepositoryProvider = FutureProvider<StatsRepository>((ref) async {
+  if (useLocalBackend) {
+    return LocalStatsRepository(ref.watch(localStoreProvider));
+  }
   final client = await ref.watch(apiClientProvider.future);
-  return StatsRepository(client);
+  return ApiStatsRepository(client);
 });
 
 final statsProvider = FutureProvider<UserStats>((ref) async {
-  try {
-    final repo = await ref.watch(statsRepositoryProvider.future);
-    return await repo.fetchStats();
-  } catch (_) {
-    ref.read(demoModeProvider.notifier).state = true;
-    return demoStats;
-  }
+  final repo = await ref.watch(statsRepositoryProvider.future);
+  return repo.fetchStats();
 });
 
 final feedbackRepositoryProvider = FutureProvider<FeedbackRepository>((ref) async {
+  if (useLocalBackend) {
+    return LocalFeedbackRepository(ref.watch(localStoreProvider));
+  }
   final client = await ref.watch(apiClientProvider.future);
   final deviceId = await ref.watch(deviceIdProvider.future);
-  return FeedbackRepository(client, deviceId);
+  return ApiFeedbackRepository(client, deviceId);
 });
 
 /// Pings `/health` so the diagnostics screen can show a live API status
-/// instead of just the configured base URL.
+/// instead of just the configured base URL. Diagnostics-only — always
+/// reports unreachable while [useLocalBackend] is true.
 final apiHealthProvider = FutureProvider<bool>((ref) async {
   final client = await ref.watch(apiClientProvider.future);
   try {
