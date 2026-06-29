@@ -14,7 +14,9 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Project scaffold, config, Docker | ✅ | |
 | DB models (users, goals, catalog, commerce sim, stats) | ✅ | `app/models/` |
 | Alembic migrations | ✅ | `migrations/versions/0001_initial_schema.py` — hand-written, needs a live Postgres to verify `upgrade`/`downgrade` round-trip |
-| Seed data (fictional categories/brands/listings) | ✅ | `app/db/seed.py` |
+| Seed data (fictional categories/brands/listings) | ✅ | `app/db/seed.py` — ~150 listings across 12 categories, plus an idempotent demo guest user (`demo-device-001`) with 3 goals, a 10-day save streak, and ~₹15k in realistic stats so a fresh install never looks empty |
+| Environment config (dev/staging/prod) | ✅ | `app/core/config.py` loads `.env` + `.env.<SPENDZERO_ENV>` (default `development`); `.env.example`/`.env.staging.example`/`.env.production.example` templates, real `.env.development` committed (no secrets) for zero-config local dev |
+| CORS | ✅ | `CORSMiddleware` in `app/main.py`, origins from `SPENDZERO_CORS_ORIGINS` (`*` in dev) |
 | Guest-device auth | ✅ | header-based, `app/core/deps.py`; Supabase account linking still ⬜ |
 | Categories/brands/listings API | ✅ | `/categories/{id}/listings` supports `q` (title search via `ilike`/trgm index), `limit`/`offset` pagination |
 | Goals API | ✅ | create/list; update/delete/archive ⬜ |
@@ -42,6 +44,19 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Account creation / Supabase auth | ⬜ | |
 | Push notifications | ⬜ | |
 | Tests | 🚧 | `test/money_test.dart` only |
+| Base URL config (no hardcoded localhost) | ✅ | `lib/core/config/env.dart` — explicit `--dart-define` > `env/*.json` file > runtime per-platform fallback (10.0.2.2 on Android, localhost elsewhere) |
+| Android/iOS platform scaffolding | 🚧 | `mobile/android/` and `mobile/ios/` are not checked into this repo (machine/SDK-specific build output) — generated locally via `scripts/setup_mobile_platforms.sh`, which also sets the application id (`com.spendzero.app`), app name, and the release `INTERNET` permission |
+
+## Developer experience / device testing
+
+| Area | Status | Notes |
+|---|---|---|
+| One-command local stack | ✅ | `./scripts/dev.sh` — Postgres+Redis (docker compose) → migrate → seed → backend (`uvicorn --reload`, bound to `0.0.0.0`) → health check; verified live end-to-end including idempotent re-seed |
+| Physical device base-URL detection | ✅ | `scripts/run_mobile.sh android\|ios` — detects emulator vs. physical device via `adb`/`flutter devices`, auto-injects the host LAN IP for physical devices via `scripts/lan_ip.sh` |
+| Release build scripts | ✅ | `scripts/build_release.sh {apk,appbundle,ios-archive} {development,staging,production}` |
+| Makefile wrapper | ✅ | `make dev`, `make android`, `make ios`, `make apk ENV=production`, etc. |
+| "Running SpendZero Locally" guide | ✅ | `docs/20-running-locally.md` — prerequisites, USB debugging setup, env config, troubleshooting table, beta-readiness checklist |
+| Beta distribution (Play Internal/Closed, TestFlight) | ⬜ | architecturally unblocked; still needs a Play Console upload keystore and an Apple Developer account, both of which are account/credential steps for the user, not code |
 
 ## Product direction (as of this entry)
 
@@ -57,6 +72,11 @@ plus streak-milestone celebration dialogs. Rationale: this is the single
 highest-frequency, highest-emotion screen in the app — every checkout ends
 here — so it had the most leverage per hour of work, ahead of any
 unstarted backend item.
+
+Devex/device-testing work above was completed as a deliberate pause on the
+retention-first roadmap (per explicit instruction) so the app could be
+installed and used on a real phone like an early beta tester. Resuming the
+roadmap below at item 1.
 
 ## Immediately next (priority order, retention-first)
 

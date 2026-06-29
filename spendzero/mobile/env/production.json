@@ -1,0 +1,4 @@
+{
+  "ENV_NAME": "production",
+  "API_BASE_URL": "https://api.spendzero.app/api/v1"
+}
