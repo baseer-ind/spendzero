@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/models/listing.dart';
 import '../../../core/utils/money.dart';
@@ -134,7 +135,10 @@ class _QuantityControl extends StatelessWidget {
       return SizedBox(
         height: 36,
         child: OutlinedButton(
-          onPressed: () => onChanged(1),
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            onChanged(1);
+          },
           style: OutlinedButton.styleFrom(
             minimumSize: const Size(44, 44),
             padding: const EdgeInsets.symmetric(horizontal: 16),
