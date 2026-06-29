@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,10 +8,16 @@ import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
+import 'confetti_burst.dart';
+
+const _streakMilestones = [3, 7, 14, 30, 60, 100];
 
 /// Shown after every simulated checkout. Never "Order Successful" — the
 /// celebration is always framed around the money the user chose not to
-/// spend, per the SpendZero product vision.
+/// spend, and (when a dream/goal is picked) around how much closer that
+/// dream just got. This is the single highest-leverage emotional beat in
+/// the app, so it gets confetti + haptics + a live "dream progress" preview
+/// rather than a flat receipt.
 class CravingCompletedScreen extends ConsumerStatefulWidget {
   const CravingCompletedScreen({super.key, required this.result});
 
@@ -25,69 +32,92 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    HapticFeedback.mediumImpact();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final goalsAsync = ref.watch(goalsProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.cravingCompletedAccent.withOpacity(0.08),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('🎉', style: TextStyle(fontSize: 48)),
-                const SizedBox(height: 12),
-                Text('Craving Completed', style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                Text('You chose not to spend', style: Theme.of(context).textTheme.bodyMedium),
-                Text(
-                  formatPaise(widget.result.amountNotSpentPaise),
-                  style: Theme.of(context)
-                      .textTheme
-                      .displaySmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                _StatsRow(result: widget.result),
-                const SizedBox(height: 24),
-                goalsAsync.when(
-                  data: (goals) => _GoalPicker(
-                    goals: goals,
-                    selectedGoalId: _selectedGoalId,
-                    onSelected: (id) => setState(() => _selectedGoalId = id),
-                  ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-                const SizedBox(height: 32),
-                Row(
+        child: Stack(
+          children: [
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => _recordOutcome('maybe_later'),
-                        child: const Text('Maybe Later'),
-                      ),
+                    const Text('🎉', style: TextStyle(fontSize: 48)),
+                    const SizedBox(height: 12),
+                    Text('Craving Completed', style: Theme.of(context).textTheme.headlineSmall),
+                    const SizedBox(height: 8),
+                    Text('You chose not to spend', style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      formatPaise(widget.result.amountNotSpentPaise),
+                      style: Theme.of(context)
+                          .textTheme
+                          .displaySmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: _isSubmitting ? null : () => _recordOutcome('saved'),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Text('I Saved It'),
+                    const SizedBox(height: 16),
+                    _StatsRow(result: widget.result),
+                    const SizedBox(height: 24),
+                    goalsAsync.when(
+                      data: (goals) => Column(
+                        children: [
+                          _GoalPicker(
+                            goals: goals,
+                            selectedGoalId: _selectedGoalId,
+                            onSelected: (id) {
+                              setState(() => _selectedGoalId = id);
+                              if (id != null) HapticFeedback.selectionClick();
+                            },
+                          ),
+                          if (_selectedGoalId != null)
+                            _DreamProgressCard(
+                              goal: goals.firstWhere((g) => g.id == _selectedGoalId),
+                              additionalSavedPaise: widget.result.amountNotSpentPaise,
+                            ),
+                        ],
                       ),
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                    const SizedBox(height: 32),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: _isSubmitting ? null : () => _recordOutcome('maybe_later'),
+                            child: const Text('Maybe Later'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: _isSubmitting ? null : () => _recordOutcome('saved'),
+                            child: _isSubmitting
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Text('I Saved It'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+            const ConfettiBurst(),
+          ],
         ),
       ),
     );
@@ -95,6 +125,11 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
 
   Future<void> _recordOutcome(String outcome) async {
     setState(() => _isSubmitting = true);
+    int previousStreak = 0;
+    if (outcome == 'saved') {
+      HapticFeedback.heavyImpact();
+      previousStreak = ref.read(statsProvider).valueOrNull?.currentStreakDays ?? 0;
+    }
     try {
       final repo = await ref.read(cravingRepositoryProvider.future);
       await repo.recordOutcome(
@@ -104,12 +139,40 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
       );
       ref.invalidate(goalsProvider);
       ref.invalidate(statsProvider);
+
+      if (outcome == 'saved' && mounted) {
+        int newStreak = previousStreak;
+        try {
+          newStreak = (await ref.read(statsProvider.future)).currentStreakDays;
+        } catch (_) {
+          // Keep previousStreak; milestone check below will simply no-op.
+        }
+        if (_streakMilestones.contains(newStreak) && newStreak > previousStreak && mounted) {
+          await _showStreakMilestone(newStreak);
+        }
+      }
     } catch (_) {
       // Best-effort: the celebration already happened locally, so a failed
       // network write shouldn't block the user from returning home.
     } finally {
       if (mounted) context.go('/');
     }
+  }
+
+  Future<void> _showStreakMilestone(int days) async {
+    HapticFeedback.heavyImpact();
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('🔥 Streak milestone!'),
+        content: Text(
+          "$days days in a row choosing your dream over the craving. That's real discipline — keep it going.",
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Nice!')),
+        ],
+      ),
+    );
   }
 }
 
@@ -164,7 +227,7 @@ class _GoalPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Put it toward a goal', style: Theme.of(context).textTheme.labelLarge),
+        Text('Put it toward a dream', style: Theme.of(context).textTheme.labelLarge),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -180,6 +243,64 @@ class _GoalPicker extends StatelessWidget {
               .toList(),
         ),
       ],
+    );
+  }
+}
+
+/// Shows the dream's progress bar *as it would look* if this save is
+/// allocated to it, before the user even confirms — the savings amount
+/// becomes "this much closer to Goa" instead of an abstract number.
+class _DreamProgressCard extends StatelessWidget {
+  const _DreamProgressCard({required this.goal, required this.additionalSavedPaise});
+
+  final SavingsGoal goal;
+  final int additionalSavedPaise;
+
+  @override
+  Widget build(BuildContext context) {
+    final projectedSaved = goal.savedPaise + additionalSavedPaise;
+    final projectedProgress =
+        goal.targetPaise == 0 ? 0.0 : (projectedSaved / goal.targetPaise).clamp(0, 1).toDouble();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${goal.emoji} ${formatPaise(additionalSavedPaise)} closer to ${goal.title}',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: goal.progress, end: projectedProgress),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, _) => LinearProgressIndicator(
+                  value: value,
+                  minHeight: 10,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${formatPaise(projectedSaved)} of ${formatPaise(goal.targetPaise)}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

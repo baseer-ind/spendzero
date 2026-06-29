@@ -38,17 +38,36 @@ Legend: ✅ done · 🚧 in progress · ⬜ not started
 | Category browsing (per-category product grid) | ✅ | `CheckoutScreen` lists real `/categories/{id}/listings` via real `ProductCard`s (rating, MRP/discount, quantity stepper) with a debounced search box wired to the backend `q` param |
 | Cart / customization | 🚧 | per-item quantity stepper, persisted server-side and resumable across restarts; options/customization UI ⬜ |
 | Real checkout wired to `/craving-sessions/checkout` | ✅ | |
-| Craving Completed screen wired to outcome API | ✅ | goal picker chips call `/outcome` with `saved`/`maybe_later` |
+| Craving Completed screen wired to outcome API | ✅ | goal picker chips call `/outcome` with `saved`/`maybe_later`; confetti burst + haptics on every save, live "dream progress" preview bar (shows the linked goal's bar animating forward *before* confirming, framing the amount as "₹X closer to Goa Trip" not an abstract number), and a streak-milestone dialog at 3/7/14/30/60/100 days |
 | Account creation / Supabase auth | ⬜ | |
 | Push notifications | ⬜ | |
 | Tests | 🚧 | `test/money_test.dart` only |
 
-## Immediately next (priority order)
+## Product direction (as of this entry)
 
-1. Supabase auth: promote a guest device identity to a full account
-   without losing saved progress.
-2. Cart item options/customization UI (size/variant pickers).
-3. Streak/achievement *celebration* moments (e.g. milestone toasts at
-   3/7/30-day streaks) — the underlying counters are done, this is the
-   UX polish layer.
-4. Analytics event ingestion; admin dashboard API.
+Reframing SpendZero as a habit-forming "dreams over money" platform, not a
+shopping-simulator/budgeting app. Retention/delight work is now prioritized
+over backend work unless backend is literally blocking. Every new feature
+is filtered through: does this make someone want to open the app again
+tomorrow?
+
+Just shipped under this lens: confetti + haptics + a live dream-progress
+bar on the Craving Completed screen (the core emotional payoff moment),
+plus streak-milestone celebration dialogs. Rationale: this is the single
+highest-frequency, highest-emotion screen in the app — every checkout ends
+here — so it had the most leverage per hour of work, ahead of any
+unstarted backend item.
+
+## Immediately next (priority order, retention-first)
+
+1. Shareable savings/achievement card (screenshot-ready "I saved ₹X toward
+   my Goa Trip 🔥 7-day streak" card) — virality hook, lets a delight
+   moment turn into word-of-mouth.
+2. Monthly/weekly savings recap (Spotify-Wrapped-style) to re-engage users
+   who haven't opened the app in a few days.
+3. Cart item options/customization UI (size/variant pickers) — still
+   useful, lower emotional leverage than the above.
+4. Supabase auth: promote a guest device identity to a full account
+   without losing saved progress — needed for durability, not urgent for
+   delight, so behind the above.
+5. Analytics event ingestion; admin dashboard API.
