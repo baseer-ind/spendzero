@@ -8,6 +8,8 @@ import '../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../features/food/presentation/food_home_screen.dart';
 import '../features/food/presentation/restaurant_screen.dart';
 import '../features/goals/presentation/goals_screen.dart';
+import '../features/grocery/presentation/grocery_home_screen.dart';
+import '../features/grocery/presentation/store_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/splash_screen.dart';
 
@@ -30,6 +32,17 @@ final appRouter = GoRouter(
       builder: (context, state) => RestaurantScreen(
         categoryId: state.pathParameters['categoryId']!,
         restaurantId: state.pathParameters['restaurantId']!,
+      ),
+    ),
+    GoRoute(
+      path: '/grocery/:categoryId',
+      builder: (context, state) => GroceryHomeScreen(category: state.extra as SpendCategory),
+    ),
+    GoRoute(
+      path: '/grocery/:categoryId/store/:storeId',
+      builder: (context, state) => StoreScreen(
+        categoryId: state.pathParameters['categoryId']!,
+        storeId: state.pathParameters['storeId']!,
       ),
     ),
     GoRoute(

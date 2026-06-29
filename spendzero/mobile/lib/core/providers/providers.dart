@@ -2,13 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/contracts.dart';
 import '../data/contracts_food.dart';
+import '../data/contracts_grocery.dart';
 import '../data/local/food_seed_data.dart';
+import '../data/local/grocery_seed_data.dart' hide Review;
+import '../data/local/grocery_seed_data.dart' as grocery_seed show Review;
 import '../data/local/local_cart_repository.dart';
 import '../data/local/local_category_repository.dart';
 import '../data/local/local_craving_repository.dart';
 import '../data/local/local_feedback_repository.dart';
 import '../data/local/local_food_repository.dart';
 import '../data/local/local_goal_repository.dart';
+import '../data/local/local_grocery_repository.dart';
 import '../data/local/local_stats_repository.dart';
 import '../data/local/local_store.dart';
 import '../data/remote/cart_repository.dart';
@@ -166,6 +170,62 @@ final foodSearchProvider =
     FutureProvider.family<List<dynamic>, String>((ref, query) async {
   final repo = ref.watch(foodRepositoryProvider);
   return repo.searchFood(query);
+});
+
+/// The "Grocery" vertical is local-only for now — no `Api*` backend
+/// counterpart exists yet, so this provider always returns
+/// [LocalGroceryRepository] regardless of [useLocalBackend].
+final groceryRepositoryProvider =
+    Provider<GroceryRepository>((ref) => LocalGroceryRepository());
+
+final groceryStoresProvider = FutureProvider<List<GroceryStore>>((ref) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchStores();
+});
+
+final groceryTrendingProvider = FutureProvider<List<GroceryStore>>((ref) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchTrending();
+});
+
+final groceryTodaysOffersProvider = FutureProvider<List<GroceryProduct>>((ref) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchTodaysOffers();
+});
+
+final groceryBestSellersProvider = FutureProvider<List<GroceryProduct>>((ref) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchBestSellers();
+});
+
+final productsForStoreProvider =
+    FutureProvider.family<List<GroceryProduct>, String>((ref, storeId) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchProducts(storeId);
+});
+
+final groceryReviewsForProvider =
+    FutureProvider.family<List<grocery_seed.Review>, String>((ref, targetId) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchReviews(targetId);
+});
+
+final grocerySearchProvider =
+    FutureProvider.family<List<dynamic>, String>((ref, query) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.searchGrocery(query);
+});
+
+final groceryStoreByIdProvider =
+    FutureProvider.family<GroceryStore?, String>((ref, storeId) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchStore(storeId);
+});
+
+final groceryProductByIdProvider =
+    FutureProvider.family<GroceryProduct?, String>((ref, productId) async {
+  final repo = ref.watch(groceryRepositoryProvider);
+  return repo.fetchProduct(productId);
 });
 
 /// Pings `/health` so the diagnostics screen can show a live API status
