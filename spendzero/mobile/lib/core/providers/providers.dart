@@ -4,11 +4,14 @@ import '../data/contracts.dart';
 import '../data/contracts_food.dart';
 import '../data/contracts_grocery.dart';
 import '../data/contracts_shopping.dart';
+import '../data/contracts_travel.dart';
 import '../data/local/food_seed_data.dart';
 import '../data/local/grocery_seed_data.dart' hide Review;
 import '../data/local/grocery_seed_data.dart' as grocery_seed show Review;
 import '../data/local/shopping_seed_data.dart' hide Review;
 import '../data/local/shopping_seed_data.dart' as shopping_seed show Review;
+import '../data/local/travel_seed_data.dart' hide Review;
+import '../data/local/travel_seed_data.dart' as travel_seed show Review;
 import '../data/local/local_cart_repository.dart';
 import '../data/local/local_category_repository.dart';
 import '../data/local/local_craving_repository.dart';
@@ -17,6 +20,7 @@ import '../data/local/local_food_repository.dart';
 import '../data/local/local_goal_repository.dart';
 import '../data/local/local_grocery_repository.dart';
 import '../data/local/local_shopping_repository.dart';
+import '../data/local/local_travel_repository.dart';
 import '../data/local/local_stats_repository.dart';
 import '../data/local/local_store.dart';
 import '../data/remote/cart_repository.dart';
@@ -241,6 +245,62 @@ final groceryProductByIdProvider =
     FutureProvider.family<GroceryProduct?, String>((ref, productId) async {
   final repo = ref.watch(groceryRepositoryProvider);
   return repo.fetchProduct(productId);
+});
+
+/// The "Travel" vertical is local-only for now — no `Api*` backend
+/// counterpart exists yet, so this provider always returns
+/// [LocalTravelRepository] regardless of [useLocalBackend].
+final travelRepositoryProvider =
+    Provider<TravelRepository>((ref) => LocalTravelRepository());
+
+final travelStaysProvider = FutureProvider<List<TravelStay>>((ref) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchStays();
+});
+
+final travelTrendingProvider = FutureProvider<List<TravelStay>>((ref) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchTrending();
+});
+
+final travelTodaysOffersProvider = FutureProvider<List<TravelRoom>>((ref) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchTodaysOffers();
+});
+
+final travelBestSellersProvider = FutureProvider<List<TravelRoom>>((ref) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchBestSellers();
+});
+
+final roomsForStayProvider =
+    FutureProvider.family<List<TravelRoom>, String>((ref, stayId) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchRooms(stayId);
+});
+
+final travelReviewsForProvider =
+    FutureProvider.family<List<travel_seed.Review>, String>((ref, targetId) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchReviews(targetId);
+});
+
+final travelSearchProvider =
+    FutureProvider.family<List<dynamic>, String>((ref, query) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.searchTravel(query);
+});
+
+final travelStayByIdProvider =
+    FutureProvider.family<TravelStay?, String>((ref, stayId) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchStay(stayId);
+});
+
+final travelRoomByIdProvider =
+    FutureProvider.family<TravelRoom?, String>((ref, roomId) async {
+  final repo = ref.watch(travelRepositoryProvider);
+  return repo.fetchRoom(roomId);
 });
 
 /// The "Shopping" vertical (Fashion + Electronics) is local-only for now —

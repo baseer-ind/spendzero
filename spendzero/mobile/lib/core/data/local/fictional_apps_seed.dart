@@ -271,7 +271,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF00695C), Color(0xFF00796B)],
     heroBadge: '✈️ Best travel deals',
     heroOffer: 'Upto ₹5,000 off on international flights',
-    entityIds: [],
+    entityIds: ['ts-nestview-residency', 'ts-rajwada-haveli'],
   ),
   FictionalApp(
     id: 'flygo',
@@ -299,7 +299,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFFBF360C), Color(0xFFD84315)],
     heroBadge: '🏨 Best hotel rates',
     heroOffer: 'Free breakfast at 200+ properties',
-    entityIds: [],
+    entityIds: ['ts-harbour-pearl-suites', 'ts-azure-bay-resort'],
   ),
   FictionalApp(
     id: 'journeynow',
@@ -327,7 +327,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF00838F), Color(0xFF00ACC1)],
     heroBadge: '🌍 Holiday packages',
     heroOffer: 'Couple packages from ₹9,999',
-    entityIds: [],
+    entityIds: ['ts-cedar-grove-cottages', 'ts-backwater-bamboo-stay'],
   ),
 
   // ── BEAUTY ───────────────────────────────────────────────────────────────

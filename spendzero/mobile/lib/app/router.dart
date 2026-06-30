@@ -18,6 +18,8 @@ import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/splash_screen.dart';
 import '../features/shopping/presentation/brand_screen.dart';
 import '../features/shopping/presentation/shopping_home_screen.dart';
+import '../features/travel/presentation/stay_screen.dart';
+import '../features/travel/presentation/travel_home_screen.dart';
 import '../features/vertical_launcher/presentation/vertical_launcher_screen.dart';
 
 Page<void> _slide(BuildContext context, GoRouterState state, Widget child) =>
@@ -107,6 +109,22 @@ final appRouter = GoRouter(
         BrandScreen(
           categoryId: s.pathParameters['categoryId']!,
           brandId: s.pathParameters['brandId']!,
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/travel/:categoryId',
+      pageBuilder: (c, s) =>
+          _slide(c, s, TravelHomeScreen(category: s.extra as SpendCategory)),
+    ),
+    GoRoute(
+      path: '/travel/:categoryId/stay/:stayId',
+      pageBuilder: (c, s) => _slide(
+        c,
+        s,
+        StayScreen(
+          categoryId: s.pathParameters['categoryId']!,
+          stayId: s.pathParameters['stayId']!,
         ),
       ),
     ),

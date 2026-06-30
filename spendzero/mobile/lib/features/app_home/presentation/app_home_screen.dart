@@ -8,6 +8,7 @@ import '../../../core/data/local/food_seed_data.dart';
 import '../../../core/data/local/grocery_seed_data.dart';
 import '../../../core/data/local/persistent_cart_store.dart';
 import '../../../core/data/local/shopping_seed_data.dart';
+import '../../../core/data/local/travel_seed_data.dart';
 import '../../../core/models/fictional_app.dart';
 
 /// The "inside a fictional app" home screen. Applies the fictional app's
@@ -142,6 +143,8 @@ class _AppHomeContent extends ConsumerWidget {
         return _buildGroceryContent(context, ref);
       case 'shopping':
         return _buildShoppingContent(context, ref);
+      case 'travel':
+        return _buildTravelContent(context, ref);
       default:
         return _buildComingSoon(context);
     }
@@ -298,6 +301,51 @@ class _AppHomeContent extends ConsumerWidget {
               );
             },
             childCount: brands.length,
+          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildTravelContent(BuildContext context, WidgetRef ref) {
+    const all = allTravelStays;
+    final stays = app.entityIds.isNotEmpty
+        ? all.where((s) => app.entityIds.contains(s.id)).toList()
+        : all;
+
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            'Stays handpicked for you',
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final s = stays[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _StayCard(
+                  stay: s,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    context.push(
+                      '/travel/$categoryId/stay/${s.id}',
+                    );
+                  },
+                ),
+              );
+            },
+            childCount: stays.length,
           ),
         ),
       ),
@@ -649,6 +697,157 @@ class _RestaurantCardState extends State<_RestaurantCard> {
                         const SizedBox(width: 4),
                         Text(
                           '${widget.distanceKm.toStringAsFixed(1)} km',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: colors.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StayCard extends StatefulWidget {
+  const _StayCard({required this.stay, required this.onTap});
+
+  final TravelStay stay;
+  final VoidCallback onTap;
+
+  @override
+  State<_StayCard> createState() => _StayCardState();
+}
+
+class _StayCardState extends State<_StayCard> {
+  bool _pressed = false;
+
+  List<Color> get _gradient {
+    final seed = widget.stay.bannerColorSeed;
+    final hue = (seed.codeUnits.fold<int>(0, (a, b) => a + b) % 360).toDouble();
+    final start = HSLColor.fromAHSL(1, hue, 0.55, 0.55).toColor();
+    final end = HSLColor.fromAHSL(1, (hue + 40) % 360, 0.6, 0.4).toColor();
+    return [start, end];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final stay = widget.stay;
+    final gradient = _gradient;
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          clipBehavior: Clip.hardEdge,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: gradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    stay.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                stay.name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                stay.location,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: colors.onSurfaceVariant),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: colors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star, size: 12, color: Colors.white),
+                              const SizedBox(width: 3),
+                              Text(
+                                stay.avgRating.toStringAsFixed(1),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.near_me_outlined, size: 14, color: colors.onSurfaceVariant),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${stay.distanceKm.toStringAsFixed(1)} km',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: colors.onSurfaceVariant),
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(Icons.sell_outlined, size: 14, color: colors.onSurfaceVariant),
+                        const SizedBox(width: 4),
+                        Text(
+                          stay.priceTier,
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
