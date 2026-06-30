@@ -44,7 +44,7 @@ class _ShimmerGoldTextState extends State<ShimmerGoldText>
           shaderCallback: (bounds) {
             final width = bounds.width;
             final dx = -width * 2 + t * width * 4;
-            return LinearGradient(
+            return const LinearGradient(
               colors: DSGradients.textShimmerGold,
               stops: DSGradients.textShimmerStops,
             ).createShader(Rect.fromLTWH(dx, 0, width * 2, bounds.height));
