@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import '../../feedback/presentation/feedback_sheet.dart';
 
@@ -71,7 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ],
             const SizedBox(height: 20),
-            Text('Where to today?', style: Theme.of(context).textTheme.titleMedium),
+            Text('Where to today?', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 12),
             categories.when(
               data: (list) => _CategoryGrid(categories: list),
@@ -125,15 +126,15 @@ class _SavingsBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [colors.primary, colors.primaryContainer],
+            colors: [AppTheme.gold, AppTheme.goldSoft],
           ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: colors.primary.withOpacity(0.25),
+              color: AppTheme.gold.withOpacity(0.25),
               blurRadius: 24,
               offset: const Offset(0, 10),
             ),
@@ -261,9 +262,9 @@ class _NoDreamYetCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colors.outlineVariant),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
         child: Row(
           children: [
@@ -318,7 +319,6 @@ class _DailyCheckInCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
@@ -328,8 +328,9 @@ class _DailyCheckInCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: colors.tertiaryContainer,
+          color: AppTheme.future.withOpacity(0.12),
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.future.withOpacity(0.24)),
         ),
         child: Row(
           children: [
@@ -343,20 +344,20 @@ class _DailyCheckInCard extends StatelessWidget {
                     'Today\'s check-in',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: colors.onTertiaryContainer,
+                          color: AppTheme.future,
                         ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     _message,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onTertiaryContainer,
+                          color: AppTheme.foreground,
                         ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 14, color: colors.onTertiaryContainer),
+            const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.future),
           ],
         ),
       ),
