@@ -630,6 +630,14 @@ class _TravelCollectionRail extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodyMedium),
                         const Spacer(),
+                        Row(
+                          children: [
+                            Icon(Icons.star_rounded, size: 13, color: Colors.amber.shade800),
+                            const SizedBox(width: 2),
+                            Text(item.rating.toStringAsFixed(1), style: Theme.of(context).textTheme.labelSmall),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
                         Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
                       ],
                     ),
