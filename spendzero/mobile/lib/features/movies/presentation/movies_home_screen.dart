@@ -236,6 +236,29 @@ class _MoviesHomeScreenState extends ConsumerState<MoviesHomeScreen> {
                 ),
                 const SizedBox(height: 20),
               ],
+              Consumer(
+                builder: (context, ref, _) {
+                  final typicalPrice = ref.watch(personalizationProvider).typicalPricePaise();
+                  if (typicalPrice == null) return const SizedBox.shrink();
+                  final recommended = allMovies.toList()
+                    ..sort((a, b) => (a.pricePaise - typicalPrice)
+                        .abs()
+                        .compareTo((b.pricePaise - typicalPrice).abs()));
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _MovieCollectionRail(
+                        title: 'Recommended for You',
+                        subtitle: 'Matched to your usual budget',
+                        items: recommended.take(10).toList(),
+                        categoryId: widget.category.id,
+                        accentColor: (context) => Theme.of(context).colorScheme.primaryContainer,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                },
+              ),
               if (savedStays.isNotEmpty) ...[
                 _StayRail(title: 'Saved for Later', stays: savedStays, onTap: _openStay),
                 const SizedBox(height: 20),
