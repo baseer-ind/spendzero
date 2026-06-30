@@ -244,12 +244,9 @@ class _CategoryGrid extends StatelessWidget {
           emoji: category.emoji,
           name: category.name,
           onTap: () {
-            if (category.id == 'demo-food') {
-              context.push('/food/${category.id}', extra: category);
-            } else if (category.id == 'demo-groceries') {
-              context.push('/grocery/${category.id}', extra: category);
-            } else if (category.id == 'demo-fashion') {
-              context.push('/shopping/${category.id}', extra: category);
+            final vertical = _verticalForCategory(category.id, category.slug);
+            if (vertical != null) {
+              context.push('/vertical/$vertical/${category.id}');
             } else {
               context.push('/checkout/${category.id}', extra: category);
             }
@@ -283,6 +280,27 @@ class _CategoryGridSkeleton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Maps a category id/slug to a vertical name. Returns null for categories
+/// that don't have a fictional-app launcher (falls back to checkout screen).
+String? _verticalForCategory(String categoryId, String slug) {
+  const slugMap = {
+    'food': 'food',
+    'grocery': 'grocery',
+    'groceries': 'grocery',
+    'fashion': 'shopping',
+    'shopping': 'shopping',
+    'travel': 'travel',
+    'beauty': 'beauty',
+    'electronics': 'electronics',
+  };
+  // Try slug first, then check categoryId for demo categories
+  if (slugMap.containsKey(slug)) return slugMap[slug];
+  if (categoryId == 'demo-food') return 'food';
+  if (categoryId == 'demo-groceries') return 'grocery';
+  if (categoryId == 'demo-fashion') return 'shopping';
+  return null;
 }
 
 class _CategoryTile extends StatefulWidget {

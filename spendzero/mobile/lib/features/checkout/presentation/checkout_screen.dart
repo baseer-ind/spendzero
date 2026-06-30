@@ -93,7 +93,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final listingsAsync = _searchQuery.isEmpty
         ? ref.watch(categoryListingsProvider(widget.category.id))
         : ref.watch(categoryListingsSearchProvider((widget.category.id, _searchQuery)));
-    _restoreCartOnce(ref.watch(cartProvider(widget.category.id)));
+    _restoreCartOnce(ref.watch(backendCartProvider(widget.category.id)));
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.category.name)),
@@ -221,7 +221,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             .toList(),
       );
       _saveDebounce?.cancel();
-      ref.invalidate(cartProvider(widget.category.id));
+      ref.invalidate(backendCartProvider(widget.category.id));
       setState(() => _quantities.clear());
       if (!mounted) return;
       context.push('/craving-completed', extra: result);

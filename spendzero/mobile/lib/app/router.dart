@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../core/models/category.dart';
 import '../core/models/craving_completed.dart';
+import '../features/app_home/presentation/app_home_screen.dart';
+import '../features/cart/presentation/cart_screen.dart';
 import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/checkout/presentation/craving_completed_screen.dart';
 import '../features/diagnostics/presentation/diagnostics_screen.dart';
@@ -15,6 +17,7 @@ import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/splash_screen.dart';
 import '../features/shopping/presentation/brand_screen.dart';
 import '../features/shopping/presentation/shopping_home_screen.dart';
+import '../features/vertical_launcher/presentation/vertical_launcher_screen.dart';
 
 Page<void> _slide(BuildContext context, GoRouterState state, Widget child) =>
     CustomTransitionPage(
@@ -111,5 +114,55 @@ final appRouter = GoRouter(
       path: '/diagnostics',
       pageBuilder: (c, s) => _slide(c, s, const DiagnosticsScreen()),
     ),
+    // ── App-within-app: vertical launcher ──────────────────────────────────
+    GoRoute(
+      path: '/vertical/:vertical/:categoryId',
+      pageBuilder: (c, s) {
+        final vertical = s.pathParameters['vertical']!;
+        final categoryId = s.pathParameters['categoryId']!;
+        final (title, subtitle, icon) = _verticalMeta(vertical);
+        return _slide(
+          c,
+          s,
+          VerticalLauncherScreen(
+            vertical: vertical,
+            categoryId: categoryId,
+            title: title,
+            subtitle: subtitle,
+            headerIcon: icon,
+          ),
+        );
+      },
+    ),
+    // ── Fictional app home (themed per-app experience) ─────────────────────
+    GoRoute(
+      path: '/vertical/:vertical/:categoryId/app/:appId',
+      pageBuilder: (c, s) => _slide(
+        c,
+        s,
+        AppHomeScreen(
+          appId: s.pathParameters['appId']!,
+          categoryId: s.pathParameters['categoryId']!,
+        ),
+      ),
+    ),
+    // ── Cart ───────────────────────────────────────────────────────────────
+    GoRoute(
+      path: '/cart',
+      pageBuilder: (c, s) => _slide(c, s, const CartScreen()),
+    ),
   ],
 );
+
+/// Returns (title, subtitle, icon) for a given vertical identifier.
+(String, String, IconData) _verticalMeta(String vertical) {
+  return switch (vertical) {
+    'food' => ('Food Delivery', 'Order from top restaurants', Icons.fastfood),
+    'grocery' => ('Grocery', 'Fresh produce delivered fast', Icons.shopping_basket),
+    'shopping' => ('Shopping', 'Fashion, electronics & more', Icons.shopping_bag),
+    'travel' => ('Travel', 'Flights, hotels & holiday packages', Icons.flight_takeoff),
+    'beauty' => ('Beauty', 'Skincare, makeup & wellness', Icons.face_retouching_natural),
+    'electronics' => ('Electronics', 'Gadgets & smart devices', Icons.devices),
+    _ => (vertical, 'Explore $vertical', Icons.category),
+  };
+}

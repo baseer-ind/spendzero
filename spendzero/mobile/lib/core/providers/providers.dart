@@ -106,7 +106,7 @@ final cartRepositoryProvider = FutureProvider<CartRepository>((ref) async {
   return ApiCartRepository(client);
 });
 
-final cartProvider = FutureProvider.family<Cart, String>((ref, categoryId) async {
+final backendCartProvider = FutureProvider.family<Cart, String>((ref, categoryId) async {
   final repo = await ref.watch(cartRepositoryProvider.future);
   return repo.fetchCart(categoryId);
 });
