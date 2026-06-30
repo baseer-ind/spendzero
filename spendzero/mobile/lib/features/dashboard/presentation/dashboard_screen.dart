@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/achievement.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/category_labels.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/activity_row.dart';
@@ -154,11 +155,11 @@ class _DashboardBody extends StatelessWidget {
         const SizedBox(height: 16),
         _BadgesCard(stats: stats),
         const SizedBox(height: 24),
-        Text('Last 7 days', style: Theme.of(context).textTheme.titleMedium),
+        Text('Last 7 days', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 12),
         _WeeklyBarChart(byDay: byDay, maxDay: maxDay),
         const SizedBox(height: 24),
-        Text('Redirected by category', style: Theme.of(context).textTheme.titleMedium),
+        Text('Redirected by category', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 12),
         if (byCategory.isEmpty)
           const _EmptySection(message: 'Nothing redirected yet — skip a craving to get started.')
@@ -172,7 +173,7 @@ class _DashboardBody extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 24),
-        Text('Dreams', style: Theme.of(context).textTheme.titleMedium),
+        Text('Dreams', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -190,8 +191,9 @@ class _DashboardBody extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: AppTheme.gold.withOpacity(0.12),
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
             ),
             child: Row(
               children: [
@@ -218,7 +220,7 @@ class _DashboardBody extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Recent victories', style: Theme.of(context).textTheme.titleMedium),
+            Text('Recent victories', style: Theme.of(context).textTheme.headlineSmall),
             if (history.isNotEmpty)
               TextButton(
                 onPressed: () => context.push('/journey'),
@@ -247,7 +249,6 @@ class _KeepGoingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final subtitle = topDream != null
         ? 'Every craving you skip moves you closer to ${topDream!.title}.'
         : 'Skip your next craving and start building momentum.';
@@ -259,13 +260,13 @@ class _KeepGoingCard extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [colors.primary, colors.primary.withOpacity(0.78)],
+            colors: [AppTheme.gold, AppTheme.goldSoft],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
         child: Row(
           children: [
@@ -276,7 +277,7 @@ class _KeepGoingCard extends StatelessWidget {
                   Text(
                     'Ready for your next win?',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colors.onPrimary,
+                          color: AppTheme.background,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -284,14 +285,14 @@ class _KeepGoingCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onPrimary.withOpacity(0.9),
+                          color: AppTheme.background.withOpacity(0.75),
                         ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            Icon(Icons.arrow_forward_rounded, color: colors.onPrimary),
+            const Icon(Icons.arrow_forward_rounded, color: AppTheme.background),
           ],
         ),
       ),
@@ -314,7 +315,6 @@ class _HeroHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final dreamFraction = topDream == null
         ? 0.0
         : (topDream!.savedPaise / topDream!.targetPaise).clamp(0.0, 1.0);
@@ -322,15 +322,15 @@ class _HeroHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [colors.primary, colors.tertiary],
+          colors: [AppTheme.gold, AppTheme.future],
         ),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: colors.primary.withOpacity(0.35),
+            color: AppTheme.future.withOpacity(0.35),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -456,7 +456,6 @@ class _MomentumStory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final nextMilestone = allAchievements.firstWhere(
       (a) => !a.isUnlocked(stats),
       orElse: () => allAchievements.last,
@@ -478,8 +477,9 @@ class _MomentumStory extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: colors.tertiaryContainer.withOpacity(0.5),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -493,7 +493,7 @@ class _MomentumStory extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
-                  ?.copyWith(color: colors.onTertiaryContainer.withOpacity(0.85)),
+                  ?.copyWith(color: AppTheme.gold),
             ),
           ],
         ],
@@ -510,7 +510,6 @@ class _BadgesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unlockedCount = allAchievements.where((a) => a.isUnlocked(stats)).length;
-    final colors = Theme.of(context).colorScheme;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -518,8 +517,9 @@ class _BadgesCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colors.secondaryContainer,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
         child: Row(
           children: [
@@ -541,7 +541,7 @@ class _BadgesCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: colors.onSecondaryContainer),
+            const Icon(Icons.chevron_right, color: AppTheme.gold),
           ],
         ),
       ),
@@ -570,8 +570,9 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -607,8 +608,9 @@ class _MiniStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -631,13 +633,13 @@ class _WeeklyBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return Container(
       height: 140,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -660,7 +662,7 @@ class _WeeklyBarChart extends StatelessWidget {
                     builder: (context, value, _) => Container(
                       height: 70 * value,
                       decoration: BoxDecoration(
-                        color: isToday ? colors.primary : colors.primary.withOpacity(0.55),
+                        color: isToday ? AppTheme.gold : AppTheme.gold.withOpacity(0.55),
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
@@ -670,7 +672,7 @@ class _WeeklyBarChart extends StatelessWidget {
                     _weekdayLabels[e.key.weekday - 1],
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: isToday ? FontWeight.bold : null,
-                          color: isToday ? colors.primary : null,
+                          color: isToday ? AppTheme.gold : null,
                         ),
                   ),
                 ],
@@ -734,6 +736,7 @@ class _CategoryRow extends StatelessWidget {
                       value: value,
                       minHeight: 6,
                       backgroundColor: colors.surfaceContainerHigh,
+                      valueColor: const AlwaysStoppedAnimation(AppTheme.gold),
                     ),
                   ),
                 ),
