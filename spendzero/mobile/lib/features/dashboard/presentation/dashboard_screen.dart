@@ -48,7 +48,7 @@ class DashboardScreen extends ConsumerWidget {
     final goals = ref.watch(goalsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Savings dashboard')),
+      appBar: AppBar(title: const Text('Your Journey')),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(statsProvider);
@@ -180,10 +180,10 @@ class _DashboardBody extends StatelessWidget {
         const SizedBox(height: 12),
         _WeeklyBarChart(byDay: byDay, maxDay: maxDay),
         const SizedBox(height: 24),
-        Text('Saved by category', style: Theme.of(context).textTheme.titleMedium),
+        Text('Redirected by category', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         if (byCategory.isEmpty)
-          const _EmptySection(message: 'Nothing saved yet — skip a craving to get started.')
+          const _EmptySection(message: 'Nothing redirected yet — skip a craving to get started.')
         else
           ...byCategory.entries.toList().asMap().entries.map(
             (indexed) => _CategoryRow(
@@ -352,7 +352,7 @@ class _HeroHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Total saved',
+            'Redirected toward your future',
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
@@ -469,7 +469,7 @@ class _MomentumStory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final nextAchievement = allAchievements.firstWhere(
+    final nextMilestone = allAchievements.firstWhere(
       (a) => !a.isUnlocked(stats),
       orElse: () => allAchievements.last,
     );
@@ -478,11 +478,11 @@ class _MomentumStory extends StatelessWidget {
     String headline;
     if (thisWeekPaise > 0 && lastWeekPaise > 0 && thisWeekPaise > lastWeekPaise) {
       final times = (thisWeekPaise / lastWeekPaise).toStringAsFixed(1);
-      headline = "You've saved ${times}x more this week than last — keep the momentum.";
+      headline = "You've redirected ${times}x more this week than last — keep the momentum.";
     } else if (thisWeekPaise > 0) {
       headline = topDream != null
-          ? "Every save this week moved you closer to ${topDream!.title}."
-          : "You've saved ${formatPaise(thisWeekPaise)} this week. Nice discipline.";
+          ? "Every choice this week moved you closer to ${topDream!.title}."
+          : "You've redirected ${formatPaise(thisWeekPaise)} toward your future this week. Nice discipline.";
     } else {
       headline = "A fresh week — skip your next craving to start the streak.";
     }
@@ -500,8 +500,8 @@ class _MomentumStory extends StatelessWidget {
           if (!allUnlocked) ...[
             const SizedBox(height: 6),
             Text(
-              'Next up: ${nextAchievement.emoji} ${nextAchievement.title} — '
-              '${nextAchievement.progressLabel(stats)}',
+              'Next up: ${nextMilestone.emoji} ${nextMilestone.title} — '
+              '${nextMilestone.progressLabel(stats)}',
               style: Theme.of(context)
                   .textTheme
                   .bodySmall
@@ -542,7 +542,7 @@ class _BadgesCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$unlockedCount of ${allAchievements.length} badges unlocked',
+                    '$unlockedCount of ${allAchievements.length} victories unlocked',
                     style: Theme.of(context)
                         .textTheme
                         .titleSmall
@@ -788,7 +788,7 @@ class _ActivityRow extends StatelessWidget {
               children: [
                 Text(
                   saved
-                      ? 'Saved ${formatPaise(amountPaise)} on ${_labelFor(categoryId)}'
+                      ? 'Redirected ${formatPaise(amountPaise)} from ${_labelFor(categoryId)}'
                       : 'Spent on ${_labelFor(categoryId)}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),

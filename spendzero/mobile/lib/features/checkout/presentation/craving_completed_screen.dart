@@ -74,9 +74,9 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
                       child: const Text('🎉', style: TextStyle(fontSize: 48)),
                     ),
                     const SizedBox(height: 12),
-                    Text('Craving Completed', style: Theme.of(context).textTheme.headlineSmall),
+                    Text('Victory!', style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 8),
-                    Text('You chose not to spend', style: Theme.of(context).textTheme.bodyMedium),
+                    Text('You chose your future', style: Theme.of(context).textTheme.bodyMedium),
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0, end: widget.result.amountNotSpentPaise.toDouble()),
                       duration: const Duration(milliseconds: 900),
@@ -140,7 +140,7 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
                                     width: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
-                                : const Text('I Saved It'),
+                                : const Text('I Redirected It'),
                           ),
                         ),
                       ],

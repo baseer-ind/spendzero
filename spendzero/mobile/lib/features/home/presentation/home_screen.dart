@@ -39,7 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.flag_outlined),
-            tooltip: 'Goals',
+            tooltip: 'My Future',
             onPressed: () => context.push('/goals'),
           ),
         ],
@@ -157,8 +157,8 @@ class _SavingsBanner extends StatelessWidget {
               children: [
                 Text(
                   dream != null
-                      ? '${dream.emoji} Saving for ${dream.title}'
-                      : 'Total saved so far',
+                      ? '${dream.emoji} Building toward ${dream.title}'
+                      : 'Redirected toward your future so far',
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
