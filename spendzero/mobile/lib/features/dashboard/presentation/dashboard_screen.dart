@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -242,7 +243,70 @@ class _DashboardBody extends StatelessWidget {
           const _EmptySection(message: 'No cravings logged yet.')
         else
           ...history.take(10).map((e) => _ActivityRow(entry: e)),
+        const SizedBox(height: 24),
+        _KeepGoingCard(topDream: topDream),
       ],
+    );
+  }
+}
+
+/// Closes the loop on the Dashboard Journey: after reviewing progress, the
+/// user needs a clear next step back into the app rather than a dead end.
+class _KeepGoingCard extends StatelessWidget {
+  const _KeepGoingCard({required this.topDream});
+
+  final SavingsGoal? topDream;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final subtitle = topDream != null
+        ? 'Every craving you skip moves you closer to ${topDream!.title}.'
+        : 'Skip your next craving and start building momentum.';
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        context.go('/');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [colors.primary, colors.primary.withOpacity(0.78)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ready for your next win?',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: colors.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colors.onPrimary.withOpacity(0.9),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Icon(Icons.arrow_forward_rounded, color: colors.onPrimary),
+          ],
+        ),
+      ),
     );
   }
 }
