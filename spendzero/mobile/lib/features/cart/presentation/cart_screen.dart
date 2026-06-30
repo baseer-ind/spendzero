@@ -216,7 +216,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Checking out means you\'re resisting this craving — and saving ${formatPaise(finalTotal)}!',
+                        'Checking out means you\'re resisting this craving — and redirecting ${formatPaise(finalTotal)} toward your future!',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                             ),
