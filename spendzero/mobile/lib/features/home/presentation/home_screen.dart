@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,7 +80,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
             stats.when(
               data: (s) => GestureDetector(
-                onTap: () => context.push('/dashboard'),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.push('/dashboard');
+                },
                 child: _SavingsBanner(
                   totalSavedPaise: s.totalAmountNotSpentPaise,
                   streakDays: s.currentStreakDays,
@@ -155,57 +159,100 @@ class _SavingsBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colors.primaryContainer,
-        borderRadius: BorderRadius.circular(20),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+      builder: (context, entrance, child) => Opacity(
+        opacity: entrance,
+        child: Transform.translate(offset: Offset(0, (1 - entrance) * 12), child: child),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Total saved so far', style: Theme.of(context).textTheme.bodyMedium),
-              if (streakDays > 0)
-                Semantics(
-                  label: '$streakDays day saving streak',
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colors.secondaryContainer,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('🔥', style: TextStyle(fontSize: 14)),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$streakDays day streak',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                      ],
+      child: Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [colors.primary, colors.primaryContainer],
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: colors.primary.withOpacity(0.25),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total saved so far',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: colors.onPrimary.withOpacity(0.85)),
+                ),
+                if (streakDays > 0)
+                  Semantics(
+                    label: '$streakDays day saving streak',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: colors.onPrimary.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('🔥', style: TextStyle(fontSize: 14)),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$streakDays day streak',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(color: colors.onPrimary),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          TweenAnimationBuilder<int>(
-            tween: IntTween(begin: 0, end: totalSavedPaise),
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, _) => Text(
-              formatPaise(value),
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: totalSavedPaise.toDouble()),
+              duration: const Duration(milliseconds: 1100),
+              curve: Curves.easeOutExpo,
+              builder: (context, value, _) => Text(
+                formatPaise(value.round()),
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: colors.onPrimary,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Row(
+              children: [
+                Icon(Icons.bar_chart_rounded, size: 14, color: colors.onPrimary.withOpacity(0.75)),
+                const SizedBox(width: 4),
+                Text(
+                  'Tap to see your dashboard',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: colors.onPrimary.withOpacity(0.75)),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
