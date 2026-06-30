@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/data/local/beauty_seed_data.dart';
+import '../../../core/data/local/movies_seed_data.dart';
 import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/food_seed_data.dart';
 import '../../../core/data/local/grocery_seed_data.dart';
@@ -148,6 +149,8 @@ class _AppHomeContent extends ConsumerWidget {
         return _buildTravelContent(context, ref);
       case 'beauty':
         return _buildBeautyContent(context, ref);
+      case 'movies':
+        return _buildMoviesContent(context, ref);
       case 'electronics':
         return _buildShoppingContent(context, ref);
       default:
@@ -403,6 +406,58 @@ class _AppHomeContent extends ConsumerWidget {
               );
             },
             childCount: brands.length,
+          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildMoviesContent(BuildContext context, WidgetRef ref) {
+    const all = allCinemaBrands;
+    final cinemas = app.entityIds.isNotEmpty
+        ? all.where((c) => app.entityIds.contains(c.id)).toList()
+        : all;
+
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            'Cinemas handpicked for you',
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final c = cinemas[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _RestaurantCard(
+                  id: c.id,
+                  name: c.name,
+                  tagline: c.brandTagline,
+                  cuisines: c.amenities,
+                  rating: c.avgRating,
+                  deliveryMins: 0,
+                  distanceKm: c.distanceKm,
+                  colorSeed: c.bannerColorSeed,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    context.push(
+                      '/movies/$categoryId/cinema/${c.id}',
+                    );
+                  },
+                ),
+              );
+            },
+            childCount: cinemas.length,
           ),
         ),
       ),

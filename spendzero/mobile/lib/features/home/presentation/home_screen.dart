@@ -351,6 +351,8 @@ String? _verticalForCategory(String categoryId, String slug) {
     'travel': 'travel',
     'beauty': 'beauty',
     'electronics': 'electronics',
+    'entertainment': 'movies',
+    'movies': 'movies',
   };
   // Try slug first, then check categoryId for demo categories
   if (slugMap.containsKey(slug)) return slugMap[slug];

@@ -6,6 +6,8 @@ import '../core/models/craving_completed.dart';
 import '../features/app_home/presentation/app_home_screen.dart';
 import '../features/beauty/presentation/beauty_home_screen.dart';
 import '../features/beauty/presentation/brand_screen.dart' as beauty;
+import '../features/movies/presentation/movies_home_screen.dart';
+import '../features/movies/presentation/cinema_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
 import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/checkout/presentation/craving_completed_screen.dart';
@@ -143,6 +145,22 @@ final appRouter = GoRouter(
         StayScreen(
           categoryId: s.pathParameters['categoryId']!,
           stayId: s.pathParameters['stayId']!,
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/movies/:categoryId',
+      pageBuilder: (c, s) =>
+          _slide(c, s, MoviesHomeScreen(category: s.extra as SpendCategory)),
+    ),
+    GoRoute(
+      path: '/movies/:categoryId/cinema/:cinemaId',
+      pageBuilder: (c, s) => _slide(
+        c,
+        s,
+        CinemaScreen(
+          categoryId: s.pathParameters['categoryId']!,
+          cinemaId: s.pathParameters['cinemaId']!,
         ),
       ),
     ),

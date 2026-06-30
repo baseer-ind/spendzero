@@ -4,6 +4,7 @@ import '../data/contracts.dart';
 import '../data/contracts_food.dart';
 import '../data/contracts_grocery.dart';
 import '../data/contracts_beauty.dart';
+import '../data/contracts_movies.dart';
 import '../data/contracts_shopping.dart';
 import '../data/contracts_travel.dart';
 import '../data/local/food_seed_data.dart';
@@ -11,6 +12,8 @@ import '../data/local/grocery_seed_data.dart' hide Review;
 import '../data/local/grocery_seed_data.dart' as grocery_seed show Review;
 import '../data/local/beauty_seed_data.dart' hide Review;
 import '../data/local/beauty_seed_data.dart' as beauty_seed show Review;
+import '../data/local/movies_seed_data.dart' hide Review;
+import '../data/local/movies_seed_data.dart' as movies_seed show Review;
 import '../data/local/shopping_seed_data.dart' hide Review;
 import '../data/local/shopping_seed_data.dart' as shopping_seed show Review;
 import '../data/local/travel_seed_data.dart' hide Review;
@@ -23,6 +26,7 @@ import '../data/local/local_food_repository.dart';
 import '../data/local/local_goal_repository.dart';
 import '../data/local/local_grocery_repository.dart';
 import '../data/local/local_beauty_repository.dart';
+import '../data/local/local_movies_repository.dart';
 import '../data/local/local_shopping_repository.dart';
 import '../data/local/local_travel_repository.dart';
 import '../data/local/local_stats_repository.dart';
@@ -417,6 +421,62 @@ final beautyProductByIdProvider =
     FutureProvider.family<BeautyProduct?, String>((ref, productId) async {
   final repo = ref.watch(beautyRepositoryProvider);
   return repo.fetchProduct(productId);
+});
+
+/// The "Movies" vertical is local-only for now — no `Api*` backend
+/// counterpart exists yet, so this provider always returns
+/// [LocalMoviesRepository] regardless of [useLocalBackend].
+final moviesRepositoryProvider =
+    Provider<MoviesRepository>((ref) => LocalMoviesRepository());
+
+final cinemasProvider = FutureProvider<List<CinemaBrand>>((ref) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchCinemas();
+});
+
+final moviesTrendingProvider = FutureProvider<List<CinemaBrand>>((ref) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchTrending();
+});
+
+final moviesTodaysOffersProvider = FutureProvider<List<Movie>>((ref) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchTodaysOffers();
+});
+
+final moviesBestSellersProvider = FutureProvider<List<Movie>>((ref) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchBestSellers();
+});
+
+final moviesForCinemaProvider =
+    FutureProvider.family<List<Movie>, String>((ref, cinemaId) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchMovies(cinemaId);
+});
+
+final movieReviewsForProvider =
+    FutureProvider.family<List<movies_seed.Review>, String>((ref, targetId) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchReviews(targetId);
+});
+
+final moviesSearchProvider =
+    FutureProvider.family<List<dynamic>, String>((ref, query) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.searchMovies(query);
+});
+
+final cinemaByIdProvider =
+    FutureProvider.family<CinemaBrand?, String>((ref, cinemaId) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchCinema(cinemaId);
+});
+
+final movieByIdProvider =
+    FutureProvider.family<Movie?, String>((ref, movieId) async {
+  final repo = ref.watch(moviesRepositoryProvider);
+  return repo.fetchMovie(movieId);
 });
 
 /// Pings `/health` so the diagnostics screen can show a live API status

@@ -12,6 +12,7 @@ const _shopping = 'shopping';
 const _travel = 'travel';
 const _beauty = 'beauty';
 const _electronics = 'electronics';
+const _movies = 'movies';
 
 const allFictionalApps = <FictionalApp>[
   // ── FOOD ─────────────────────────────────────────────────────────────────
@@ -444,6 +445,64 @@ const allFictionalApps = <FictionalApp>[
     heroBadge: '🤖 AI & Smart home',
     heroOffer: 'Smart home starter kit at 30% off',
     entityIds: ['sb-echonest-audio'],
+  ),
+
+  // ── MOVIES ───────────────────────────────────────────────────────────────
+  FictionalApp(
+    id: 'cinetix',
+    vertical: _movies,
+    name: 'CineTix',
+    tagline: 'Book your next big screen moment',
+    primaryColor: Color(0xFFB71C1C),
+    accentColor: Color(0xFFEF5350),
+    surfaceColor: Color(0xFFFFF0F0),
+    logoIcon: Icons.local_movies,
+    logoBgGradient: [Color(0xFFB71C1C), Color(0xFFD32F2F)],
+    heroBadge: '🍿 IMAX & 4DX',
+    heroOffer: 'Buy 1 get 1 on Tuesdays',
+    entityIds: ['cb-starlight-multiplex'],
+  ),
+  FictionalApp(
+    id: 'reelpass',
+    vertical: _movies,
+    name: 'ReelPass',
+    tagline: 'Premium seats, premium cinema',
+    primaryColor: Color(0xFF4A148C),
+    accentColor: Color(0xFFAB47BC),
+    surfaceColor: Color(0xFFF8F0FF),
+    logoIcon: Icons.theaters,
+    logoBgGradient: [Color(0xFF4A148C), Color(0xFF6A1B9A)],
+    heroBadge: '🎟️ Luxury recliners',
+    heroOffer: '20% off on weekend bookings',
+    entityIds: ['cb-velvet-screens'],
+  ),
+  FictionalApp(
+    id: 'showtyme',
+    vertical: _movies,
+    name: 'ShowTyme',
+    tagline: 'Your neighbourhood ticket window',
+    primaryColor: Color(0xFFE65100),
+    accentColor: Color(0xFFFFB74D),
+    surfaceColor: Color(0xFFFFF6EC),
+    logoIcon: Icons.confirmation_number,
+    logoBgGradient: [Color(0xFFE65100), Color(0xFFEF6C00)],
+    heroBadge: '🎬 Budget-friendly shows',
+    heroOffer: 'Tickets starting at ₹99',
+    entityIds: ['cb-cornerplex-talkies'],
+  ),
+  FictionalApp(
+    id: 'flickbox',
+    vertical: _movies,
+    name: 'FlickBox',
+    tagline: 'All the movies, one tap away',
+    primaryColor: Color(0xFF263238),
+    accentColor: Color(0xFF607D8B),
+    surfaceColor: Color(0xFFF3F5F6),
+    logoIcon: Icons.movie_filter,
+    logoBgGradient: [Color(0xFF263238), Color(0xFF37474F)],
+    heroBadge: '🌟 Trending releases',
+    heroOffer: 'Free popcorn upgrade on first booking',
+    entityIds: [],
   ),
 ];
 
