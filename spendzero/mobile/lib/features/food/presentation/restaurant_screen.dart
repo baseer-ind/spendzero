@@ -13,6 +13,34 @@ import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
 import 'menu_item_detail_sheet.dart';
 
+/// Local keyword lookup (no AI/network) so each restaurant's identity card
+/// shows a cuisine-appropriate emoji instead of a generic first-letter
+/// monogram — a richer, more "designed" feel for a one-line list of fixed
+/// cuisine tags.
+const _cuisineEmojiKeywords = <String, String>{
+  'biryani': '🍛', 'hyderabadi': '🍛', 'mughlai': '🍢',
+  'north indian': '🍛', 'thali': '🍱', 'punjabi': '🫓',
+  'south indian': '🥞', 'tiffins': '🥞', 'breakfast': '🍳',
+  'pizza': '🍕', 'italian': '🍝',
+  'indo-chinese': '🥡', 'asian': '🥡',
+  'desserts': '🍰', 'ice cream': '🍦',
+  'healthy': '🥗', 'bowls': '🥗', 'salads': '🥗',
+  'street food': '🌮', 'chaat': '🌮', 'rolls': '🌯',
+  'continental': '🍽️', 'cafe': '☕', 'coffee': '☕', 'sandwiches': '🥪',
+  'multi-cuisine': '🍽️', 'cloud kitchen': '🍽️',
+  'tandoor': '🍢', 'kebabs': '🍢',
+  'coastal': '🐟', 'seafood': '🐟', 'kerala': '🐟',
+  'late night': '🌙',
+};
+
+String _emojiForCuisines(List<String> cuisines) {
+  for (final cuisine in cuisines) {
+    final match = _cuisineEmojiKeywords[cuisine.toLowerCase()];
+    if (match != null) return match;
+  }
+  return '🍴';
+}
+
 List<Color> _gradientForSeed(String seed) {
   final hue = (seed.codeUnits.fold<int>(0, (a, b) => a + b) % 360).toDouble();
   final start = HSLColor.fromAHSL(1, hue, 0.55, 0.55).toColor();
@@ -559,12 +587,8 @@ class _SimilarRestaurantsRail extends StatelessWidget {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          r.name.substring(0, 1),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          _emojiForCuisines(r.cuisines),
+                          style: const TextStyle(fontSize: 28),
                         ),
                       ),
                       Padding(

@@ -28,9 +28,11 @@ engineering checklist.
       show a keyword-matched emoji glyph (pizza → 🍕, kurta → 👘, phone → 📱, etc.) on a
       two-tone gradient, so items read as recognizable products instead of interchangeable
       blocks. (`product_card.dart`)
-- [ ] Restaurant/store banners and the "similar items" rail still use single-letter-on-
-      gradient identity. Functional, but reads as a placeholder rather than a designed brand
-      mark — needs a richer treatment.
+- [x] **Restaurant "similar items" rail used a single-letter-on-gradient identity.** Fixed:
+      rail cards now show a cuisine-matched emoji glyph (biryani → 🍛, pizza → 🍕, cafe → ☕,
+      etc.) via local keyword lookup, same pattern as product thumbnails. The restaurant detail
+      banner was reviewed and already shows name/tagline/rating/distance — no change needed
+      there. (`restaurant_screen.dart`)
 - [ ] Generic browsing screens read as a "catalog," not a "discovery surface" — weak visual
       hierarchy (uniform grid, no featured/hero items).
 - [ ] No onboarding moment — first-time users land straight on the home grid with only a
