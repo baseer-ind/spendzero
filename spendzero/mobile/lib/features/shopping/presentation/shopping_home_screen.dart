@@ -235,6 +235,29 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
+              Consumer(
+                builder: (context, ref, _) {
+                  final typicalPrice = ref.watch(personalizationProvider).typicalPricePaise();
+                  if (typicalPrice == null) return const SizedBox.shrink();
+                  final recommended = allShoppingProducts.toList()
+                    ..sort((a, b) => (a.pricePaise - typicalPrice)
+                        .abs()
+                        .compareTo((b.pricePaise - typicalPrice).abs()));
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ShoppingCollectionRail(
+                        title: 'Recommended for You',
+                        subtitle: 'Matched to your usual budget',
+                        items: recommended.take(10).toList(),
+                        accentColor: (c) => Theme.of(c).colorScheme.primaryContainer,
+                        categoryId: widget.category.id,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                },
+              ),
               if (savedBrands.isNotEmpty) ...[
                 _BrandRail(title: 'Saved for Later', brands: savedBrands, onTap: _openBrand),
                 const SizedBox(height: 20),
