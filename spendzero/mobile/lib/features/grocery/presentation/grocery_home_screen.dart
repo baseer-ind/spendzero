@@ -13,6 +13,7 @@ import '../../../core/data/local/personalization_store.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 
 String _appIdFor(String storeId) => findAppIdForEntity(storeId) ?? storeId;
@@ -192,7 +193,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                   title: 'Recommended for You',
                   subtitle: 'Matched to your usual basket size',
                   items: recommended,
-                  accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                  accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                   categoryId: widget.category.id,
                 ),
                 const SizedBox(height: 20),
@@ -221,7 +222,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 title: 'Weekly Must-Haves',
                 subtitle: 'Hand-picked staples worth restocking',
                 items: weeklyMustHaves(),
-                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -229,7 +230,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 title: 'Organic Picks',
                 subtitle: 'Natural, chemical-free choices',
                 items: organicPicks(),
-                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                accentColor: (c) => AppTheme.future.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -237,7 +238,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 title: 'Pantry Restock',
                 subtitle: 'The staples that run out first',
                 items: pantryStaples(),
-                accentColor: (c) => Theme.of(c).colorScheme.primaryContainer,
+                accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -245,7 +246,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 title: 'Snack Attack',
                 subtitle: 'Trending in everyone\'s snack drawer',
                 items: snackAttack(),
-                accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                accentColor: (c) => AppTheme.surface,
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -253,7 +254,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 title: 'Best Rated',
                 subtitle: 'Loved by hundreds of shoppers',
                 items: bestRatedGroceryProducts(),
-                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -261,7 +262,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 title: 'Hidden Gems',
                 subtitle: 'High ratings, still flying under the radar',
                 items: hiddenGemGroceryProducts(),
-                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                accentColor: (c) => AppTheme.future.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -277,7 +278,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 ),
                 const SizedBox(height: 20),
               ],
-              Text('Browse Stores', style: Theme.of(context).textTheme.titleMedium),
+              Text('Browse Stores', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 12),
               storesAsync.when(
                 data: (stores) {
@@ -383,8 +384,11 @@ class _SearchResults extends ConsumerWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: ListTile(
-                tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: AppTheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                ),
                 title: Text(product.name),
                 subtitle: Text(formatPaise(product.pricePaise)),
                 onTap: () {
@@ -416,7 +420,7 @@ class _StoreRail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 150,
@@ -491,7 +495,7 @@ class _OffersRail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Today's Offers", style: Theme.of(context).textTheme.titleMedium),
+        Text("Today's Offers", style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 130,
@@ -514,14 +518,14 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final discount = item.discountPercent;
     return Container(
       width: 170,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.gold.withOpacity(0.12),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,7 +540,7 @@ class _OfferCard extends StatelessWidget {
                 Text(
                   '$discount% off',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.primary,
+                        color: AppTheme.gold,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -574,7 +578,7 @@ class _GroceryCollectionRail extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
         Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -614,7 +618,7 @@ class _GroceryCollectionRail extends ConsumerWidget {
                         const Spacer(),
                         Row(
                           children: [
-                            Icon(Icons.star_rounded, size: 13, color: Colors.amber.shade800),
+                            const Icon(Icons.star_rounded, size: 13, color: AppTheme.gold),
                             const SizedBox(width: 2),
                             Text(item.rating.toStringAsFixed(1), style: Theme.of(context).textTheme.labelSmall),
                           ],
@@ -684,8 +688,9 @@ class _StoreCard extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -715,7 +720,7 @@ class _StoreCard extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.star_rounded, size: 16, color: colors.secondary),
+                      const Icon(Icons.star_rounded, size: 16, color: AppTheme.gold),
                       const SizedBox(width: 2),
                       Text(
                         '${store.avgRating.toStringAsFixed(1)} (${store.reviewCount})',
@@ -778,7 +783,7 @@ class _RailSkeletonState extends State<_RailSkeleton> with SingleTickerProviderS
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.title, style: Theme.of(context).textTheme.titleMedium),
+        Text(widget.title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 130,
@@ -794,7 +799,7 @@ class _RailSkeletonState extends State<_RailSkeleton> with SingleTickerProviderS
                 child: Container(
                   width: 160,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
@@ -845,7 +850,7 @@ class _StoreListSkeletonState extends State<_StoreListSkeleton>
               child: Container(
                 height: 88,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: AppTheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),

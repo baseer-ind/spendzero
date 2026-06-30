@@ -10,6 +10,7 @@ import '../../../core/data/local/persistent_cart_store.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import 'menu_item_detail_sheet.dart';
 
@@ -332,7 +333,7 @@ class _MenuSections extends StatelessWidget {
         if (desserts.isNotEmpty)
           _MenuSection(title: 'Desserts', items: desserts, quantities: quantities, onAdd: onAdd, onQuantityChanged: onQuantityChanged),
         const SizedBox(height: 8),
-        Text('Frequently Ordered Together', style: Theme.of(context).textTheme.titleMedium),
+        Text('Frequently Ordered Together', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 70,
@@ -373,7 +374,7 @@ class _MenuSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          Text(title, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           ...items.map((item) => _MenuItemRow(
                 item: item,
@@ -491,7 +492,7 @@ class _QuantityStepper extends StatelessWidget {
     return Container(
       height: 36,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: AppTheme.gold,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -499,10 +500,10 @@ class _QuantityStepper extends StatelessWidget {
         children: [
           InkWell(
             onTap: () => onChanged(quantity - 1),
-            child: SizedBox(
+            child: const SizedBox(
               width: 32,
               height: 36,
-              child: Icon(Icons.remove, size: 16, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(Icons.remove, size: 16, color: AppTheme.background),
             ),
           ),
           SizedBox(
@@ -510,15 +511,15 @@ class _QuantityStepper extends StatelessWidget {
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.background),
             ),
           ),
           InkWell(
             onTap: () => onChanged(quantity + 1),
-            child: SizedBox(
+            child: const SizedBox(
               width: 32,
               height: 36,
-              child: Icon(Icons.add, size: 16, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(Icons.add, size: 16, color: AppTheme.background),
             ),
           ),
         ],
@@ -550,7 +551,7 @@ class _SimilarRestaurantsRail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('You might also like', style: Theme.of(context).textTheme.titleMedium),
+        Text('You might also like', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 168,
@@ -569,8 +570,9 @@ class _SimilarRestaurantsRail extends StatelessWidget {
                 child: Container(
                   width: 150,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.08)),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: Column(
@@ -608,8 +610,8 @@ class _SimilarRestaurantsRail extends StatelessWidget {
                             const SizedBox(height: 2),
                             Row(
                               children: [
-                                Icon(Icons.star_rounded,
-                                    size: 13, color: Colors.amber.shade800),
+                                const Icon(Icons.star_rounded,
+                                    size: 13, color: AppTheme.gold),
                                 const SizedBox(width: 2),
                                 Text(r.avgRating.toStringAsFixed(1),
                                     style: Theme.of(context).textTheme.labelSmall),
@@ -644,7 +646,7 @@ class _ReviewsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Reviews', style: Theme.of(context).textTheme.titleMedium),
+        Text('Reviews', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         ...visible.map((r) => _ReviewTile(review: r)),
         if (!showAll && reviews.length > 3)
@@ -661,13 +663,13 @@ class _ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,7 +679,7 @@ class _ReviewTile extends StatelessWidget {
               CircleAvatar(radius: 14, child: Text(review.reviewerInitials, style: const TextStyle(fontSize: 11))),
               const SizedBox(width: 8),
               Expanded(child: Text(review.reviewerName, style: Theme.of(context).textTheme.bodyMedium)),
-              Icon(Icons.star_rounded, size: 16, color: colors.secondary),
+              const Icon(Icons.star_rounded, size: 16, color: AppTheme.gold),
               Text(review.rating.toStringAsFixed(1)),
             ],
           ),
@@ -687,7 +689,7 @@ class _ReviewTile extends StatelessWidget {
           Text(
             '${review.daysAgo}d ago · ${review.helpfulCount} found this helpful'
             '${review.verifiedOrder ? ' · Verified order' : ''}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.outline),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.mutedForeground),
           ),
         ],
       ),

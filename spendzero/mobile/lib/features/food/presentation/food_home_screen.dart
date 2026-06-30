@@ -13,6 +13,7 @@ import '../../../core/data/local/personalization_store.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 
 String _appIdFor(String restaurantId) => findAppIdForEntity(restaurantId) ?? restaurantId;
@@ -191,7 +192,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                   title: 'Recommended for You',
                   subtitle: 'Based on what you usually order',
                   items: recommended,
-                  accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                  accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                   categoryId: widget.category.id,
                 ),
                 const SizedBox(height: 20),
@@ -220,7 +221,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 title: 'Weekend Specials',
                 subtitle: 'Hand-picked for slow Saturday mornings',
                 items: weekendSpecials(),
-                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -228,7 +229,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 title: 'Late Night Cravings',
                 subtitle: 'For when the kitchen calls after 9pm',
                 items: lateNightCravings(),
-                accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                accentColor: (c) => AppTheme.surface,
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -236,7 +237,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 title: 'Healthy Week',
                 subtitle: 'Lighter dishes that still hit the spot',
                 items: healthyWeekPicks(),
-                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                accentColor: (c) => AppTheme.future.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -244,7 +245,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 title: 'Quick Office Lunch',
                 subtitle: 'Bestsellers ready in 15 minutes or less',
                 items: quickOfficeLunch(),
-                accentColor: (c) => Theme.of(c).colorScheme.primaryContainer,
+                accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -252,7 +253,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 title: 'Best Rated',
                 subtitle: 'Loved by hundreds of regulars',
                 items: bestRatedMenuItems(),
-                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                accentColor: (c) => AppTheme.gold.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -260,7 +261,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 title: 'Hidden Gems',
                 subtitle: 'High ratings, still flying under the radar',
                 items: hiddenGemMenuItems(),
-                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                accentColor: (c) => AppTheme.future.withOpacity(0.12),
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
@@ -280,7 +281,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 ),
                 const SizedBox(height: 20),
               ],
-              Text('Browse Restaurants', style: Theme.of(context).textTheme.titleMedium),
+              Text('Browse Restaurants', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 12),
               restaurantsAsync.when(
                 data: (restaurants) {
@@ -386,8 +387,11 @@ class _SearchResults extends ConsumerWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: ListTile(
-                tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: AppTheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                ),
                 title: Text(item.name),
                 subtitle: Text(formatPaise(item.pricePaise)),
                 onTap: () {
@@ -419,7 +423,7 @@ class _RestaurantRail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 150,
@@ -494,7 +498,7 @@ class _OffersRail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Today's Offers", style: Theme.of(context).textTheme.titleMedium),
+        Text("Today's Offers", style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 130,
@@ -517,14 +521,14 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final discount = item.discountPercent;
     return Container(
       width: 170,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.gold.withOpacity(0.12),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -539,7 +543,7 @@ class _OfferCard extends StatelessWidget {
                 Text(
                   '$discount% off',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.primary,
+                        color: AppTheme.gold,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -578,7 +582,7 @@ class _CollectionRail extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
         Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -599,6 +603,7 @@ class _CollectionRail extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
+                  splashColor: AppTheme.gold.withOpacity(0.1),
                   onTap: () async {
                     HapticFeedback.selectionClick();
                     await RecentlyViewedFoodStore().recordView(item.restaurantId);
@@ -619,7 +624,7 @@ class _CollectionRail extends ConsumerWidget {
                         const Spacer(),
                         Row(
                           children: [
-                            Icon(Icons.star_rounded, size: 13, color: Colors.amber.shade800),
+                            const Icon(Icons.star_rounded, size: 13, color: AppTheme.gold),
                             const SizedBox(width: 2),
                             Text(item.rating.toStringAsFixed(1), style: Theme.of(context).textTheme.labelSmall),
                           ],
@@ -689,8 +694,9 @@ class _RestaurantCard extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -720,7 +726,7 @@ class _RestaurantCard extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.star_rounded, size: 16, color: colors.secondary),
+                      const Icon(Icons.star_rounded, size: 16, color: AppTheme.gold),
                       const SizedBox(width: 2),
                       Text(
                         '${restaurant.avgRating.toStringAsFixed(1)} (${restaurant.reviewCount})',
@@ -783,7 +789,7 @@ class _RailSkeletonState extends State<_RailSkeleton> with SingleTickerProviderS
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.title, style: Theme.of(context).textTheme.titleMedium),
+        Text(widget.title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 130,
@@ -799,7 +805,7 @@ class _RailSkeletonState extends State<_RailSkeleton> with SingleTickerProviderS
                 child: Container(
                   width: 160,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
@@ -850,7 +856,7 @@ class _RestaurantListSkeletonState extends State<_RestaurantListSkeleton>
               child: Container(
                 height: 88,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: AppTheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),

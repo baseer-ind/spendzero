@@ -105,7 +105,7 @@ class _MenuItemDetailSheetState extends ConsumerState<MenuItemDetailSheet> {
               ),
               if (related.isNotEmpty) ...[
                 const SizedBox(height: 20),
-                Text('You may also like', style: Theme.of(context).textTheme.titleSmall),
+                Text('You may also like', style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 60,
