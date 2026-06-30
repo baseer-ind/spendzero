@@ -163,11 +163,12 @@ class _DashboardBody extends StatelessWidget {
         if (byCategory.isEmpty)
           const _EmptySection(message: 'Nothing saved yet — skip a craving to get started.')
         else
-          ...byCategory.entries.map(
-            (e) => _CategoryRow(
-              categoryId: e.key,
-              amountPaise: e.value,
-              fraction: e.value / maxCategory,
+          ...byCategory.entries.toList().asMap().entries.map(
+            (indexed) => _CategoryRow(
+              index: indexed.key,
+              categoryId: indexed.value.key,
+              amountPaise: indexed.value.value,
+              fraction: indexed.value.value / maxCategory,
             ),
           ),
         const SizedBox(height: 24),
@@ -313,8 +314,11 @@ class _WeeklyBarChart extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: byDay.entries.map((e) {
+        children: byDay.entries.toList().asMap().entries.map((indexed) {
+          final i = indexed.key;
+          final e = indexed.value;
           final fraction = maxDay == 0 ? 0.0 : e.value / maxDay;
+          final isToday = i == byDay.length - 1;
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -323,18 +327,24 @@ class _WeeklyBarChart extends StatelessWidget {
                 children: [
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0, end: fraction.clamp(0.05, 1.0)),
-                    duration: const Duration(milliseconds: 600),
+                    duration: Duration(milliseconds: 500 + i * 60),
                     curve: Curves.easeOutCubic,
                     builder: (context, value, _) => Container(
                       height: 70 * value,
                       decoration: BoxDecoration(
-                        color: colors.primary,
+                        color: isToday ? colors.primary : colors.primary.withOpacity(0.55),
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(_weekdayLabels[e.key.weekday - 1], style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    _weekdayLabels[e.key.weekday - 1],
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: isToday ? FontWeight.bold : null,
+                          color: isToday ? colors.primary : null,
+                        ),
+                  ),
                 ],
               ),
             ),
@@ -346,16 +356,30 @@ class _WeeklyBarChart extends StatelessWidget {
 }
 
 class _CategoryRow extends StatelessWidget {
-  const _CategoryRow({required this.categoryId, required this.amountPaise, required this.fraction});
+  const _CategoryRow({
+    required this.categoryId,
+    required this.amountPaise,
+    required this.fraction,
+    this.index = 0,
+  });
 
   final String categoryId;
   final int amountPaise;
   final double fraction;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Padding(
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 300 + (index * 60).clamp(0, 360)),
+      curve: Curves.easeOutCubic,
+      builder: (context, entrance, child) => Opacity(
+        opacity: entrance,
+        child: Transform.translate(offset: Offset((1 - entrance) * 16, 0), child: child),
+      ),
+      child: Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
@@ -390,6 +414,7 @@ class _CategoryRow extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

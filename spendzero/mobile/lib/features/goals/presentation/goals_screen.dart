@@ -119,7 +119,7 @@ class _GoalList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         if (index == goals.length) return _ArchivedSection(archived: archived);
-        return _GoalCard(goal: goals[index]);
+        return _GoalCard(goal: goals[index], index: index);
       },
     );
   }
@@ -165,9 +165,10 @@ class _ArchivedSection extends ConsumerWidget {
 }
 
 class _GoalCard extends ConsumerWidget {
-  const _GoalCard({required this.goal});
+  const _GoalCard({required this.goal, this.index = 0});
 
   final SavingsGoal goal;
+  final int index;
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -202,7 +203,15 @@ class _GoalCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isComplete = goal.progress >= 1;
     final colors = Theme.of(context).colorScheme;
-    return Semantics(
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 280 + (index * 50).clamp(0, 300)),
+      curve: Curves.easeOutCubic,
+      builder: (context, entrance, child) => Opacity(
+        opacity: entrance,
+        child: Transform.translate(offset: Offset(0, (1 - entrance) * 14), child: child),
+      ),
+      child: Semantics(
       label: '${goal.title}, ${formatPaise(goal.savedPaise)} saved of '
           '${formatPaise(goal.targetPaise)}'
           '${isComplete ? ', completed' : ''}',
@@ -290,6 +299,7 @@ class _GoalCard extends ConsumerWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

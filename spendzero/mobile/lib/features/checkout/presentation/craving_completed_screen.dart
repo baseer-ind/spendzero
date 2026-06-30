@@ -291,7 +291,15 @@ class _DreamProgressCard extends StatelessWidget {
     final projectedProgress =
         goal.targetPaise == 0 ? 0.0 : (projectedSaved / goal.targetPaise).clamp(0, 1).toDouble();
 
-    return Padding(
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutCubic,
+      builder: (context, entrance, child) => Opacity(
+        opacity: entrance,
+        child: Transform.scale(scale: 0.94 + entrance * 0.06, child: child),
+      ),
+      child: Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Container(
         width: double.infinity,
@@ -330,6 +338,7 @@ class _DreamProgressCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
