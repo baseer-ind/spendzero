@@ -20,6 +20,7 @@ import '../features/goals/presentation/goals_screen.dart';
 import '../features/grocery/presentation/grocery_home_screen.dart';
 import '../features/grocery/presentation/store_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/onboarding/presentation/intro_screen.dart';
 import '../features/onboarding/presentation/splash_screen.dart';
 import '../features/shopping/presentation/brand_screen.dart';
 import '../features/shopping/presentation/shopping_home_screen.dart';
@@ -51,6 +52,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/splash',
       pageBuilder: (c, s) => _slide(c, s, const SplashScreen()),
+    ),
+    GoRoute(
+      path: '/intro',
+      pageBuilder: (c, s) => _slide(c, s, const IntroScreen()),
     ),
     GoRoute(
       path: '/',

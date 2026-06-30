@@ -2,7 +2,7 @@
 
 **Execution State:** 🟢 Working
 
-**Latest Commit:** (pending — about to commit home-grid featured-hero fix)
+**Latest Commit:** (pending — about to commit first-launch intro/onboarding flow)
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
@@ -15,18 +15,20 @@ Experience Alpha → Experience Beta → Launch Candidate → Public V1).
 **Current CI Run:** none triggered yet for the pending commit.
 
 **Current Task:** Working through the ruthless-review findings in `docs/MILESTONES.md`.
-Just fixed: the home screen's category grid was a flat uniform 3-col grid with no visual
-hierarchy. The top category is now promoted to a wide "Popular today" hero card above the
-remaining grid, giving the home screen a clear featured entry point instead of reading as an
-undifferentiated catalog.
+Just fixed: there was no onboarding moment — first-time users landed straight on the home grid
+with only a one-time dismissible hint. Added a 3-page first-launch intro
+(`intro_screen.dart`, routed at `/intro` between `/splash` and `/`) framing the core loop
+before the home grid: "skip a craving, fund a dream" → "shop freely, nothing ever charges
+you" → "watch your dream get closer." Shown once via a SharedPreferences flag, skippable.
+Removed the old dismissible hint card from `home_screen.dart` since the intro now covers that
+framing more substantially.
 
-**Last Completed Task:** Home grid featured-hero card (`home_screen.dart`,
-`_FeaturedCategoryCard`).
+**Last Completed Task:** First-launch intro/onboarding flow (`intro_screen.dart`,
+`splash_screen.dart`, `router.dart`).
 
-**Next Planned Task:** No onboarding moment — first-time users land straight on the home grid
-with only a one-time dismissible hint; needs the core-loop framing ("skip a craving → fund a
-dream") CRED/Airbnb-caliber apps use before dropping users into the grid. Next item on the
-Experience Beta findings list.
+**Next Planned Task:** Achievements screen hasn't had the storytelling pass the other four
+journeys got — still statistical rather than celebratory. Next item on the Experience Beta
+findings list.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's correction —
 tracking via the Experience Beta findings checklist in `docs/MILESTONES.md` instead.

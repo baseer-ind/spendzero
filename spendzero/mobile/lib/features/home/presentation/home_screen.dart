@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/models/category.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
 import '../../feedback/presentation/feedback_sheet.dart';
-
-const _firstLaunchHintKey = 'spendzero_seen_first_launch_hint';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -20,26 +17,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool? _showHint;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadHintState();
-  }
-
-  Future<void> _loadHintState() async {
-    final prefs = await SharedPreferences.getInstance();
-    final seen = prefs.getBool(_firstLaunchHintKey) ?? false;
-    if (mounted) setState(() => _showHint = !seen);
-  }
-
-  Future<void> _dismissHint() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_firstLaunchHintKey, true);
-    if (mounted) setState(() => _showHint = false);
-  }
-
   @override
   Widget build(BuildContext context) {
     final categories = ref.watch(categoriesProvider);
@@ -76,10 +53,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            if (_showHint == true) ...[
-              _FirstLaunchHint(onDismiss: _dismissHint),
-              const SizedBox(height: 16),
-            ],
             stats.when(
               data: (s) => GestureDetector(
                 onTap: () {
@@ -112,46 +85,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Closes the "what do I even do here" gap for a brand-new install,
-/// identified in docs/23-validation-review.md — shown once, dismissible,
-/// no multi-screen onboarding flow.
-class _FirstLaunchHint extends StatelessWidget {
-  const _FirstLaunchHint({required this.onDismiss});
-
-  final VoidCallback onDismiss;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.tertiaryContainer,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('👋', style: TextStyle(fontSize: 20)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Tap any category below. Nothing here ever spends real '
-              'money — it\'s all about catching what you didn\'t buy.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, size: 18),
-            tooltip: 'Dismiss',
-            onPressed: onDismiss,
-          ),
-        ],
       ),
     );
   }

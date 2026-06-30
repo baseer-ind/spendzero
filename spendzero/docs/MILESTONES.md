@@ -37,9 +37,11 @@ engineering checklist.
       category is now promoted to a wide "Popular today" hero card above the remaining 3-col
       grid, breaking the uniform-tile pattern and giving the home screen a clear entry point.
       (`home_screen.dart`, `_FeaturedCategoryCard`)
-- [ ] No onboarding moment — first-time users land straight on the home grid with only a
-      one-time dismissible hint. CRED/Airbnb-caliber apps frame the core loop ("skip a
-      craving → fund a dream") before dropping users into the grid.
+- [x] **No onboarding moment** — first-time users landed straight on the home grid with only a
+      one-time dismissible hint. Fixed: added a 3-page first-launch intro (`intro_screen.dart`)
+      framing the core loop — "skip a craving, fund a dream" → "shop freely, nothing ever
+      charges you" → "watch your dream get closer" — shown once via SharedPreferences flag,
+      skippable, replacing the old dismissible hint card on the home grid itself.
 - [ ] Achievements screen hasn't had the storytelling pass the other four journeys got — still
       statistical rather than celebratory.
 - [ ] No "return tomorrow" hook beyond streak counting — nothing proactively nudges a user

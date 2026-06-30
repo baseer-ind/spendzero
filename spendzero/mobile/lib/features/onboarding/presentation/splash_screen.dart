@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'intro_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,9 +21,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(milliseconds: 600),
     )..forward();
-    // Guest mode needs no sign-in, so we drop straight into the home feed.
-    Future.delayed(const Duration(milliseconds: 1100), () {
-      if (mounted) context.go('/');
+    Future.delayed(const Duration(milliseconds: 1100), () async {
+      if (!mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+      final seenIntro = prefs.getBool(introSeenKey) ?? false;
+      if (!mounted) return;
+      context.go(seenIntro ? '/' : '/intro');
     });
   }
 
