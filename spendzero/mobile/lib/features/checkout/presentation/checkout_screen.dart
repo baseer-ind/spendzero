@@ -224,7 +224,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ref.invalidate(backendCartProvider(widget.category.id));
       setState(() => _quantities.clear());
       if (!mounted) return;
-      context.push('/craving-completed', extra: result);
+      context.pushReplacement('/craving-completed', extra: result);
     } catch (_) {
       setState(() => _checkoutError = 'Checkout failed. Please try again.');
     } finally {

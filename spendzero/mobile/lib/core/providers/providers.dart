@@ -83,6 +83,17 @@ final goalsProvider = FutureProvider<List<SavingsGoal>>((ref) async {
   return repo.fetchGoals();
 });
 
+final archivedGoalsProvider = FutureProvider<List<SavingsGoal>>((ref) async {
+  final repo = await ref.watch(goalRepositoryProvider.future);
+  final all = await repo.fetchGoals(includeArchived: true);
+  return all.where((g) => g.archived).toList();
+});
+
+final savingsHistoryProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final repo = await ref.watch(statsRepositoryProvider.future);
+  return repo.fetchHistory();
+});
+
 final categoryListingsProvider =
     FutureProvider.family<List<Listing>, String>((ref, categoryId) async {
   final repo = await ref.watch(categoryRepositoryProvider.future);

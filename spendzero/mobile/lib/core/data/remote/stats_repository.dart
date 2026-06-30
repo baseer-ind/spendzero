@@ -12,4 +12,7 @@ class ApiStatsRepository implements StatsRepository {
     final json = await _client.get('/me/stats') as Map<String, dynamic>;
     return UserStats.fromJson(json);
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchHistory() async => [];
 }

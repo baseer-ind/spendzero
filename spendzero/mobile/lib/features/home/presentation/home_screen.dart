@@ -53,6 +53,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () => showFeedbackSheet(context),
           ),
           IconButton(
+            icon: const Icon(Icons.bar_chart_rounded),
+            tooltip: 'Dashboard',
+            onPressed: () => context.push('/dashboard'),
+          ),
+          IconButton(
             icon: const Icon(Icons.flag_outlined),
             tooltip: 'Goals',
             onPressed: () => context.push('/goals'),
@@ -73,9 +78,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 16),
             ],
             stats.when(
-              data: (s) => _SavingsBanner(
-                totalSavedPaise: s.totalAmountNotSpentPaise,
-                streakDays: s.currentStreakDays,
+              data: (s) => GestureDetector(
+                onTap: () => context.push('/dashboard'),
+                child: _SavingsBanner(
+                  totalSavedPaise: s.totalAmountNotSpentPaise,
+                  streakDays: s.currentStreakDays,
+                ),
               ),
               loading: () => const _SavingsBannerSkeleton(),
               error: (error, _) => const _SavingsBannerSkeleton(),

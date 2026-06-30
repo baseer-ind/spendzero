@@ -7,6 +7,7 @@ import '../features/app_home/presentation/app_home_screen.dart';
 import '../features/cart/presentation/cart_screen.dart';
 import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/checkout/presentation/craving_completed_screen.dart';
+import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/diagnostics/presentation/diagnostics_screen.dart';
 import '../features/food/presentation/food_home_screen.dart';
 import '../features/food/presentation/restaurant_screen.dart';
@@ -51,6 +52,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/goals',
       pageBuilder: (c, s) => _slide(c, s, const GoalsScreen()),
+    ),
+    GoRoute(
+      path: '/dashboard',
+      pageBuilder: (c, s) => _slide(c, s, const DashboardScreen()),
     ),
     GoRoute(
       path: '/checkout/:categoryId',

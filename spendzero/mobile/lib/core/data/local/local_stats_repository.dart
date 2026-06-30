@@ -86,4 +86,12 @@ class LocalStatsRepository implements StatsRepository {
       categoriesExplored: categoriesExplored,
     );
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchHistory() async {
+    final history = await _store.readList(_historyKey);
+    final sorted = [...history]
+      ..sort((a, b) => (b['completed_at'] as String).compareTo(a['completed_at'] as String));
+    return sorted;
+  }
 }

@@ -12,8 +12,7 @@ class LocalGoalRepository implements GoalRepository {
 
   final LocalStore _store;
 
-  @override
-  Future<List<SavingsGoal>> fetchGoals() async {
+  Future<List<SavingsGoal>> _readAll() async {
     final stored = await _store.readList(_goalsKey);
     if (stored.isEmpty) {
       final seeded = seedGoals.map((g) => g.toJson()).toList();
@@ -24,28 +23,74 @@ class LocalGoalRepository implements GoalRepository {
   }
 
   @override
+  Future<List<SavingsGoal>> fetchGoals({bool includeArchived = false}) async {
+    final all = await _readAll();
+    return includeArchived ? all : all.where((g) => !g.archived).toList();
+  }
+
+  @override
   Future<SavingsGoal> createGoal({
     required String title,
     required String emoji,
     required int targetPaise,
+    DateTime? targetDate,
+    String notes = '',
+    String category = 'General',
+    GoalPriority priority = GoalPriority.medium,
+    String? imageSeed,
   }) async {
-    final goals = await fetchGoals();
+    final goals = await _readAll();
     final goal = SavingsGoal(
       id: const Uuid().v4(),
       title: title,
       emoji: emoji,
       targetPaise: targetPaise,
       savedPaise: 0,
+      targetDate: targetDate,
+      notes: notes,
+      category: category,
+      priority: priority,
+      imageSeed: imageSeed,
     );
     final updated = [...goals, goal];
     await _store.writeList(_goalsKey, updated.map((g) => g.toJson()).toList());
     return goal;
   }
 
+  @override
+  Future<SavingsGoal?> updateGoal(SavingsGoal goal) async {
+    final goals = await _readAll();
+    final index = goals.indexWhere((g) => g.id == goal.id);
+    if (index == -1) return null;
+    final updated = [...goals];
+    updated[index] = goal;
+    await _store.writeList(_goalsKey, updated.map((g) => g.toJson()).toList());
+    return goal;
+  }
+
+  @override
+  Future<void> deleteGoal(String goalId) async {
+    final goals = await _readAll();
+    final updated = goals.where((g) => g.id != goalId).toList();
+    await _store.writeList(_goalsKey, updated.map((g) => g.toJson()).toList());
+  }
+
+  @override
+  Future<SavingsGoal?> setArchived(String goalId, bool archived) async {
+    final goals = await _readAll();
+    final index = goals.indexWhere((g) => g.id == goalId);
+    if (index == -1) return null;
+    final updatedGoal = goals[index].copyWith(archived: archived);
+    final updated = [...goals];
+    updated[index] = updatedGoal;
+    await _store.writeList(_goalsKey, updated.map((g) => g.toJson()).toList());
+    return updatedGoal;
+  }
+
   /// Concrete-only helper (not part of [GoalRepository]) used by the
   /// craving repository to credit a savings outcome to a goal.
   Future<SavingsGoal?> allocateSavings(String goalId, int amountPaise) async {
-    final goals = await fetchGoals();
+    final goals = await _readAll();
     final index = goals.indexWhere((g) => g.id == goalId);
     if (index == -1) return null;
     final updatedGoal = goals[index].copyWith(savedPaise: goals[index].savedPaise + amountPaise);

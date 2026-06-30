@@ -17,12 +17,20 @@ abstract class CategoryRepository {
 }
 
 abstract class GoalRepository {
-  Future<List<SavingsGoal>> fetchGoals();
+  Future<List<SavingsGoal>> fetchGoals({bool includeArchived = false});
   Future<SavingsGoal> createGoal({
     required String title,
     required String emoji,
     required int targetPaise,
+    DateTime? targetDate,
+    String notes = '',
+    String category = 'General',
+    GoalPriority priority = GoalPriority.medium,
+    String? imageSeed,
   });
+  Future<SavingsGoal?> updateGoal(SavingsGoal goal);
+  Future<void> deleteGoal(String goalId);
+  Future<SavingsGoal?> setArchived(String goalId, bool archived);
 }
 
 abstract class CartRepository {
@@ -46,6 +54,7 @@ abstract class CravingRepository {
 
 abstract class StatsRepository {
   Future<UserStats> fetchStats();
+  Future<List<Map<String, dynamic>>> fetchHistory() async => [];
 }
 
 abstract class FeedbackRepository {
