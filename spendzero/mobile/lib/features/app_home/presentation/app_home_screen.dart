@@ -667,41 +667,67 @@ class _RestaurantCardState extends State<_RestaurantCard> {
   }
 }
 
-class _CartBadge extends StatelessWidget {
+class _CartBadge extends StatefulWidget {
   const _CartBadge({required this.count, required this.onTap});
 
   final int count;
   final VoidCallback onTap;
 
   @override
+  State<_CartBadge> createState() => _CartBadgeState();
+}
+
+class _CartBadgeState extends State<_CartBadge> {
+  int _previousCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousCount = widget.count;
+  }
+
+  @override
+  void didUpdateWidget(_CartBadge old) {
+    super.didUpdateWidget(old);
+    _previousCount = old.count;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bumped = widget.count != _previousCount;
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-            onPressed: onTap,
+            onPressed: widget.onTap,
           ),
           Positioned(
             top: 4,
             right: 4,
-            child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-              constraints:
-                  const BoxConstraints(minWidth: 16, minHeight: 16),
-              child: Text(
-                '$count',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+            child: TweenAnimationBuilder<double>(
+              key: ValueKey(widget.count),
+              tween: Tween(begin: bumped ? 1.5 : 1.0, end: 1.0),
+              duration: const Duration(milliseconds: 320),
+              curve: Curves.elasticOut,
+              builder: (context, scale, _) => Transform.scale(
+                scale: scale,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Text(
+                    '${widget.count}',
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
             ),
           ),

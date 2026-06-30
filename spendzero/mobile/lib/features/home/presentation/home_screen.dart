@@ -296,9 +296,11 @@ class _CategoryGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final category = categories[index];
         return _CategoryTile(
+          index: index,
           emoji: category.emoji,
           name: category.name,
           onTap: () {
+            HapticFeedback.selectionClick();
             final vertical = _verticalForCategory(category.id, category.slug);
             if (vertical != null) {
               context.push('/vertical/$vertical/${category.id}');
@@ -359,8 +361,14 @@ String? _verticalForCategory(String categoryId, String slug) {
 }
 
 class _CategoryTile extends StatefulWidget {
-  const _CategoryTile({required this.emoji, required this.name, required this.onTap});
+  const _CategoryTile({
+    required this.index,
+    required this.emoji,
+    required this.name,
+    required this.onTap,
+  });
 
+  final int index;
   final String emoji;
   final String name;
   final VoidCallback onTap;
@@ -374,31 +382,51 @@ class _CategoryTileState extends State<_CategoryTile> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTapUp: (_) => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.94 : 1,
-        duration: const Duration(milliseconds: 100),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: widget.onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Semantics(
-              button: true,
-              label: widget.name,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(widget.emoji, style: const TextStyle(fontSize: 28)),
-                  const SizedBox(height: 6),
-                  Text(widget.name, style: Theme.of(context).textTheme.labelMedium),
-                ],
+    final delay = (widget.index * 40).clamp(0, 320);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 280 + delay),
+      curve: Curves.easeOutCubic,
+      builder: (context, entrance, child) => Opacity(
+        opacity: entrance,
+        child: Transform.scale(scale: 0.85 + entrance * 0.15, child: child),
+      ),
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTapUp: (_) => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.94 : 1,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOut,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: widget.onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: _pressed
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+              ),
+              child: Semantics(
+                button: true,
+                label: widget.name,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(widget.emoji, style: const TextStyle(fontSize: 28)),
+                    const SizedBox(height: 6),
+                    Text(widget.name, style: Theme.of(context).textTheme.labelMedium),
+                  ],
+                ),
               ),
             ),
           ),

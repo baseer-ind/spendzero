@@ -143,14 +143,14 @@ class _DashboardBody extends StatelessWidget {
           crossAxisSpacing: 12,
           childAspectRatio: 1.7,
           children: [
-            _StatCard(label: 'Total saved', value: formatPaise(stats.totalAmountNotSpentPaise), emoji: '💰'),
-            _StatCard(label: "Today", value: formatPaise(_sumSince(today)), emoji: '☀️'),
-            _StatCard(label: 'This week', value: formatPaise(_sumSince(weekStart)), emoji: '📅'),
-            _StatCard(label: 'This month', value: formatPaise(_sumSince(monthStart)), emoji: '🗓'),
-            _StatCard(label: 'This year', value: formatPaise(_sumSince(yearStart)), emoji: '📈'),
-            _StatCard(label: 'Cravings defeated', value: '${stats.cravingsCompleted}', emoji: '🛡'),
-            _StatCard(label: 'Current streak', value: '${stats.currentStreakDays} days', emoji: '🔥'),
-            _StatCard(label: 'Longest streak', value: '${stats.longestStreakDays} days', emoji: '🏆'),
+            _StatCard(index: 0, label: 'Total saved', value: formatPaise(stats.totalAmountNotSpentPaise), emoji: '💰'),
+            _StatCard(index: 1, label: "Today", value: formatPaise(_sumSince(today)), emoji: '☀️'),
+            _StatCard(index: 2, label: 'This week', value: formatPaise(_sumSince(weekStart)), emoji: '📅'),
+            _StatCard(index: 3, label: 'This month', value: formatPaise(_sumSince(monthStart)), emoji: '🗓'),
+            _StatCard(index: 4, label: 'This year', value: formatPaise(_sumSince(yearStart)), emoji: '📈'),
+            _StatCard(index: 5, label: 'Cravings defeated', value: '${stats.cravingsCompleted}', emoji: '🛡'),
+            _StatCard(index: 6, label: 'Current streak', value: '${stats.currentStreakDays} days', emoji: '🔥'),
+            _StatCard(index: 7, label: 'Longest streak', value: '${stats.longestStreakDays} days', emoji: '🏆'),
           ],
         ),
         const SizedBox(height: 24),
@@ -226,32 +226,42 @@ class _DashboardBody extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.label, required this.value, required this.emoji});
+  const _StatCard({required this.index, required this.label, required this.value, required this.emoji});
 
+  final int index;
   final String label;
   final String value;
   final String emoji;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 320 + index * 40),
+      curve: Curves.easeOutCubic,
+      builder: (context, entrance, child) => Opacity(
+        opacity: entrance,
+        child: Transform.translate(offset: Offset(0, (1 - entrance) * 10), child: child),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 4),
-          Text(value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
-        ],
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 4),
+            Text(value,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis),
+            Text(label, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
       ),
     );
   }
