@@ -248,6 +248,22 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
+              _CollectionRail(
+                title: 'Best Rated',
+                subtitle: 'Loved by hundreds of regulars',
+                items: bestRatedMenuItems(),
+                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _CollectionRail(
+                title: 'Hidden Gems',
+                subtitle: 'High ratings, still flying under the radar',
+                items: hiddenGemMenuItems(),
+                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
               if (savedRestaurants.isNotEmpty) ...[
                 _RestaurantRail(
                   title: 'Saved for Later',

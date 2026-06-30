@@ -1695,6 +1695,23 @@ List<MenuItem> trendingMenuItems() =>
 List<MenuItem> bestSellerMenuItems() =>
     allMenuItemsFull.where((m) => m.isBestSeller).toList();
 
+/// Top-rated dishes with a meaningful number of reviews — the "Best Rated"
+/// discovery rail.
+List<MenuItem> bestRatedMenuItems() {
+  final eligible = allMenuItemsFull.where((m) => m.reviewCount >= 50).toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
+/// Highly rated but under-discovered dishes — the "Hidden Gems" rail.
+List<MenuItem> hiddenGemMenuItems() {
+  final eligible = allMenuItemsFull
+      .where((m) => m.rating >= 4.4 && m.reviewCount < 50)
+      .toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
 /// Curated "Weekend Specials" — a hand-picked subset (not flag-driven) so
 /// the rail always shows a stable, intentional selection.
 List<MenuItem> weekendSpecials() {
