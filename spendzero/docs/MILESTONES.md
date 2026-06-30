@@ -54,11 +54,18 @@ engineering checklist.
       Deliberately scoped to in-app only (no push notifications/background scheduling — that
       would mean new infra, out of scope per the standing offline/no-new-infrastructure
       constraint). (`home_screen.dart`, `_DailyCheckInCard`)
-- [ ] Cart screen hasn't been reviewed yet against the same "feels premium" bar as checkout
-      and craving-completed.
+- [x] **Cart screen hadn't been reviewed against the same "feels premium" bar.** Found and
+      fixed the same generic-shopping-bag-icon placeholder issue on cart item thumbnails — now
+      uses the same keyword-matched emoji + two-tone gradient as product cards (extracted into
+      a shared `core/utils/product_emoji.dart` so cart and checkout always agree on an item's
+      identity). Rest of the cart screen (coupon section, grouped-by-app headers, bill summary,
+      "you're resisting this craving" framing) was already at the same quality bar as checkout.
+      (`cart_screen.dart`, `product_card.dart`, `product_emoji.dart`)
 
-Experience Beta is done when the unchecked items above are resolved or consciously deferred
-with stated reasoning — not when a feature checklist is ticked.
+All seven Experience Beta findings from the ruthless panel review are now resolved. Before
+declaring Experience Beta complete, a fresh ruthless-panel pass should be done across the
+whole app to check for anything the original review missed — completion is judged by that
+review, not by this checklist being empty.
 
 ## Engineering quality bar (necessary, not sufficient on its own)
 

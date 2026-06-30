@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/models/listing.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/product_emoji.dart';
 
 /// A real product card (image placeholder, title, rating, price/MRP,
 /// quantity stepper) replacing the plain checkbox list, per
@@ -101,34 +102,6 @@ class ProductCard extends StatelessWidget {
   }
 }
 
-/// Maps a product title to a recognizable emoji glyph via local keyword
-/// matching — no AI/network calls, just a rule-based lookup — so items read
-/// as "that's a pizza" / "that's a kurta" at a glance instead of every card
-/// showing the same generic shopping-bag icon.
-const _titleEmojiKeywords = <String, String>{
-  'pizza': '🍕', 'burger': '🍔', 'biryani': '🍛', 'cake': '🍰',
-  'coffee': '☕', 'tea': '🍵', 'chai': '🍵', 'juice': '🧃',
-  'salad': '🥗', 'sandwich': '🥪', 'noodle': '🍜', 'rice': '🍚',
-  'ice cream': '🍦', 'paneer': '🧀', 'chicken': '🍗', 'fish': '🐟',
-  'soup': '🍲', 'roll': '🌯', 'dosa': '🥞', 'idli': '🍙', 'momo': '🥟',
-  'pasta': '🍝', 'fries': '🍟', 'donut': '🍩', 'cookie': '🍪',
-  'shirt': '👕', 'kurta': '👘', 'jeans': '👖', 'shoe': '👟', 'sneaker': '👟',
-  'dress': '👗', 'jacket': '🧥', 'bag': '👜', 'watch': '⌚', 'saree': '🥻',
-  'phone': '📱', 'laptop': '💻', 'headphone': '🎧', 'earbud': '🎧',
-  'speaker': '🔊', 'charger': '🔌', 'camera': '📷', 'tv': '📺',
-  'sofa': '🛋️', 'chair': '🪑', 'lamp': '💡', 'table': '🛋️',
-  'milk': '🥛', 'bread': '🍞', 'egg': '🥚', 'fruit': '🍎', 'vegetable': '🥦',
-  'lipstick': '💄', 'perfume': '🧴', 'cream': '🧴', 'shampoo': '🧴',
-};
-
-String _emojiForTitle(String title) {
-  final lower = title.toLowerCase();
-  for (final entry in _titleEmojiKeywords.entries) {
-    if (lower.contains(entry.key)) return entry.value;
-  }
-  return '🛍️';
-}
-
 class _Thumbnail extends StatelessWidget {
   const _Thumbnail({required this.seed, required this.title});
 
@@ -152,7 +125,7 @@ class _Thumbnail extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
-      child: Text(_emojiForTitle(title), style: const TextStyle(fontSize: 28)),
+      child: Text(emojiForProductTitle(title), style: const TextStyle(fontSize: 28)),
     );
   }
 }

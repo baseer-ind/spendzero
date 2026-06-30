@@ -8,6 +8,7 @@ import '../../../core/data/local/persistent_cart_store.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/product_emoji.dart';
 
 class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
@@ -304,8 +305,8 @@ class _CartItemTile extends StatelessWidget {
         .codeUnits
         .fold<int>(0, (a, b) => a + b) %
         360;
-    final thumbColor =
-        HSLColor.fromAHSL(1, hue.toDouble(), 0.45, 0.85).toColor();
+    final start = HSLColor.fromAHSL(1, hue.toDouble(), 0.55, 0.82).toColor();
+    final end = HSLColor.fromAHSL(1, ((hue + 28) % 360).toDouble(), 0.55, 0.68).toColor();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -320,12 +321,17 @@ class _CartItemTile extends StatelessWidget {
           Container(
             width: 52,
             height: 52,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: thumbColor,
+              gradient: LinearGradient(
+                colors: [start, end],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.shopping_bag_outlined,
-                color: colors.onSurfaceVariant, size: 24),
+            child: Text(emojiForProductTitle(item.name),
+                style: const TextStyle(fontSize: 22)),
           ),
           const SizedBox(width: 12),
           Expanded(

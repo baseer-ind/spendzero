@@ -2,7 +2,7 @@
 
 **Execution State:** 🟢 Working
 
-**Latest Commit:** (pending — about to commit daily check-in nudge card)
+**Latest Commit:** (pending — about to commit cart-screen thumbnail fix, last Experience Beta finding)
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
@@ -14,18 +14,24 @@ Experience Alpha → Experience Beta → Launch Candidate → Public V1).
 
 **Current CI Run:** none triggered yet for the pending commit.
 
-**Current Task:** Working through the ruthless-review findings in `docs/MILESTONES.md`.
-Just fixed: there was no "return tomorrow" hook beyond streak counting. Added a
-`_DailyCheckInCard` to the home screen — "Today's check-in: {dream} needs you today" /
-"keep your streak alive" framing — shown whenever an active dream exists, tapping through to
-the dashboard. Deliberately kept in-app-only (no push notifications/background scheduling,
-which would mean new infra and is out of scope).
+**Current Task:** Just resolved the last unchecked item in `docs/MILESTONES.md`'s Experience
+Beta findings: the cart screen had the same generic-shopping-bag-icon placeholder thumbnails
+that product cards had before being fixed. Extracted the emoji-keyword lookup into a shared
+`core/utils/product_emoji.dart` (used by both `product_card.dart` and `cart_screen.dart`) so
+cart items now show the same keyword-matched emoji + two-tone gradient identity as everywhere
+else. The rest of the cart screen (coupon flow, app-grouped headers, bill summary, "resisting
+this craving" copy) was already at the checkout-screen quality bar.
 
-**Last Completed Task:** Daily check-in nudge card (`home_screen.dart`, `_DailyCheckInCard`).
+All seven Experience Beta findings are now resolved.
 
-**Next Planned Task:** Cart screen hasn't been reviewed against the same "feels premium" bar
-as checkout and craving-completed. Last unchecked item on the Experience Beta findings list —
-once resolved, do a fresh ruthless-panel review pass before considering Experience Beta done.
+**Last Completed Task:** Cart screen thumbnail identity fix + shared `product_emoji.dart`
+util (`cart_screen.dart`, `product_card.dart`).
+
+**Next Planned Task:** Do a fresh ruthless-panel review (Apple HIG / Airbnb / CRED / OneCard /
+first-time Indian consumer) across the whole app now that all seven original findings are
+resolved, to check for anything the first pass missed before considering Experience Beta
+genuinely done — per the standing instruction that milestone completion is judged by that
+review, not by an empty checklist.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's correction —
 tracking via the Experience Beta findings checklist in `docs/MILESTONES.md` instead.
