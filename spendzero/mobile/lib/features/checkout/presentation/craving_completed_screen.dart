@@ -11,6 +11,7 @@ import '../../../core/models/user_stats.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
+import '../../goals/presentation/create_goal_sheet.dart';
 import 'confetti_burst.dart';
 
 const _streakMilestones = [3, 7, 14, 30, 60, 100];
@@ -273,7 +274,7 @@ class _Stat extends StatelessWidget {
   }
 }
 
-class _GoalPicker extends StatelessWidget {
+class _GoalPicker extends ConsumerWidget {
   const _GoalPicker({
     required this.goals,
     required this.selectedGoalId,
@@ -285,8 +286,7 @@ class _GoalPicker extends StatelessWidget {
   final ValueChanged<String?> onSelected;
 
   @override
-  Widget build(BuildContext context) {
-    if (goals.isEmpty) return const SizedBox.shrink();
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -295,15 +295,23 @@ class _GoalPicker extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: goals
-              .map(
-                (goal) => ChoiceChip(
-                  label: Text('${goal.emoji} ${goal.title}'),
-                  selected: selectedGoalId == goal.id,
-                  onSelected: (_) => onSelected(selectedGoalId == goal.id ? null : goal.id),
-                ),
-              )
-              .toList(),
+          children: [
+            ...goals.map(
+              (goal) => ChoiceChip(
+                label: Text('${goal.emoji} ${goal.title}'),
+                selected: selectedGoalId == goal.id,
+                onSelected: (_) => onSelected(selectedGoalId == goal.id ? null : goal.id),
+              ),
+            ),
+            ActionChip(
+              avatar: const Icon(Icons.add, size: 16),
+              label: const Text('New dream'),
+              onPressed: () async {
+                await showCreateGoalSheet(context, ref);
+                ref.invalidate(goalsProvider);
+              },
+            ),
+          ],
         ),
       ],
     );
