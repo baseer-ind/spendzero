@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/local/travel_seed_data.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 
 /// Bottom sheet shown when tapping a room row — description, amenities,
@@ -37,7 +38,6 @@ class _RoomDetailSheetState extends ConsumerState<RoomDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final room = widget.room;
-    final colors = Theme.of(context).colorScheme;
     final related = allTravelRooms
         .where((r) =>
             r.id != room.id &&
@@ -78,7 +78,7 @@ class _RoomDetailSheetState extends ConsumerState<RoomDetailSheet> {
                       formatPaise(room.mrpPaise!),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             decoration: TextDecoration.lineThrough,
-                            color: colors.outline,
+                            color: AppTheme.mutedForeground,
                           ),
                     ),
                   ],
@@ -105,7 +105,7 @@ class _RoomDetailSheetState extends ConsumerState<RoomDetailSheet> {
               ),
               if (related.isNotEmpty) ...[
                 const SizedBox(height: 20),
-                Text('You may also like', style: Theme.of(context).textTheme.titleSmall),
+                Text('You may also like', style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 60,

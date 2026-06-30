@@ -13,6 +13,7 @@ import '../../../core/data/local/travel_seed_data.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 
 String _appIdFor(String stayId) => findAppIdForEntity(stayId) ?? stayId;
@@ -202,7 +203,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                   subtitle: 'Bestselling stays travellers love',
                   items: travelMustHaves(),
                   categoryId: widget.category.id,
-                  accentColor: (context) => Theme.of(context).colorScheme.primary,
+                  accentColor: (context) => AppTheme.gold,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -212,7 +213,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                   subtitle: 'Set the mood for two',
                   items: romanticGetaways(),
                   categoryId: widget.category.id,
-                  accentColor: (context) => Colors.pinkAccent,
+                  accentColor: (context) => AppTheme.future,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -222,7 +223,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                   subtitle: 'Unwind in style',
                   items: poolAndSpaEscapes(),
                   categoryId: widget.category.id,
-                  accentColor: (context) => Colors.tealAccent.shade700,
+                  accentColor: (context) => AppTheme.future,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -232,7 +233,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                   subtitle: 'Free cancellation, zero stress',
                   items: flexiblePlans(),
                   categoryId: widget.category.id,
-                  accentColor: (context) => Theme.of(context).colorScheme.tertiary,
+                  accentColor: (context) => AppTheme.gold,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -252,7 +253,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                         subtitle: 'Matched to your usual budget',
                         items: recommended.take(10).toList(),
                         categoryId: widget.category.id,
-                        accentColor: (context) => Theme.of(context).colorScheme.primaryContainer,
+                        accentColor: (context) => AppTheme.gold,
                       ),
                       const SizedBox(height: 20),
                     ],
@@ -265,7 +266,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                   subtitle: 'Loved by hundreds of travelers',
                   items: bestRatedTravelRooms(),
                   categoryId: widget.category.id,
-                  accentColor: (context) => Theme.of(context).colorScheme.secondary,
+                  accentColor: (context) => AppTheme.gold,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -275,7 +276,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                   subtitle: 'High ratings, still flying under the radar',
                   items: hiddenGemTravelRooms(),
                   categoryId: widget.category.id,
-                  accentColor: (context) => Colors.deepPurpleAccent,
+                  accentColor: (context) => AppTheme.future,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -291,7 +292,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                 ),
                 const SizedBox(height: 20),
               ],
-              Text('Browse Stays', style: Theme.of(context).textTheme.titleMedium),
+              Text('Browse Stays', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 12),
               staysAsync.when(
                 data: (stays) {
@@ -397,8 +398,11 @@ class _SearchResults extends ConsumerWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: ListTile(
-                tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tileColor: AppTheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.white.withOpacity(0.08)),
+                ),
                 title: Text(room.name),
                 subtitle: Text('${formatPaise(room.pricePaise)} / ${room.unit}'),
                 onTap: () {
@@ -430,7 +434,7 @@ class _StayRail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 150,
@@ -512,7 +516,7 @@ class _OffersRail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Today's Offers", style: Theme.of(context).textTheme.titleMedium),
+        Text("Today's Offers", style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 130,
@@ -535,14 +539,14 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final discount = item.discountPercent;
     return Container(
       width: 170,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.gold.withOpacity(0.12),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -557,7 +561,7 @@ class _OfferCard extends StatelessWidget {
                 Text(
                   '$discount% off',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.primary,
+                        color: AppTheme.gold,
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -587,12 +591,11 @@ class _TravelCollectionRail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
-        Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.outline)),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.mutedForeground)),
         const SizedBox(height: 10),
         SizedBox(
           height: 130,
@@ -603,7 +606,7 @@ class _TravelCollectionRail extends ConsumerWidget {
             itemBuilder: (context, index) {
               final item = items[index];
               return Material(
-                color: colors.surfaceContainerHighest,
+                color: AppTheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
@@ -632,7 +635,7 @@ class _TravelCollectionRail extends ConsumerWidget {
                         const Spacer(),
                         Row(
                           children: [
-                            Icon(Icons.star_rounded, size: 13, color: Colors.amber.shade800),
+                            const Icon(Icons.star_rounded, size: 13, color: AppTheme.gold),
                             const SizedBox(width: 2),
                             Text(item.rating.toStringAsFixed(1), style: Theme.of(context).textTheme.labelSmall),
                           ],
@@ -690,7 +693,6 @@ class _StayCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).colorScheme;
     final gradient = _gradientForSeed(stay.bannerColorSeed);
     final appId = _appIdFor(stay.id);
     final saved = ref.watch(
@@ -702,8 +704,9 @@ class _StayCard extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -733,7 +736,7 @@ class _StayCard extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.star_rounded, size: 16, color: colors.secondary),
+                      const Icon(Icons.star_rounded, size: 16, color: AppTheme.gold),
                       const SizedBox(width: 2),
                       Text(
                         '${stay.avgRating.toStringAsFixed(1)} (${stay.reviewCount})',
@@ -752,7 +755,7 @@ class _StayCard extends ConsumerWidget {
             IconButton(
               icon: Icon(
                 saved ? Icons.favorite : Icons.favorite_border,
-                color: saved ? colors.error : colors.onSurfaceVariant,
+                color: saved ? AppTheme.destructive : AppTheme.mutedForeground,
               ),
               onPressed: () {
                 HapticFeedback.lightImpact();
@@ -796,7 +799,7 @@ class _RailSkeletonState extends State<_RailSkeleton> with SingleTickerProviderS
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.title, style: Theme.of(context).textTheme.titleMedium),
+        Text(widget.title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 130,
@@ -812,8 +815,9 @@ class _RailSkeletonState extends State<_RailSkeleton> with SingleTickerProviderS
                 child: Container(
                   width: 160,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.08)),
                   ),
                 ),
               ),
@@ -863,8 +867,9 @@ class _StayListSkeletonState extends State<_StayListSkeleton>
               child: Container(
                 height: 88,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: AppTheme.surface,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.08)),
                 ),
               ),
             ),

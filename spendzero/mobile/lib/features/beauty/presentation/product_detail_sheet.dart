@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/local/beauty_seed_data.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 
 /// Bottom sheet shown when tapping a product row — description, variant,
@@ -37,7 +38,6 @@ class _BeautyProductDetailSheetState extends ConsumerState<BeautyProductDetailSh
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
-    final colors = Theme.of(context).colorScheme;
 
     return SafeArea(
       child: Padding(
@@ -53,7 +53,7 @@ class _BeautyProductDetailSheetState extends ConsumerState<BeautyProductDetailSh
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
-                      ?.copyWith(color: colors.outline)),
+                      ?.copyWith(color: AppTheme.mutedForeground)),
               const SizedBox(height: 8),
               Text(product.description, style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 12),
@@ -73,14 +73,14 @@ class _BeautyProductDetailSheetState extends ConsumerState<BeautyProductDetailSh
                       formatPaise(product.mrpPaise!),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             decoration: TextDecoration.lineThrough,
-                            color: colors.outline,
+                            color: AppTheme.mutedForeground,
                           ),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       '${product.discountPercent}% off',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.primary,
+                            color: AppTheme.gold,
                             fontWeight: FontWeight.w600,
                           ),
                     ),

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/persistent_cart_store.dart';
 import '../../../core/models/fictional_app.dart';
+import '../../../core/theme/app_theme.dart';
 
 /// The "choose your app" screen for a vertical (Food, Grocery, Shopping…).
 /// Shows all fictional apps for that vertical as rich branded cards.
@@ -95,7 +96,6 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
@@ -104,10 +104,10 @@ class _Header extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: colors.primaryContainer,
+              color: AppTheme.gold.withOpacity(0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: colors.primary, size: 28),
+            child: Icon(icon, color: AppTheme.gold, size: 28),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -117,7 +117,7 @@ class _Header extends StatelessWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colors.onSurfaceVariant,
+                        color: AppTheme.mutedForeground,
                       ),
                 ),
                 Text(
@@ -201,9 +201,7 @@ class _AppCardState extends State<_AppCard> {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
+                                  color: AppTheme.mutedForeground,
                                   height: 1.3,
                                 ),
                           ),
@@ -421,8 +419,8 @@ class _CartBadge extends StatelessWidget {
             right: 4,
             child: Container(
               padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.error,
+              decoration: const BoxDecoration(
+                color: AppTheme.destructive,
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),

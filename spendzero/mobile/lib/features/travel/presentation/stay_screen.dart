@@ -9,6 +9,7 @@ import '../../../core/data/local/persistent_cart_store.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import 'room_detail_sheet.dart';
 
@@ -101,7 +102,7 @@ class _StayScreenState extends ConsumerState<StayScreen> {
               );
               return IconButton(
                 icon: Icon(saved ? Icons.favorite : Icons.favorite_border),
-                color: saved ? Theme.of(context).colorScheme.error : null,
+                color: saved ? AppTheme.destructive : null,
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   ref.read(wishlistProvider.notifier).toggle(stay.id, appId, widget.categoryId);
@@ -320,7 +321,7 @@ class _RoomSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          Text(title, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           ...items.map((item) => _RoomRow(
                 item: item,
@@ -349,7 +350,6 @@ class _RoomRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final discount = item.discountPercent;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -381,7 +381,7 @@ class _RoomRow extends StatelessWidget {
                           formatPaise(item.mrpPaise!),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 decoration: TextDecoration.lineThrough,
-                                color: colors.outline,
+                                color: AppTheme.mutedForeground,
                               ),
                         ),
                       ],
@@ -423,7 +423,7 @@ class _NightsStepper extends StatelessWidget {
     return Container(
       height: 36,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: AppTheme.gold,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -431,10 +431,10 @@ class _NightsStepper extends StatelessWidget {
         children: [
           InkWell(
             onTap: () => onChanged(nights - 1),
-            child: SizedBox(
+            child: const SizedBox(
               width: 32,
               height: 36,
-              child: Icon(Icons.remove, size: 16, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(Icons.remove, size: 16, color: AppTheme.background),
             ),
           ),
           SizedBox(
@@ -442,15 +442,15 @@ class _NightsStepper extends StatelessWidget {
             child: Text(
               '$nights',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.background),
             ),
           ),
           InkWell(
             onTap: () => onChanged(nights + 1),
-            child: SizedBox(
+            child: const SizedBox(
               width: 32,
               height: 36,
-              child: Icon(Icons.add, size: 16, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(Icons.add, size: 16, color: AppTheme.background),
             ),
           ),
         ],
@@ -473,7 +473,7 @@ class _ReviewsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Reviews', style: Theme.of(context).textTheme.titleMedium),
+        Text('Reviews', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         ...visible.map((r) => _ReviewTile(review: r)),
         if (!showAll && reviews.length > 3)
@@ -490,13 +490,13 @@ class _ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,7 +506,7 @@ class _ReviewTile extends StatelessWidget {
               CircleAvatar(radius: 14, child: Text(review.reviewerInitials, style: const TextStyle(fontSize: 11))),
               const SizedBox(width: 8),
               Expanded(child: Text(review.reviewerName, style: Theme.of(context).textTheme.bodyMedium)),
-              Icon(Icons.star_rounded, size: 16, color: colors.secondary),
+              const Icon(Icons.star_rounded, size: 16, color: AppTheme.gold),
               Text(review.rating.toStringAsFixed(1)),
             ],
           ),
@@ -516,7 +516,7 @@ class _ReviewTile extends StatelessWidget {
           Text(
             '${review.daysAgo}d ago · ${review.helpfulCount} found this helpful'
             '${review.verifiedOrder ? ' · Verified order' : ''}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.outline),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppTheme.mutedForeground),
           ),
         ],
       ),
