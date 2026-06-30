@@ -199,7 +199,7 @@ class _Banner extends StatelessWidget {
   Widget build(BuildContext context) {
     final gradient = _gradientForSeed(store.bannerColorSeed);
     return Container(
-      height: 140,
+      constraints: const BoxConstraints(minHeight: 140),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
@@ -207,14 +207,22 @@ class _Banner extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
             store.name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          Text(store.brandTagline, style: const TextStyle(color: Colors.white70)),
+          Text(
+            store.brandTagline,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white70),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
