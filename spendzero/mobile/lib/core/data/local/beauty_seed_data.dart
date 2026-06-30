@@ -542,3 +542,23 @@ List<BeautyProduct> beautyTodaysOffers() =>
 List<BeautyBrand> trendingBeautyBrands() => allBeautyBrands.where((b) => b.isTrending).toList();
 
 List<BeautyProduct> bestSellerBeautyProducts() => allBeautyProducts.where((p) => p.isBestSeller).toList();
+
+const _skincareCategories = {'Skincare', 'Serums', 'Suncare'};
+const _makeupCategories = {'Makeup', 'Lip', 'Eyes'};
+const _haircareCategories = {'Haircare', 'Styling'};
+
+/// The "Skincare Edit" collection — serums, moisturizers, and suncare.
+List<BeautyProduct> skincareEdit() =>
+    allBeautyProducts.where((p) => _skincareCategories.contains(p.category)).toList();
+
+/// The "Makeup Must-Haves" collection — lip, eyes, and base makeup.
+List<BeautyProduct> makeupMustHaves() =>
+    allBeautyProducts.where((p) => _makeupCategories.contains(p.category)).toList();
+
+/// The "Haircare Picks" collection.
+List<BeautyProduct> haircarePicks() =>
+    allBeautyProducts.where((p) => _haircareCategories.contains(p.category)).toList();
+
+/// Newly launched products across all brands.
+List<BeautyProduct> newArrivalsBeauty() =>
+    allBeautyProducts.where((p) => p.isNewArrival).toList();
