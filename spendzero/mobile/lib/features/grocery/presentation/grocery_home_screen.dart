@@ -249,6 +249,22 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
+              _GroceryCollectionRail(
+                title: 'Best Rated',
+                subtitle: 'Loved by hundreds of shoppers',
+                items: bestRatedGroceryProducts(),
+                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _GroceryCollectionRail(
+                title: 'Hidden Gems',
+                subtitle: 'High ratings, still flying under the radar',
+                items: hiddenGemGroceryProducts(),
+                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
               if (savedStores.isNotEmpty) ...[
                 _StoreRail(title: 'Saved for Later', stores: savedStores, onTap: _openStore),
                 const SizedBox(height: 20),

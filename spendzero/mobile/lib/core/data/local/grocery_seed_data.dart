@@ -2235,3 +2235,19 @@ List<GroceryProduct> pantryStaples() => allGroceryProducts
 /// Snack-drawer refill collection.
 List<GroceryProduct> snackAttack() =>
     allGroceryProducts.where((p) => p.tags.contains('snack') && p.isTrending).toList();
+
+/// Top-rated products with a meaningful number of reviews.
+List<GroceryProduct> bestRatedGroceryProducts() {
+  final eligible = allGroceryProducts.where((p) => p.reviewCount >= 50).toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
+/// Highly rated but under-discovered products.
+List<GroceryProduct> hiddenGemGroceryProducts() {
+  final eligible = allGroceryProducts
+      .where((p) => p.rating >= 4.4 && p.reviewCount < 50)
+      .toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
