@@ -15,9 +15,13 @@ engineering checklist.
   for a future pass but don't block this milestone.
 - **Launch Candidate** — Confident enough to hand the APK to 20–50 testers without caveats. A
   first-time Indian consumer, given 30 minutes unsupervised: feels genuinely delighted,
-  understands the purpose immediately, creates a dream, browses multiple fictional apps and
-  enjoys it, uses the cart naturally, feels emotionally rewarded after checkout, and wants to
-  come back tomorrow. **Status: in progress.**
+  understands the purpose immediately, creates a Future, browses multiple fictional apps and
+  enjoys it, uses the cart naturally, feels emotionally rewarded after choosing their Future,
+  and wants to come back tomorrow. Per `docs/EXPERIENCE_BLUEPRINT.md`'s Founder Review
+  Checklist: does it strengthen My Future, reduce cognitive load, and meet the Apple/CRED/
+  Airbnb/Spotify bar on every screen? **Status: in progress** — Project Future rebrand and IA
+  restructure (Home/My Future/Journey/Profile bottom nav, "Choose My Future" checkout reframe)
+  both CI-verified; full Founder Review Checklist pass against the new IA not yet run.
 - **Public V1** — Ready for Play Store/App Store submission. **Status: not started.**
 
 ## Completed milestone: Experience Beta
@@ -91,7 +95,9 @@ first pass missed.
 - [ ] Restaurant "Frequently ordered together" chips look decorative, not tappable — needs a
       proper card treatment or pressed-state styling.
 - [ ] Product cards have no reserved badge slot for future sale/limited-stock treatments.
-- [ ] Dashboard "Recent activity" hard-stops at 10 items with no "view all" link.
+- [x] ~~Dashboard "Recent activity" hard-stops at 10 items with no "view all" link.~~ Resolved
+      by the IA restructure: My Future now shows 5 most recent with a "View Journey" link to the
+      new full-history Journey tab.
 - [ ] Achievements unlocked cards don't show *when* a badge was unlocked.
 - [ ] Cart coupon hint ("Try: ZERO10 · SAVE20 · ...") reads as static seed copy rather than
       dynamic, personalized microcopy.
