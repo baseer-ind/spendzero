@@ -437,6 +437,13 @@ class _AppHomeContent extends ConsumerWidget {
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final c = cinemas[index];
+              final cinemaMovies = moviesForCinema(c.id);
+              final avgDuration = cinemaMovies.isEmpty
+                  ? 120
+                  : cinemaMovies
+                          .map((m) => m.durationMins)
+                          .reduce((a, b) => a + b) ~/
+                      cinemaMovies.length;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _RestaurantCard(
@@ -445,7 +452,7 @@ class _AppHomeContent extends ConsumerWidget {
                   tagline: c.brandTagline,
                   cuisines: c.amenities,
                   rating: c.avgRating,
-                  deliveryMins: 0,
+                  deliveryMins: avgDuration,
                   distanceKm: c.distanceKm,
                   colorSeed: c.bannerColorSeed,
                   onTap: () {
