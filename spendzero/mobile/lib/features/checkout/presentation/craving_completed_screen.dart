@@ -86,7 +86,7 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
                         style: Theme.of(context)
                             .textTheme
                             .displaySmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                            ?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.gold),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -347,9 +347,9 @@ class _DreamProgressCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,7 +368,8 @@ class _DreamProgressCard extends StatelessWidget {
                 builder: (context, value, _) => LinearProgressIndicator(
                   value: value,
                   minHeight: 10,
-                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  backgroundColor: Colors.white.withOpacity(0.08),
+                  valueColor: const AlwaysStoppedAnimation(AppTheme.gold),
                 ),
               ),
             ),
