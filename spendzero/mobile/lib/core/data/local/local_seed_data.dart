@@ -14,6 +14,7 @@ const seedCategories = <SpendCategory>[
   SpendCategory(id: 'demo-electronics', slug: 'electronics', name: 'Electronics', emoji: '📱'),
   SpendCategory(id: 'demo-travel', slug: 'travel', name: 'Travel', emoji: '✈️'),
   SpendCategory(id: 'demo-entertainment', slug: 'entertainment', name: 'Movies', emoji: '🎬'),
+  SpendCategory(id: 'demo-beauty', slug: 'beauty', name: 'Beauty', emoji: '💄'),
 ];
 
 const _seedListingsByCategory = <String, List<Listing>>{
@@ -87,6 +88,17 @@ const _seedListingsByCategory = <String, List<Listing>>{
       pricePaise: 59900,
       rating: 4.0,
       reviewCount: 320,
+    ),
+  ],
+  'demo-beauty': [
+    Listing(
+      id: 'demo-beauty-1',
+      brandId: 'demo-brand',
+      title: 'Vitamin C Face Serum',
+      pricePaise: 89900,
+      mrpPaise: 119900,
+      rating: 4.5,
+      reviewCount: 1850,
     ),
   ],
 };
