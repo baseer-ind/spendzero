@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/grocery_seed_data.dart';
+import '../../../core/data/local/personalization_store.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
@@ -99,6 +100,9 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
   void initState() {
     super.initState();
     _loadRecentlyViewed();
+    Future.microtask(
+      () => ref.read(personalizationProvider.notifier).recordCategoryView(widget.category.id),
+    );
   }
 
   Future<void> _loadRecentlyViewed() async {
@@ -130,6 +134,7 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
 
   void _openStore(GroceryStore store) async {
     await RecentlyViewedGroceryStore().recordView(store.id);
+    ref.read(personalizationProvider.notifier).recordAppView(_appIdFor(store.id));
     if (!mounted) return;
     context.push('/grocery/${widget.category.id}/store/${store.id}');
   }
@@ -145,6 +150,17 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
         .map((e) => findGroceryStoreById(e.entityId))
         .whereType<GroceryStore>()
         .toList();
+    final signals = ref.watch(personalizationProvider);
+    final typicalPrice = signals.typicalPricePaise();
+    final recommended = typicalPrice == null
+        ? const <GroceryProduct>[]
+        : (allGroceryProducts
+                .where((p) => (p.pricePaise - typicalPrice).abs() <= typicalPrice)
+                .toList()
+              ..sort((a, b) =>
+                  (a.pricePaise - typicalPrice).abs().compareTo((b.pricePaise - typicalPrice).abs())))
+            .take(10)
+            .toList();
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.category.name)),
@@ -171,6 +187,16 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
             if (_searchQuery.isNotEmpty)
               _SearchResults(query: _searchQuery, categoryId: widget.category.id)
             else ...[
+              if (recommended.isNotEmpty) ...[
+                _GroceryCollectionRail(
+                  title: 'Recommended for You',
+                  subtitle: 'Matched to your usual basket size',
+                  items: recommended,
+                  accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                  categoryId: widget.category.id,
+                ),
+                const SizedBox(height: 20),
+              ],
               trendingAsync.when(
                 data: (stores) => stores.isEmpty
                     ? const SizedBox.shrink()
@@ -191,7 +217,37 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                 error: (_, __) => const SizedBox.shrink(),
               ),
               const SizedBox(height: 20),
-              _WeeklyMustHavesRail(items: weeklyMustHaves()),
+              _GroceryCollectionRail(
+                title: 'Weekly Must-Haves',
+                subtitle: 'Hand-picked staples worth restocking',
+                items: weeklyMustHaves(),
+                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _GroceryCollectionRail(
+                title: 'Organic Picks',
+                subtitle: 'Natural, chemical-free choices',
+                items: organicPicks(),
+                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _GroceryCollectionRail(
+                title: 'Pantry Restock',
+                subtitle: 'The staples that run out first',
+                items: pantryStaples(),
+                accentColor: (c) => Theme.of(c).colorScheme.primaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _GroceryCollectionRail(
+                title: 'Snack Attack',
+                subtitle: 'Trending in everyone\'s snack drawer',
+                items: snackAttack(),
+                accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                categoryId: widget.category.id,
+              ),
               const SizedBox(height: 20),
               if (savedStores.isNotEmpty) ...[
                 _StoreRail(title: 'Saved for Later', stores: savedStores, onTap: _openStore),
@@ -477,42 +533,72 @@ class _OfferCard extends StatelessWidget {
   }
 }
 
-class _WeeklyMustHavesRail extends StatelessWidget {
-  const _WeeklyMustHavesRail({required this.items});
+/// Generic horizontal rail for a curated [GroceryProduct] collection
+/// (Weekly Must-Haves, Organic Picks, Pantry Staples, Snack Attack, ...).
+/// Each card opens the product's store and records personalization signals.
+class _GroceryCollectionRail extends ConsumerWidget {
+  const _GroceryCollectionRail({
+    required this.title,
+    required this.subtitle,
+    required this.items,
+    required this.accentColor,
+    required this.categoryId,
+  });
 
+  final String title;
+  final String subtitle;
   final List<GroceryProduct> items;
+  final Color Function(BuildContext) accentColor;
+  final String categoryId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (items.isEmpty) return const SizedBox.shrink();
-    final colors = Theme.of(context).colorScheme;
+    final colors = accentColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Weekly Must-Haves', style: Theme.of(context).textTheme.titleMedium),
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          subtitle,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 110,
+          height: 120,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final item = items[index];
-              return Container(
-                width: 150,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colors.tertiaryContainer,
+              return Material(
+                color: colors,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
-                    const Spacer(),
-                    Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
-                  ],
+                  onTap: () async {
+                    await RecentlyViewedGroceryStore().recordView(item.storeId);
+                    final personalization = ref.read(personalizationProvider.notifier);
+                    personalization.recordPriceView(item.pricePaise);
+                    if (context.mounted) {
+                      context.push('/grocery/$categoryId/store/${item.storeId}');
+                    }
+                  },
+                  child: Container(
+                    width: 150,
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+                        const Spacer(),
+                        Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },

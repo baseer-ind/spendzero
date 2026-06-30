@@ -2222,3 +2222,16 @@ List<GroceryProduct> weeklyMustHaves() {
   ];
   return ids.map(findGroceryProductById).whereType<GroceryProduct>().toList();
 }
+
+/// Organic & natural collection, surfaced for health-conscious shoppers.
+List<GroceryProduct> organicPicks() =>
+    allGroceryProducts.where((p) => p.tags.contains('organic')).toList();
+
+/// Pantry-restock essentials — staples that run out first.
+List<GroceryProduct> pantryStaples() => allGroceryProducts
+    .where((p) => p.tags.contains('staple') && p.isBestSeller)
+    .toList();
+
+/// Snack-drawer refill collection.
+List<GroceryProduct> snackAttack() =>
+    allGroceryProducts.where((p) => p.tags.contains('snack') && p.isTrending).toList();
