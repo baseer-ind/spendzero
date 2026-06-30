@@ -7,10 +7,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/grocery_seed_data.dart';
+import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
+
+String _appIdFor(String storeId) => findAppIdForEntity(storeId) ?? storeId;
+
+enum _SortOption { relevance, ratingDesc, deliveryTimeAsc, priceAsc }
+
+extension on _SortOption {
+  String get label => switch (this) {
+        _SortOption.relevance => 'Relevance',
+        _SortOption.ratingDesc => 'Rating: High to Low',
+        _SortOption.deliveryTimeAsc => 'Delivery Time',
+        _SortOption.priceAsc => 'Price: Low to High',
+      };
+}
 
 const _recentlyViewedKey = 'grocery_recently_viewed_stores_v1';
 const _maxRecentlyViewed = 8;
@@ -60,6 +75,25 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
   String _searchQuery = '';
   String? _selectedCategory;
   List<GroceryStore> _recentlyViewed = [];
+  _SortOption _sortOption = _SortOption.relevance;
+
+  List<GroceryStore> _applySort(List<GroceryStore> list) {
+    final sorted = [...list];
+    switch (_sortOption) {
+      case _SortOption.relevance:
+        break;
+      case _SortOption.ratingDesc:
+        sorted.sort((a, b) => b.avgRating.compareTo(a.avgRating));
+        break;
+      case _SortOption.deliveryTimeAsc:
+        sorted.sort((a, b) => a.deliveryTimeMins.compareTo(b.deliveryTimeMins));
+        break;
+      case _SortOption.priceAsc:
+        sorted.sort((a, b) => a.priceTier.length.compareTo(b.priceTier.length));
+        break;
+    }
+    return sorted;
+  }
 
   @override
   void initState() {
@@ -105,6 +139,12 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
     final storesAsync = ref.watch(groceryStoresProvider);
     final trendingAsync = ref.watch(groceryTrendingProvider);
     final offersAsync = ref.watch(groceryTodaysOffersProvider);
+    final wishlist = ref.watch(wishlistProvider);
+    final savedStores = wishlist
+        .where((e) => e.categoryId == widget.category.id)
+        .map((e) => findGroceryStoreById(e.entityId))
+        .whereType<GroceryStore>()
+        .toList();
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.category.name)),
@@ -153,6 +193,10 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
               const SizedBox(height: 20),
               _WeeklyMustHavesRail(items: weeklyMustHaves()),
               const SizedBox(height: 20),
+              if (savedStores.isNotEmpty) ...[
+                _StoreRail(title: 'Saved for Later', stores: savedStores, onTap: _openStore),
+                const SizedBox(height: 20),
+              ],
               if (_recentlyViewed.isNotEmpty) ...[
                 _StoreRail(
                   title: 'Recently Viewed',
@@ -169,18 +213,36 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                   for (final s in stores) {
                     categories.addAll(s.categories);
                   }
-                  final filtered = _selectedCategory == null
+                  final filtered = _applySort(_selectedCategory == null
                       ? stores
                       : stores
                           .where((s) => s.categories.contains(_selectedCategory))
-                          .toList();
+                          .toList());
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _CategoryChipRow(
-                        categories: categories.toList()..sort(),
-                        selected: _selectedCategory,
-                        onSelected: _onCategorySelected,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _CategoryChipRow(
+                              categories: categories.toList()..sort(),
+                              selected: _selectedCategory,
+                              onSelected: _onCategorySelected,
+                            ),
+                          ),
+                          PopupMenuButton<_SortOption>(
+                            icon: const Icon(Icons.sort_rounded),
+                            tooltip: 'Sort',
+                            initialValue: _sortOption,
+                            onSelected: (value) {
+                              HapticFeedback.selectionClick();
+                              setState(() => _sortOption = value);
+                            },
+                            itemBuilder: (context) => _SortOption.values
+                                .map((opt) => PopupMenuItem(value: opt, child: Text(opt.label)))
+                                .toList(),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       if (filtered.isEmpty)
@@ -189,7 +251,11 @@ class _GroceryHomeScreenState extends ConsumerState<GroceryHomeScreen> {
                         ...filtered.map(
                           (s) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
-                            child: _StoreCard(store: s, onTap: () => _openStore(s)),
+                            child: _StoreCard(
+                              store: s,
+                              onTap: () => _openStore(s),
+                              categoryId: widget.category.id,
+                            ),
                           ),
                         ),
                     ],
@@ -231,6 +297,7 @@ class _SearchResults extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _StoreCard(
                   store: result,
+                  categoryId: categoryId,
                   onTap: () async {
                     await RecentlyViewedGroceryStore().recordView(result.id);
                     if (context.mounted) {
@@ -485,16 +552,21 @@ class _CategoryChipRow extends StatelessWidget {
   }
 }
 
-class _StoreCard extends StatelessWidget {
-  const _StoreCard({required this.store, required this.onTap});
+class _StoreCard extends ConsumerWidget {
+  const _StoreCard({required this.store, required this.onTap, this.categoryId = 'grocery'});
 
   final GroceryStore store;
   final VoidCallback onTap;
+  final String categoryId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final gradient = _gradientForSeed(store.bannerColorSeed);
+    final appId = _appIdFor(store.id);
+    final saved = ref.watch(
+      wishlistProvider.select((list) => list.any((e) => e.entityId == store.id && e.appId == appId)),
+    );
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -547,6 +619,16 @@ class _StoreCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            IconButton(
+              icon: Icon(
+                saved ? Icons.favorite : Icons.favorite_border,
+                color: saved ? colors.error : colors.onSurfaceVariant,
+              ),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(wishlistProvider.notifier).toggle(store.id, appId, categoryId);
+              },
             ),
           ],
         ),
