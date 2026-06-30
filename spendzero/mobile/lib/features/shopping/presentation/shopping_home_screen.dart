@@ -7,10 +7,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/shopping_seed_data.dart';
+import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
+
+String _appIdFor(String brandId) => findAppIdForEntity(brandId) ?? brandId;
+
+enum _SortOption { relevance, ratingDesc, deliveryTimeAsc, priceAsc }
+
+extension on _SortOption {
+  String get label => switch (this) {
+        _SortOption.relevance => 'Relevance',
+        _SortOption.ratingDesc => 'Rating: High to Low',
+        _SortOption.deliveryTimeAsc => 'Delivery Time',
+        _SortOption.priceAsc => 'Price: Low to High',
+      };
+}
 
 const _recentlyViewedKey = 'shopping_recently_viewed_brands_v1';
 const _maxRecentlyViewed = 8;
@@ -74,6 +89,25 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
   String _searchQuery = '';
   String? _selectedCategory;
   List<ShoppingBrand> _recentlyViewed = [];
+  _SortOption _sortOption = _SortOption.relevance;
+
+  List<ShoppingBrand> _applySort(List<ShoppingBrand> list) {
+    final sorted = [...list];
+    switch (_sortOption) {
+      case _SortOption.relevance:
+        break;
+      case _SortOption.ratingDesc:
+        sorted.sort((a, b) => b.avgRating.compareTo(a.avgRating));
+        break;
+      case _SortOption.deliveryTimeAsc:
+        sorted.sort((a, b) => a.deliveryTimeMins.compareTo(b.deliveryTimeMins));
+        break;
+      case _SortOption.priceAsc:
+        sorted.sort((a, b) => a.priceTier.length.compareTo(b.priceTier.length));
+        break;
+    }
+    return sorted;
+  }
 
   @override
   void initState() {
@@ -120,6 +154,12 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
     final brandsAsync = ref.watch(shoppingBrandsProvider);
     final trendingAsync = ref.watch(shoppingTrendingProvider);
     final offersAsync = ref.watch(shoppingTodaysOffersProvider);
+    final wishlist = ref.watch(wishlistProvider);
+    final savedBrands = wishlist
+        .where((e) => e.categoryId == widget.category.id)
+        .map((e) => findShoppingBrandById(e.entityId))
+        .whereType<ShoppingBrand>()
+        .toList();
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.category.name)),
@@ -166,6 +206,10 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
                 error: (_, __) => const SizedBox.shrink(),
               ),
               const SizedBox(height: 20),
+              if (savedBrands.isNotEmpty) ...[
+                _BrandRail(title: 'Saved for Later', brands: savedBrands, onTap: _openBrand),
+                const SizedBox(height: 20),
+              ],
               if (_recentlyViewed.isNotEmpty) ...[
                 _BrandRail(
                   title: 'Recently Viewed',
@@ -182,18 +226,36 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
                   for (final b in brands) {
                     categories.addAll(b.categories);
                   }
-                  final filtered = _selectedCategory == null
+                  final filtered = _applySort(_selectedCategory == null
                       ? brands
                       : brands
                           .where((b) => b.categories.contains(_selectedCategory))
-                          .toList();
+                          .toList());
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _CategoryChipRow(
-                        categories: categories.toList()..sort(),
-                        selected: _selectedCategory,
-                        onSelected: _onCategorySelected,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _CategoryChipRow(
+                              categories: categories.toList()..sort(),
+                              selected: _selectedCategory,
+                              onSelected: _onCategorySelected,
+                            ),
+                          ),
+                          PopupMenuButton<_SortOption>(
+                            icon: const Icon(Icons.sort_rounded),
+                            tooltip: 'Sort',
+                            initialValue: _sortOption,
+                            onSelected: (value) {
+                              HapticFeedback.selectionClick();
+                              setState(() => _sortOption = value);
+                            },
+                            itemBuilder: (context) => _SortOption.values
+                                .map((opt) => PopupMenuItem(value: opt, child: Text(opt.label)))
+                                .toList(),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       if (filtered.isEmpty)
@@ -202,7 +264,11 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
                         ...filtered.map(
                           (b) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
-                            child: _BrandCard(brand: b, onTap: () => _openBrand(b)),
+                            child: _BrandCard(
+                              brand: b,
+                              onTap: () => _openBrand(b),
+                              categoryId: widget.category.id,
+                            ),
                           ),
                         ),
                     ],
@@ -244,6 +310,7 @@ class _SearchResults extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _BrandCard(
                   brand: result,
+                  categoryId: categoryId,
                   onTap: () async {
                     await RecentlyViewedShoppingBrand().recordView(result.id);
                     if (context.mounted) {
@@ -452,16 +519,21 @@ class _CategoryChipRow extends StatelessWidget {
   }
 }
 
-class _BrandCard extends StatelessWidget {
-  const _BrandCard({required this.brand, required this.onTap});
+class _BrandCard extends ConsumerWidget {
+  const _BrandCard({required this.brand, required this.onTap, this.categoryId = 'shopping'});
 
   final ShoppingBrand brand;
   final VoidCallback onTap;
+  final String categoryId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final gradient = _gradientForSeed(brand.bannerColorSeed);
+    final appId = _appIdFor(brand.id);
+    final saved = ref.watch(
+      wishlistProvider.select((list) => list.any((e) => e.entityId == brand.id && e.appId == appId)),
+    );
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -514,6 +586,16 @@ class _BrandCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            IconButton(
+              icon: Icon(
+                saved ? Icons.favorite : Icons.favorite_border,
+                color: saved ? colors.error : colors.onSurfaceVariant,
+              ),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(wishlistProvider.notifier).toggle(brand.id, appId, categoryId);
+              },
             ),
           ],
         ),

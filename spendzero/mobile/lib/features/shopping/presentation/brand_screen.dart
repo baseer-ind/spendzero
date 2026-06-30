@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/persistent_cart_store.dart';
 import '../../../core/data/local/shopping_seed_data.dart';
+import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
@@ -87,7 +88,29 @@ class _BrandScreenState extends ConsumerState<BrandScreen> {
     _restoreFromCartOnce();
 
     return Scaffold(
-      appBar: AppBar(title: Text(brand.name)),
+      appBar: AppBar(
+        title: Text(brand.name),
+        actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final appId = _appId;
+              final saved = ref.watch(
+                wishlistProvider.select(
+                  (list) => list.any((e) => e.entityId == brand.id && e.appId == appId),
+                ),
+              );
+              return IconButton(
+                icon: Icon(saved ? Icons.favorite : Icons.favorite_border),
+                color: saved ? Theme.of(context).colorScheme.error : null,
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  ref.read(wishlistProvider.notifier).toggle(brand.id, appId, widget.categoryId);
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
