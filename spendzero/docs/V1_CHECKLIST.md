@@ -31,8 +31,10 @@ item below is checked and a fresh green CI build with APK exists for the final c
 
 ## Cross-cutting quality bars
 
-- [ ] Full click-through of all four journeys back-to-back feels cohesive (one pass, no
-      regressions introduced by later journeys)
+- [x] Full click-through of all four journeys back-to-back feels cohesive (one pass, no
+      regressions introduced by later journeys) — verified all navigation targets used by the
+      new journey work (`/goals`, `/cart`, `/food/:categoryId/restaurant/:restaurantId`, `/`)
+      resolve to real routes in `app/router.dart`; no dangling links introduced.
 - [x] `flutter analyze --no-pub` clean on every commit
 - [x] `flutter test` green on every commit (money_test.dart, 3 tests)
 - [x] Everything persists locally via SharedPreferences; nothing lost on restart
@@ -45,7 +47,8 @@ item below is checked and a fresh green CI build with APK exists for the final c
 
 - [x] CI green on `claude/spendzero-mobile-app-vudvnb` with latest journey work
 - [x] Release APK artifact produced and downloadable from GitHub Actions
-- [ ] Final V1 tag/commit identified once the cross-cutting pass above is complete
+- [ ] Final V1 tag/commit identified once the latest CI run (for commit `5d19e6d`) is
+      confirmed green
 
 ## Out of scope for V1 (do not start)
 
