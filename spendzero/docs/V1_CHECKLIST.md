@@ -47,8 +47,9 @@ item below is checked and a fresh green CI build with APK exists for the final c
 
 - [x] CI green on `claude/spendzero-mobile-app-vudvnb` with latest journey work
 - [x] Release APK artifact produced and downloadable from GitHub Actions
-- [ ] Final V1 tag/commit identified once the latest CI run (for commit `5d19e6d`) is
-      confirmed green
+- [x] Final V1 commit: `5d19e6d` — CI run `28435140150`, conclusion: success.
+      Artifacts: `spendzero-release-apk` (23.8 MB), `spendzero-release-aab` (24.0 MB),
+      `spendzero-debug-apk` (89.2 MB). All mandatory items above are checked — **V1 complete.**
 
 ## Out of scope for V1 (do not start)
 

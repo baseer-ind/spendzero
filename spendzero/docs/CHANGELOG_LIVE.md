@@ -2,6 +2,12 @@
 
 Append-only log of meaningful feature work, newest first. Each entry maps to a commit.
 
+## 2026-06-30 — V1 sign-off
+
+- **V1 complete.** Final commit `5d19e6d`, CI run `28435140150` (success). All four core
+  journeys (Home, Food, Dream, Dashboard) have a complete storytelling/redesign pass; the
+  V1 Definition of Done checklist (`docs/V1_CHECKLIST.md`) is fully satisfied.
+
 ## 2026-06-30
 
 - **Dashboard Journey**: Added `_KeepGoingCard` CTA at the end of the dashboard — closes the
