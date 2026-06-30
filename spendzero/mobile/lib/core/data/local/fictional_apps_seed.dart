@@ -343,7 +343,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFFE91E63), Color(0xFFC2185B)],
     heroBadge: '✨ Dermatologist picks',
     heroOffer: 'Free skin analysis with every order',
-    entityIds: [],
+    entityIds: ['bb-dermalumin'],
   ),
   FictionalApp(
     id: 'pinkbox',
@@ -357,7 +357,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFFD81B60), Color(0xFFE91E63)],
     heroBadge: '🎁 Subscription boxes',
     heroOffer: 'First box for ₹299 (worth ₹1,500)',
-    entityIds: [],
+    entityIds: ['bb-purebloom', 'bb-curlcrush'],
   ),
   FictionalApp(
     id: 'beautybee',
@@ -371,7 +371,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF880E4F), Color(0xFFAD1457)],
     heroBadge: '💄 Luxury brands',
     heroOffer: 'International brands, Indian prices',
-    entityIds: [],
+    entityIds: ['bb-luxeglow'],
   ),
   FictionalApp(
     id: 'glamnest',
@@ -385,7 +385,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF4A148C), Color(0xFF6A1B9A)],
     heroBadge: '👑 Celeb-inspired',
     heroOffer: 'Makeup tutorials + product bundles',
-    entityIds: [],
+    entityIds: ['bb-velvetmuse'],
   ),
 
   // ── ELECTRONICS ──────────────────────────────────────────────────────────

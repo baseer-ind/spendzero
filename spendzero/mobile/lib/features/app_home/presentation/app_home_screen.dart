@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/data/local/beauty_seed_data.dart';
 import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/food_seed_data.dart';
 import '../../../core/data/local/grocery_seed_data.dart';
@@ -145,6 +146,8 @@ class _AppHomeContent extends ConsumerWidget {
         return _buildShoppingContent(context, ref);
       case 'travel':
         return _buildTravelContent(context, ref);
+      case 'beauty':
+        return _buildBeautyContent(context, ref);
       default:
         return _buildComingSoon(context);
     }
@@ -346,6 +349,58 @@ class _AppHomeContent extends ConsumerWidget {
               );
             },
             childCount: stays.length,
+          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildBeautyContent(BuildContext context, WidgetRef ref) {
+    const all = allBeautyBrands;
+    final brands = app.entityIds.isNotEmpty
+        ? all.where((b) => app.entityIds.contains(b.id)).toList()
+        : all;
+
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            'Brands handpicked for you',
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final b = brands[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _RestaurantCard(
+                  id: b.id,
+                  name: b.name,
+                  tagline: b.brandTagline,
+                  cuisines: b.categories,
+                  rating: b.avgRating,
+                  deliveryMins: b.deliveryTimeMins,
+                  distanceKm: b.distanceKm,
+                  colorSeed: b.bannerColorSeed,
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    context.push(
+                      '/beauty/$categoryId/brand/${b.id}',
+                    );
+                  },
+                ),
+              );
+            },
+            childCount: brands.length,
           ),
         ),
       ),

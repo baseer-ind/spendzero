@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../core/models/category.dart';
 import '../core/models/craving_completed.dart';
 import '../features/app_home/presentation/app_home_screen.dart';
+import '../features/beauty/presentation/beauty_home_screen.dart';
+import '../features/beauty/presentation/brand_screen.dart' as beauty;
 import '../features/cart/presentation/cart_screen.dart';
 import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/checkout/presentation/craving_completed_screen.dart';
@@ -107,6 +109,22 @@ final appRouter = GoRouter(
         c,
         s,
         BrandScreen(
+          categoryId: s.pathParameters['categoryId']!,
+          brandId: s.pathParameters['brandId']!,
+        ),
+      ),
+    ),
+    GoRoute(
+      path: '/beauty/:categoryId',
+      pageBuilder: (c, s) =>
+          _slide(c, s, BeautyHomeScreen(category: s.extra as SpendCategory)),
+    ),
+    GoRoute(
+      path: '/beauty/:categoryId/brand/:brandId',
+      pageBuilder: (c, s) => _slide(
+        c,
+        s,
+        beauty.BrandScreen(
           categoryId: s.pathParameters['categoryId']!,
           brandId: s.pathParameters['brandId']!,
         ),

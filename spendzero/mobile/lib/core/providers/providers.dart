@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/contracts.dart';
 import '../data/contracts_food.dart';
 import '../data/contracts_grocery.dart';
+import '../data/contracts_beauty.dart';
 import '../data/contracts_shopping.dart';
 import '../data/contracts_travel.dart';
 import '../data/local/food_seed_data.dart';
 import '../data/local/grocery_seed_data.dart' hide Review;
 import '../data/local/grocery_seed_data.dart' as grocery_seed show Review;
+import '../data/local/beauty_seed_data.dart' hide Review;
+import '../data/local/beauty_seed_data.dart' as beauty_seed show Review;
 import '../data/local/shopping_seed_data.dart' hide Review;
 import '../data/local/shopping_seed_data.dart' as shopping_seed show Review;
 import '../data/local/travel_seed_data.dart' hide Review;
@@ -19,6 +22,7 @@ import '../data/local/local_feedback_repository.dart';
 import '../data/local/local_food_repository.dart';
 import '../data/local/local_goal_repository.dart';
 import '../data/local/local_grocery_repository.dart';
+import '../data/local/local_beauty_repository.dart';
 import '../data/local/local_shopping_repository.dart';
 import '../data/local/local_travel_repository.dart';
 import '../data/local/local_stats_repository.dart';
@@ -356,6 +360,62 @@ final shoppingBrandByIdProvider =
 final shoppingProductByIdProvider =
     FutureProvider.family<ShoppingProduct?, String>((ref, productId) async {
   final repo = ref.watch(shoppingRepositoryProvider);
+  return repo.fetchProduct(productId);
+});
+
+/// The "Beauty" vertical (skincare/makeup/haircare) is local-only for now —
+/// no `Api*` backend counterpart exists yet, so this provider always
+/// returns [LocalBeautyRepository] regardless of [useLocalBackend].
+final beautyRepositoryProvider =
+    Provider<BeautyRepository>((ref) => LocalBeautyRepository());
+
+final beautyBrandsProvider = FutureProvider<List<BeautyBrand>>((ref) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.fetchBrands();
+});
+
+final beautyTrendingProvider = FutureProvider<List<BeautyBrand>>((ref) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.fetchTrending();
+});
+
+final beautyTodaysOffersProvider = FutureProvider<List<BeautyProduct>>((ref) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.fetchTodaysOffers();
+});
+
+final beautyBestSellersProvider = FutureProvider<List<BeautyProduct>>((ref) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.fetchBestSellers();
+});
+
+final productsForBeautyBrandProvider =
+    FutureProvider.family<List<BeautyProduct>, String>((ref, brandId) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.fetchProducts(brandId);
+});
+
+final beautyReviewsForProvider =
+    FutureProvider.family<List<beauty_seed.Review>, String>((ref, targetId) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.fetchReviews(targetId);
+});
+
+final beautySearchProvider =
+    FutureProvider.family<List<dynamic>, String>((ref, query) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.searchBeauty(query);
+});
+
+final beautyBrandByIdProvider =
+    FutureProvider.family<BeautyBrand?, String>((ref, brandId) async {
+  final repo = ref.watch(beautyRepositoryProvider);
+  return repo.fetchBrand(brandId);
+});
+
+final beautyProductByIdProvider =
+    FutureProvider.family<BeautyProduct?, String>((ref, productId) async {
+  final repo = ref.watch(beautyRepositoryProvider);
   return repo.fetchProduct(productId);
 });
 
