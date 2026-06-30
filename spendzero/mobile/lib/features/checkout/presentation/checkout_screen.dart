@@ -146,11 +146,30 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget _buildListings(BuildContext context, List<Listing> listings) {
     if (listings.isEmpty) {
       return Center(
-        child: Text(
-          _searchQuery.isEmpty
-              ? 'No ${widget.category.name} listings yet — check back soon.'
-              : 'No results for "$_searchQuery".',
-          style: Theme.of(context).textTheme.bodyMedium,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _searchQuery.isEmpty
+                    ? 'No ${widget.category.name} listings yet — check back soon.'
+                    : 'No results for "$_searchQuery".',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              if (_searchQuery.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                  child: Text('Browse all ${widget.category.name}'),
+                ),
+              ],
+            ],
+          ),
         ),
       );
     }

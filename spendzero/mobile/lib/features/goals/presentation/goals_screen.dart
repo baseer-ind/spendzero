@@ -215,7 +215,9 @@ class _GoalCard extends ConsumerWidget {
       label: '${goal.title}, ${formatPaise(goal.savedPaise)} saved of '
           '${formatPaise(goal.targetPaise)}'
           '${isComplete ? ', completed' : ''}',
-      child: GestureDetector(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => showCreateGoalSheet(context, ref, editing: goal),
         onLongPress: () => showCreateGoalSheet(context, ref, editing: goal),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),

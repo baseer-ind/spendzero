@@ -117,7 +117,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       color: Theme.of(context).colorScheme.onSurfaceVariant)),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: () => context.pop(),
+                onPressed: () => context.canPop() ? context.pop() : context.go('/'),
                 child: const Text('Browse apps'),
               ),
             ],

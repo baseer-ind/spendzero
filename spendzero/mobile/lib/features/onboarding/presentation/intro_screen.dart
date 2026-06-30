@@ -144,7 +144,7 @@ class _IntroScreenState extends State<IntroScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _next,
-                  child: Text(isLast ? 'Get started' : 'Next'),
+                  child: Text(isLast ? 'Skip my first craving' : 'Next'),
                 ),
               ),
             ),
