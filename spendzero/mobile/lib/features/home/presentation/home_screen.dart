@@ -95,6 +95,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               loading: () => const _SavingsBannerSkeleton(),
               error: (error, _) => const _SavingsBannerSkeleton(),
             ),
+            if (goals.valueOrNull != null && goals.value!.where((g) => !g.archived).isEmpty) ...[
+              const SizedBox(height: 12),
+              _NoDreamYetCard(onTap: () => context.push('/goals')),
+            ],
             const SizedBox(height: 20),
             Text('Where to today?', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
@@ -299,6 +303,59 @@ class _SavingsBanner extends StatelessWidget {
                   ),
                 ],
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Nudges a brand-new user to set their first dream, so every later "you
+/// saved ₹X" moment has somewhere meaningful to point at instead of an
+/// abstract total.
+class _NoDreamYetCard extends StatelessWidget {
+  const _NoDreamYetCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: colors.outlineVariant),
+        ),
+        child: Row(
+          children: [
+            const Text('🌱', style: TextStyle(fontSize: 22)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('What are you saving for?',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Set a dream and every save you make starts counting toward it.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, size: 14, color: colors.onSurfaceVariant),
           ],
         ),
       ),
