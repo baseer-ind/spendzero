@@ -2,7 +2,7 @@
 
 **Execution State:** 🟢 Working
 
-**Latest Commit:** (pending — about to commit achievements storytelling pass)
+**Latest Commit:** (pending — about to commit daily check-in nudge card)
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
@@ -15,16 +15,17 @@ Experience Alpha → Experience Beta → Launch Candidate → Public V1).
 **Current CI Run:** none triggered yet for the pending commit.
 
 **Current Task:** Working through the ruthless-review findings in `docs/MILESTONES.md`.
-Just fixed: the Achievements/Badges screen was purely statistical — a flat "X of Y unlocked"
-counter. Replaced it with a `_StoryBanner` that shows a dynamic headline reacting to progress,
-an animated progress bar, and a "Next up: {badge} — {progress}" highlight, bringing it in line
-with the narrative treatment already used on Home/Dashboard.
+Just fixed: there was no "return tomorrow" hook beyond streak counting. Added a
+`_DailyCheckInCard` to the home screen — "Today's check-in: {dream} needs you today" /
+"keep your streak alive" framing — shown whenever an active dream exists, tapping through to
+the dashboard. Deliberately kept in-app-only (no push notifications/background scheduling,
+which would mean new infra and is out of scope).
 
-**Last Completed Task:** Achievements screen storytelling pass (`achievements_screen.dart`,
-`_StoryBanner`).
+**Last Completed Task:** Daily check-in nudge card (`home_screen.dart`, `_DailyCheckInCard`).
 
-**Next Planned Task:** No "return tomorrow" hook beyond streak counting — nothing proactively
-nudges a user back the next day. Next item on the Experience Beta findings list.
+**Next Planned Task:** Cart screen hasn't been reviewed against the same "feels premium" bar
+as checkout and craving-completed. Last unchecked item on the Experience Beta findings list —
+once resolved, do a fresh ruthless-panel review pass before considering Experience Beta done.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's correction —
 tracking via the Experience Beta findings checklist in `docs/MILESTONES.md` instead.

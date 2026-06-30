@@ -48,8 +48,12 @@ engineering checklist.
       unlocked. Legend status.") plus an animated progress bar and a "Next up: {badge} —
       {progress}" highlight, matching the narrative treatment used on Dashboard/Home.
       (`achievements_screen.dart`)
-- [ ] No "return tomorrow" hook beyond streak counting — nothing proactively nudges a user
-      back the next day (e.g. a daily check-in moment, "your dream needs you" framing).
+- [x] **No "return tomorrow" hook beyond streak counting.** Fixed: added a `_DailyCheckInCard`
+      on the home screen — "Today's check-in: {dream} needs you today" / "keep your streak
+      alive" framing, shown whenever an active dream exists, taps through to the dashboard.
+      Deliberately scoped to in-app only (no push notifications/background scheduling — that
+      would mean new infra, out of scope per the standing offline/no-new-infrastructure
+      constraint). (`home_screen.dart`, `_DailyCheckInCard`)
 - [ ] Cart screen hasn't been reviewed yet against the same "feels premium" bar as checkout
       and craving-completed.
 

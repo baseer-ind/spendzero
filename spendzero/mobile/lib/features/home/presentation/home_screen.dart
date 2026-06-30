@@ -72,6 +72,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 12),
               _NoDreamYetCard(onTap: () => context.push('/goals')),
             ],
+            if (goals.valueOrNull != null && goals.value!.where((g) => !g.archived).isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _DailyCheckInCard(
+                dream: _topDream(goals.value!)!,
+                streakDays: stats.valueOrNull?.currentStreakDays ?? 0,
+                onTap: () => context.push('/dashboard'),
+              ),
+            ],
             const SizedBox(height: 20),
             Text('Where to today?', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
@@ -289,6 +297,76 @@ class _NoDreamYetCard extends StatelessWidget {
               ),
             ),
             Icon(Icons.arrow_forward_ios, size: 14, color: colors.onSurfaceVariant),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A "your dream needs you today" nudge — framed as a daily ritual moment
+/// rather than pure streak math, so opening the app each day has an
+/// emotional reason to come back, addressing the "no return tomorrow hook"
+/// finding. Purely local/in-app; no push notifications or new infra.
+class _DailyCheckInCard extends StatelessWidget {
+  const _DailyCheckInCard({
+    required this.dream,
+    required this.streakDays,
+    required this.onTap,
+  });
+
+  final SavingsGoal dream;
+  final int streakDays;
+  final VoidCallback onTap;
+
+  String get _message {
+    if (streakDays == 0) {
+      return '${dream.title} is waiting. Skip one craving today to start a streak.';
+    }
+    return '${dream.title} needs you today — keep your $streakDays-day streak alive.';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: colors.tertiaryContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Text(dream.emoji, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Today\'s check-in',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colors.onTertiaryContainer,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _message,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colors.onTertiaryContainer,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, size: 14, color: colors.onTertiaryContainer),
           ],
         ),
       ),
