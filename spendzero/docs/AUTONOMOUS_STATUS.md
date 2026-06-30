@@ -29,14 +29,16 @@ asked to prioritize against finishing the in-progress language/copy pass.
   `--org com.projectfuture --project-name app` scaffolding flow and `applicationId` build cleanly
   end-to-end. **Rebrand is fully CI-verified.**
 
-**Language pass (Stage 2) — partial, paused for IA restructure:**
+**Language pass (Stage 2) — complete:**
 Done: dashboard hero stat, "Redirected by category," momentum-story headline, badges-card copy,
 activity-row copy, home screen banner, craving-completed screen ("Victory!" / "I Redirected It"),
-cart screen's redirect nudge + "Choose My Future" CTA. Reviewed and left as-is (already aligned):
-`goals_screen.dart`, `achievements_screen.dart`. Seed-data product/brand names judged out of scope
-(catalog content, not framing language). **Remaining:** broader 27-file grep surface — remaining
-vertical home/detail screens (shopping/beauty/movies/food/grocery/travel), to resume now that the
-IA restructure has landed.
+cart screen's redirect nudge + "Choose My Future" CTA, new Journey/Profile screens (written
+language-clean from the start), `root_shell.dart` nav labels. Reviewed and left as-is (already
+aligned): `goals_screen.dart`, `achievements_screen.dart`. Reviewed remaining vertical home/detail
+screens (shopping/beauty/movies/food/grocery/travel) — all "saved"/"budget" hits there are
+wishlist-heart UI mechanics ("Saved for Later", favorite icons) and catalog section labels
+("Budget Shopping" marketing copy), not financial-savings framing; judged out of scope, same as
+seed-data product/brand names. No remaining language-table violations found across the app.
 
 **IA restructure (per Experience Blueprint, "IA restructure first") — done, CI run in progress:**
 - New persistent bottom navigation via `StatefulShellRoute.indexedStack`: **Home / My Future /
@@ -61,24 +63,25 @@ IA restructure has landed.
   duplicate Home's content without clear differentiation given the current screen inventory. Will
   revisit if the user wants a literal 5-tab structure.
 - `flutter analyze --no-pub` clean, `flutter test` 3/3 passing after every edit in this batch.
-- **CI run `28441851823`** (commit `165185b4`) — triggered automatically, currently `in_progress`.
-  This is the first CI verification of the new `StatefulShellRoute`-based router structure; not
-  yet confirmed green.
+- **CI run `28441851823`** (commit `165185b4`) — `conclusion: success`. All 3 artifacts confirmed
+  present: `project-future-debug-apk` (89.2MB), `project-future-release-apk` (23.9MB),
+  `project-future-release-aab` (24.2MB). The new `StatefulShellRoute`-based navigation shell
+  builds cleanly end-to-end against freshly-scaffolded android/ios platforms. **IA restructure is
+  fully CI-verified.**
 
-**Current CI Run:** `28441851823` (commit `165185b4`, IA restructure) — in progress, awaiting
-result.
+**Current CI Run:** none pending — both rebrand (`28441492563`) and IA restructure
+(`28441851823`) are CI-green.
 
-**Current Task:** Confirm CI run `28441851823` succeeds (validates the new navigation shell builds
-cleanly against freshly-scaffolded android/ios platforms), then resume the Stage 2 language pass
-on the remaining vertical home/detail screens.
+**Current Task:** Resume the Stage 2 language pass on the remaining vertical home/detail screens
+(shopping/beauty/movies/food/grocery/travel) per `docs/PRODUCT_FOUNDATION.md`'s language table.
 
-**Last Completed Task:** Verified Stage 1 rebrand CI run (`28441492563`) succeeded with all 3
-artifacts present; implemented and pushed the full IA restructure (`165185b`) per the user's "IA
-restructure first" decision.
+**Last Completed Task:** Verified both Stage 1 rebrand (`28441492563`) and IA-restructure
+(`28441851823`) CI runs succeeded with all artifacts present; completed Stage 2 language pass
+review across all remaining screens — no violations found.
 
-**Next Planned Task:** Verify IA-restructure CI run, then continue Stage 2 language pass on
-remaining vertical screens; later, revisit `docs/MILESTONES.md`'s Launch Candidate definition to
-reflect the Experience Blueprint-driven IA.
+**Next Planned Task:** Revisit `docs/MILESTONES.md`'s Launch Candidate definition to reflect the
+Experience Blueprint-driven IA and confirm Launch Candidate readiness against the Founder Review
+Checklist (Apple/CRED/Airbnb/Spotify bar) from `docs/EXPERIENCE_BLUEPRINT.md`.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's standing
 correction — tracking via milestone definitions and ruthless-panel/Founder Review Checklist
@@ -86,11 +89,10 @@ findings instead.
 
 ## Known Blockers
 
-None. CI run `28441851823` for the IA-restructure commit is in progress and unconfirmed as of this
-update — flagged as the immediate next verification step, not a blocker.
+None. Both rebrand and IA-restructure CI runs are green with all artifacts confirmed present.
 
 The sandbox cannot download GitHub Actions artifacts directly (outbound network policy blocks
 `blob.core.windows.net`) — APKs are delivered as GitHub Actions run links rather than file
 attachments. Standing environment constraint, not a development blocker.
 
-**Last Updated:** 2026-06-30 (IA restructure per Experience Blueprint; Stage 1 rebrand CI-verified)
+**Last Updated:** 2026-06-30 (IA restructure CI-verified; Stage 2 language pass complete)
