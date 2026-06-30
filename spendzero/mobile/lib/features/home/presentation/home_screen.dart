@@ -32,16 +32,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             tooltip: 'Send feedback',
             onPressed: () => showFeedbackSheet(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.bar_chart_rounded),
-            tooltip: 'Dashboard',
-            onPressed: () => context.push('/dashboard'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.flag_outlined),
-            tooltip: 'My Future',
-            onPressed: () => context.push('/goals'),
-          ),
         ],
       ),
       body: RefreshIndicator(

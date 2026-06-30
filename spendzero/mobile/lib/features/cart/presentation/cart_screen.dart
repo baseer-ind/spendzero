@@ -238,7 +238,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Text(
-                          'Checkout · ${formatPaise(finalTotal)}',
+                          'Choose My Future · ${formatPaise(finalTotal)}',
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),

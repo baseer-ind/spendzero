@@ -20,13 +20,16 @@ import '../features/goals/presentation/goals_screen.dart';
 import '../features/grocery/presentation/grocery_home_screen.dart';
 import '../features/grocery/presentation/store_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/journey/presentation/journey_screen.dart';
 import '../features/onboarding/presentation/intro_screen.dart';
 import '../features/onboarding/presentation/splash_screen.dart';
+import '../features/profile/presentation/profile_screen.dart';
 import '../features/shopping/presentation/brand_screen.dart';
 import '../features/shopping/presentation/shopping_home_screen.dart';
 import '../features/travel/presentation/stay_screen.dart';
 import '../features/travel/presentation/travel_home_screen.dart';
 import '../features/vertical_launcher/presentation/vertical_launcher_screen.dart';
+import 'root_shell.dart';
 
 Page<void> _slide(BuildContext context, GoRouterState state, Widget child) =>
     CustomTransitionPage(
@@ -57,17 +60,26 @@ final appRouter = GoRouter(
       path: '/intro',
       pageBuilder: (c, s) => _slide(c, s, const IntroScreen()),
     ),
-    GoRoute(
-      path: '/',
-      pageBuilder: (c, s) => _slide(c, s, const HomeScreen()),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) => RootShell(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/', builder: (c, s) => const HomeScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/dashboard', builder: (c, s) => const DashboardScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/journey', builder: (c, s) => const JourneyScreen()),
+        ]),
+        StatefulShellBranch(routes: [
+          GoRoute(path: '/profile', builder: (c, s) => const ProfileScreen()),
+        ]),
+      ],
     ),
     GoRoute(
       path: '/goals',
       pageBuilder: (c, s) => _slide(c, s, const GoalsScreen()),
-    ),
-    GoRoute(
-      path: '/dashboard',
-      pageBuilder: (c, s) => _slide(c, s, const DashboardScreen()),
     ),
     GoRoute(
       path: '/checkout/:categoryId',

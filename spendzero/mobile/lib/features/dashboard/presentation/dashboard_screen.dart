@@ -6,35 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/achievement.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/utils/category_labels.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/activity_row.dart';
 
-const _categoryLabels = {
-  'demo-food': 'Food',
-  'demo-groceries': 'Grocery',
-  'demo-fashion': 'Shopping',
-  'demo-electronics': 'Electronics',
-  'demo-travel': 'Travel',
-  'demo-entertainment': 'Entertainment',
-  'demo-beauty': 'Beauty',
-  'demo-furniture': 'Furniture',
-};
+String _labelFor(String categoryId) => labelForCategory(categoryId);
 
-const _categoryEmoji = {
-  'demo-food': '🍔',
-  'demo-groceries': '🛒',
-  'demo-fashion': '👕',
-  'demo-electronics': '📱',
-  'demo-travel': '✈️',
-  'demo-entertainment': '🎬',
-  'demo-beauty': '💄',
-  'demo-furniture': '🛋️',
-};
-
-String _labelFor(String categoryId) =>
-    _categoryLabels[categoryId] ??
-    categoryId.replaceFirst('demo-', '').replaceAll('-', ' ');
-
-String _emojiFor(String categoryId) => _categoryEmoji[categoryId] ?? '💰';
+String _emojiFor(String categoryId) => emojiForCategory(categoryId);
 
 DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
@@ -48,7 +26,7 @@ class DashboardScreen extends ConsumerWidget {
     final goals = ref.watch(goalsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Journey')),
+      appBar: AppBar(title: const Text('My Future')),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(statsProvider);
@@ -237,12 +215,22 @@ class _DashboardBody extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 24),
-        Text('Recent activity', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Recent victories', style: Theme.of(context).textTheme.titleMedium),
+            if (history.isNotEmpty)
+              TextButton(
+                onPressed: () => context.push('/journey'),
+                child: const Text('View Journey'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
         if (history.isEmpty)
           const _EmptySection(message: 'No cravings logged yet.')
         else
-          ...history.take(10).map((e) => _ActivityRow(entry: e)),
+          ...history.take(5).map((e) => ActivityRow(entry: e)),
         const SizedBox(height: 24),
         _KeepGoingCard(topDream: topDream),
       ],
@@ -755,52 +743,6 @@ class _CategoryRow extends StatelessWidget {
         ],
       ),
     ),
-    );
-  }
-}
-
-class _ActivityRow extends StatelessWidget {
-  const _ActivityRow({required this.entry});
-
-  final Map<String, dynamic> entry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final categoryId = entry['category_id'] as String;
-    final outcome = entry['outcome'] as String;
-    final amountPaise = entry['amount_paise'] as int;
-    final completedAt = DateTime.parse(entry['completed_at'] as String);
-    final saved = outcome == 'saved';
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: saved ? colors.tertiaryContainer : colors.errorContainer,
-            child: Text(_emojiFor(categoryId), style: const TextStyle(fontSize: 16)),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  saved
-                      ? 'Redirected ${formatPaise(amountPaise)} from ${_labelFor(categoryId)}'
-                      : 'Spent on ${_labelFor(categoryId)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  '${completedAt.day}/${completedAt.month}/${completedAt.year}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.outline),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
