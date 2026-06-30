@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/beauty_seed_data.dart';
+import '../../../core/data/local/personalization_store.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
@@ -99,6 +100,9 @@ class _BeautyHomeScreenState extends ConsumerState<BeautyHomeScreen> {
   void initState() {
     super.initState();
     _loadRecentlyViewed();
+    Future.microtask(
+      () => ref.read(personalizationProvider.notifier).recordCategoryView(widget.category.id),
+    );
   }
 
   Future<void> _loadRecentlyViewed() async {
@@ -130,6 +134,7 @@ class _BeautyHomeScreenState extends ConsumerState<BeautyHomeScreen> {
 
   void _openBrand(BeautyBrand brand) async {
     await RecentlyViewedBeautyBrand().recordView(brand.id);
+    ref.read(personalizationProvider.notifier).recordAppView(_appIdFor(brand.id));
     if (!mounted) return;
     context.push('/beauty/${widget.category.id}/brand/${brand.id}');
   }

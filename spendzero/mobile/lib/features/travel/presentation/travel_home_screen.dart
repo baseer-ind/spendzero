@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/data/local/fictional_apps_seed.dart';
+import '../../../core/data/local/personalization_store.dart';
 import '../../../core/data/local/travel_seed_data.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
@@ -99,6 +100,9 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
   void initState() {
     super.initState();
     _loadRecentlyViewed();
+    Future.microtask(
+      () => ref.read(personalizationProvider.notifier).recordCategoryView(widget.category.id),
+    );
   }
 
   Future<void> _loadRecentlyViewed() async {
@@ -130,6 +134,7 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
 
   void _openStay(TravelStay stay) async {
     await RecentlyViewedTravelStay().recordView(stay.id);
+    ref.read(personalizationProvider.notifier).recordAppView(_appIdFor(stay.id));
     if (!mounted) return;
     context.push('/travel/${widget.category.id}/stay/${stay.id}');
   }
