@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../core/data/local/food_seed_data.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
@@ -38,6 +40,7 @@ class RestaurantScreen extends ConsumerStatefulWidget {
 class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
   final Map<String, int> _quantities = {};
   bool _showAllReviews = false;
+  bool _isCheckingOut = false;
 
   void _setQuantity(MenuItem item, int quantity) {
     setState(() {
@@ -133,8 +136,14 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: FilledButton(
-          onPressed: () => _checkout(itemsById),
-          child: Text('Add craving to cart · $count items · ${formatPaise(total)}'),
+          onPressed: _isCheckingOut ? null : () => _checkout(itemsById),
+          child: _isCheckingOut
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text('Place order · $count items · ${formatPaise(total)}'),
         ),
       ),
     );
@@ -142,11 +151,12 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
 
   Future<void> _checkout(Map<String, MenuItem> itemsById) async {
     HapticFeedback.mediumImpact();
+    setState(() => _isCheckingOut = true);
     try {
-      final repo = await ref.read(cartRepositoryProvider.future);
-      await repo.saveItems(
-        widget.categoryId,
-        _quantities.entries
+      final repo = await ref.read(cravingRepositoryProvider.future);
+      final result = await repo.checkout(
+        categoryId: widget.categoryId,
+        items: _quantities.entries
             .where((e) => itemsById.containsKey(e.key))
             .map((e) => {
                   'listing_id': e.key,
@@ -156,14 +166,15 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
             .toList(),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Added to your craving cart.')),
-      );
+      setState(() => _quantities.clear());
+      context.push('/craving-completed', extra: result);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Couldn't save your cart. Please try again.")),
+        const SnackBar(content: Text("Couldn't complete your order. Please try again.")),
       );
+    } finally {
+      if (mounted) setState(() => _isCheckingOut = false);
     }
   }
 }
