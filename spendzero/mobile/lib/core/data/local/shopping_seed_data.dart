@@ -3390,3 +3390,17 @@ List<ShoppingProduct> trendingShoppingProducts() =>
 
 List<ShoppingProduct> bestSellerShoppingProducts() =>
     allShoppingProducts.where((p) => p.isBestSeller).toList();
+
+/// Budget-friendly picks for cost-conscious shoppers.
+List<ShoppingProduct> budgetShopping() =>
+    allShoppingProducts.where((p) => p.tags.contains('budget')).toList();
+
+/// Higher price-tier, premium-feel picks.
+List<ShoppingProduct> premiumPicks() => (allShoppingProducts.toList()
+      ..sort((a, b) => b.pricePaise.compareTo(a.pricePaise)))
+    .take(12)
+    .toList();
+
+/// Fresh-in-stock items for the "New This Week" collection.
+List<ShoppingProduct> newThisWeek() =>
+    allShoppingProducts.where((p) => p.isNewArrival).toList();

@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/data/local/fictional_apps_seed.dart';
+import '../../../core/data/local/personalization_store.dart';
 import '../../../core/data/local/shopping_seed_data.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
@@ -114,6 +115,9 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
     super.initState();
     _selectedCategory = _defaultCategoryFilter(widget.category.id);
     _loadRecentlyViewed();
+    Future.microtask(
+      () => ref.read(personalizationProvider.notifier).recordCategoryView(widget.category.id),
+    );
   }
 
   Future<void> _loadRecentlyViewed() async {
@@ -145,6 +149,7 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
 
   void _openBrand(ShoppingBrand brand) async {
     await RecentlyViewedShoppingBrand().recordView(brand.id);
+    ref.read(personalizationProvider.notifier).recordAppView(_appIdFor(brand.id));
     if (!mounted) return;
     context.push('/shopping/${widget.category.id}/brand/${brand.id}');
   }
@@ -204,6 +209,30 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
                     : _OffersRail(items: items),
                 loading: () => const _RailSkeleton(title: "Today's Offers"),
                 error: (_, __) => const SizedBox.shrink(),
+              ),
+              const SizedBox(height: 20),
+              _ShoppingCollectionRail(
+                title: 'New This Week',
+                subtitle: 'Just landed in the catalogue',
+                items: newThisWeek(),
+                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _ShoppingCollectionRail(
+                title: 'Budget Shopping',
+                subtitle: 'Quality picks that won\'t break the bank',
+                items: budgetShopping(),
+                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _ShoppingCollectionRail(
+                title: 'Premium Picks',
+                subtitle: 'Top-tier pieces worth the splurge',
+                items: premiumPicks(),
+                accentColor: (c) => Theme.of(c).colorScheme.primaryContainer,
+                categoryId: widget.category.id,
               ),
               const SizedBox(height: 20),
               if (savedBrands.isNotEmpty) ...[
@@ -418,6 +447,82 @@ class _BrandRailCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Generic horizontal rail for a curated [ShoppingProduct] collection
+/// (Budget Shopping, Premium Picks, New This Week, ...). Each card opens
+/// the product's brand and records personalization signals.
+class _ShoppingCollectionRail extends ConsumerWidget {
+  const _ShoppingCollectionRail({
+    required this.title,
+    required this.subtitle,
+    required this.items,
+    required this.accentColor,
+    required this.categoryId,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<ShoppingProduct> items;
+  final Color Function(BuildContext) accentColor;
+  final String categoryId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    final colors = accentColor(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          subtitle,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 130,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Material(
+                color: colors,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () async {
+                    await RecentlyViewedShoppingBrand().recordView(item.brandId);
+                    final personalization = ref.read(personalizationProvider.notifier);
+                    personalization.recordPriceView(item.pricePaise);
+                    if (context.mounted) {
+                      context.push('/shopping/$categoryId/brand/${item.brandId}');
+                    }
+                  },
+                  child: Container(
+                    width: 170,
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium),
+                        const Spacer(),
+                        Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
