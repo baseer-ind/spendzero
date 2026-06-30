@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-time setup: scaffolds mobile/android and mobile/ios via `flutter
 # create`, then patches the application id / bundle id / app name so they
-# match SpendZero instead of Flutter's defaults.
+# match Project Future instead of Flutter's defaults.
 #
 # Run this once after cloning, before scripts/run_mobile.sh or any Android
 # Studio / Xcode work. Safe to re-run (flutter create is idempotent on an
@@ -15,13 +15,13 @@ if ! command -v flutter >/dev/null 2>&1; then
   exit 1
 fi
 
-APP_ID="com.spendzero.app"
+APP_ID="com.projectfuture.app"
 
 if [ -d "mobile/android" ] && [ -d "mobile/ios" ]; then
   echo "mobile/android and mobile/ios already exist — skipping flutter create."
 else
   echo "==> Scaffolding Android + iOS platform folders..."
-  (cd mobile && flutter create . --platforms=android,ios --org com.spendzero --project-name spendzero)
+  (cd mobile && flutter create . --platforms=android,ios --org com.projectfuture --project-name app)
 fi
 
 if [ -f "mobile/android/app/build.gradle" ]; then
@@ -32,7 +32,7 @@ if [ -f "mobile/android/app/build.gradle" ]; then
 fi
 
 if [ -f "mobile/android/app/src/main/AndroidManifest.xml" ]; then
-  sed -i.bak 's/android:label="mobile"/android:label="SpendZero"/' mobile/android/app/src/main/AndroidManifest.xml || true
+  sed -i.bak 's/android:label="app"/android:label="Project Future"/' mobile/android/app/src/main/AndroidManifest.xml || true
   # Release builds need this explicitly — the debug-only INTERNET permission
   # flutter_tools injects automatically does not carry over to release/profile.
   if ! grep -q 'android.permission.INTERNET' mobile/android/app/src/main/AndroidManifest.xml; then
@@ -43,9 +43,9 @@ if [ -f "mobile/android/app/src/main/AndroidManifest.xml" ]; then
 fi
 
 if [ -f "mobile/ios/Runner/Info.plist" ]; then
-  echo "==> Setting iOS bundle display name to SpendZero..."
-  /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName SpendZero" mobile/ios/Runner/Info.plist 2>/dev/null || \
-    sed -i.bak 's/<key>CFBundleDisplayName<\/key>.*<string>.*<\/string>/<key>CFBundleDisplayName<\/key><string>SpendZero<\/string>/' mobile/ios/Runner/Info.plist || true
+  echo "==> Setting iOS bundle display name to Project Future..."
+  /usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName Project Future' mobile/ios/Runner/Info.plist 2>/dev/null || \
+    sed -i.bak 's/<key>CFBundleDisplayName<\/key>.*<string>.*<\/string>/<key>CFBundleDisplayName<\/key><string>Project Future<\/string>/' mobile/ios/Runner/Info.plist || true
   rm -f mobile/ios/Runner/Info.plist.bak
 fi
 

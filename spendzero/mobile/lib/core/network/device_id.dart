@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-const _deviceIdKey = 'spendzero_device_id';
+const _deviceIdKey = 'project_future_device_id';
 
 /// Stable per-install identity used for guest mode — no sign-in required.
 /// Matches `guest_devices.device_id` on the backend (see

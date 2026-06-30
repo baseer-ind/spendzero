@@ -1,4 +1,4 @@
 {
   "ENV_NAME": "production",
-  "API_BASE_URL": "https://api.spendzero.app/api/v1"
+  "API_BASE_URL": "https://api.projectfuture.app/api/v1"
 }

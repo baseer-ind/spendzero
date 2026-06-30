@@ -1,4 +1,4 @@
 {
   "ENV_NAME": "staging",
-  "API_BASE_URL": "https://staging-api.spendzero.app/api/v1"
+  "API_BASE_URL": "https://staging-api.projectfuture.app/api/v1"
 }

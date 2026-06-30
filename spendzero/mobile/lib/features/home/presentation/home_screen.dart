@@ -25,7 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SpendZero'),
+        title: const Text('Project Future'),
         actions: [
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline),

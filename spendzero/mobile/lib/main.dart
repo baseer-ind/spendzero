@@ -15,5 +15,5 @@ void main() {
       debugPrint('Uncaught error: ${details.exceptionAsString()}');
     }
   };
-  runApp(const ProviderScope(child: SpendZeroApp()));
+  runApp(const ProviderScope(child: ProjectFutureApp()));
 }

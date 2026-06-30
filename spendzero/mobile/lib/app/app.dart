@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 import 'router.dart';
 
-class SpendZeroApp extends StatelessWidget {
-  const SpendZeroApp({super.key});
+class ProjectFutureApp extends StatelessWidget {
+  const ProjectFutureApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'SpendZero',
+      title: 'Project Future',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

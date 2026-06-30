@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Represents one fictional app inside a SpendZero vertical (e.g. "Zwigato"
+/// Represents one fictional app inside a Project Future vertical (e.g. "Zwigato"
 /// inside the Food vertical). Each app has its own brand identity — colors,
 /// icon, tagline — and maps to a subset of the vertical's content.
 class FictionalApp {

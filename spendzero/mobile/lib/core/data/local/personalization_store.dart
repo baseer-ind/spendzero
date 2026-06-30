@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _kPersonalizationKey = 'spendzero_personalization_v1';
+const _kPersonalizationKey = 'project_future_personalization_v1';
 const _maxPriceSamples = 40;
 const _maxSearchTerms = 25;
 

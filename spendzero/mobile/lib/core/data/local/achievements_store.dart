@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _kSeenAchievementsKey = 'spendzero_achievements_seen_v1';
+const _kSeenAchievementsKey = 'project_future_achievements_seen_v1';
 
 /// Tracks which achievement ids the user has already had a celebration
 /// shown for. Unlock state itself is always derived fresh from

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/fictional_app.dart';
 
-/// All fictional apps across every SpendZero vertical. Each entry has a
+/// All fictional apps across every Project Future vertical. Each entry has a
 /// unique brand identity (colors, icon, tagline, offers). Content (restaurants
 /// / stores / products) is referenced by [entityIds] and served by the
 /// corresponding vertical repository.

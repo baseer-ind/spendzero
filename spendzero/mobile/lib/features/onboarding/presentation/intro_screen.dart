@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const introSeenKey = 'spendzero_seen_intro';
+const introSeenKey = 'project_future_seen_intro';
 
 /// First-launch-only framing of the core loop — "skip a craving, fund a
 /// dream" — shown once before the home grid, so new users understand the

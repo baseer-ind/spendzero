@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:spendzero/core/utils/money.dart';
+import 'package:project_future/core/utils/money.dart';
 
 void main() {
   group('formatPaise', () {

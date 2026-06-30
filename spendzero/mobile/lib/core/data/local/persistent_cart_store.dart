@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/cart_item.dart';
 
-const _kCartKey = 'spendzero_persistent_cart_v2';
+const _kCartKey = 'project_future_persistent_cart_v2';
 
 /// StateNotifier that owns the in-memory cart and syncs it to
 /// SharedPreferences on every mutation. This is the single source of truth
