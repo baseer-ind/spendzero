@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/models/category.dart';
+import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
 import '../../feedback/presentation/feedback_sheet.dart';
@@ -43,6 +44,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final categories = ref.watch(categoriesProvider);
     final stats = ref.watch(statsProvider);
+    final goals = ref.watch(goalsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,13 +89,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: _SavingsBanner(
                   totalSavedPaise: s.totalAmountNotSpentPaise,
                   streakDays: s.currentStreakDays,
+                  topDream: goals.valueOrNull != null ? _topDream(goals.value!) : null,
                 ),
               ),
               loading: () => const _SavingsBannerSkeleton(),
               error: (error, _) => const _SavingsBannerSkeleton(),
             ),
             const SizedBox(height: 20),
-            Text('Browse a category', style: Theme.of(context).textTheme.titleMedium),
+            Text('Where to today?', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
             categories.when(
               data: (list) => _CategoryGrid(categories: list),
@@ -150,15 +153,32 @@ class _FirstLaunchHint extends StatelessWidget {
   }
 }
 
+/// Picks the dream the home screen should tell a story about: the active,
+/// non-archived goal closest to completion (most emotionally rewarding to
+/// surface — "almost there" beats "just started").
+SavingsGoal? _topDream(List<SavingsGoal> goals) {
+  final active = goals.where((g) => !g.archived && g.progress < 1).toList()
+    ..sort((a, b) => b.progress.compareTo(a.progress));
+  if (active.isNotEmpty) return active.first;
+  final any = goals.where((g) => !g.archived).toList();
+  return any.isEmpty ? null : any.first;
+}
+
 class _SavingsBanner extends StatelessWidget {
-  const _SavingsBanner({required this.totalSavedPaise, required this.streakDays});
+  const _SavingsBanner({
+    required this.totalSavedPaise,
+    required this.streakDays,
+    this.topDream,
+  });
 
   final int totalSavedPaise;
   final int streakDays;
+  final SavingsGoal? topDream;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final dream = topDream;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 500),
@@ -191,7 +211,9 @@ class _SavingsBanner extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total saved so far',
+                  dream != null
+                      ? '${dream.emoji} Saving for ${dream.title}'
+                      : 'Total saved so far',
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
@@ -237,20 +259,46 @@ class _SavingsBanner extends StatelessWidget {
                     ),
               ),
             ),
-            const SizedBox(height: 2),
-            Row(
-              children: [
-                Icon(Icons.bar_chart_rounded, size: 14, color: colors.onPrimary.withOpacity(0.75)),
-                const SizedBox(width: 4),
-                Text(
-                  'Tap to see your dashboard',
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: colors.onPrimary.withOpacity(0.75)),
+            const SizedBox(height: 4),
+            if (dream != null) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: dream.progress),
+                  duration: const Duration(milliseconds: 900),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, _) => LinearProgressIndicator(
+                    value: value,
+                    minHeight: 8,
+                    backgroundColor: colors.onPrimary.withOpacity(0.18),
+                    valueColor: AlwaysStoppedAnimation(colors.onPrimary),
+                  ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${(dream.progress * 100).round()}% of the way to ${dream.title} — '
+                '${formatPaise(dream.targetPaise - dream.savedPaise)} to go',
+                style: Theme.of(context)
+                    .textTheme
+                    .labelSmall
+                    ?.copyWith(color: colors.onPrimary.withOpacity(0.85)),
+              ),
+            ] else
+              Row(
+                children: [
+                  Icon(Icons.bar_chart_rounded,
+                      size: 14, color: colors.onPrimary.withOpacity(0.75)),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Tap to see your dashboard',
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelSmall
+                        ?.copyWith(color: colors.onPrimary.withOpacity(0.75)),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
