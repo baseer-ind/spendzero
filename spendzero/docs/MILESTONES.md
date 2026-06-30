@@ -10,15 +10,17 @@ engineering checklist.
   no dead ends). No claim of polish or delight. **Status: done.**
 - **Experience Beta** — Premium UI, motion, imagery, and emotional design. A real user would
   describe individual screens as "nice," even before the whole app feels fully cohesive.
-  **Status: in progress.**
+  **Status: done.** Two ruthless-panel review passes complete (11 findings total, all fixed and
+  CI-verified as of run `28439047239`, commit `00bf7ca`). 6 lower-severity backlog items remain
+  for a future pass but don't block this milestone.
 - **Launch Candidate** — Confident enough to hand the APK to 20–50 testers without caveats. A
   first-time Indian consumer, given 30 minutes unsupervised: feels genuinely delighted,
   understands the purpose immediately, creates a dream, browses multiple fictional apps and
   enjoys it, uses the cart naturally, feels emotionally rewarded after checkout, and wants to
-  come back tomorrow. **Status: not started.**
+  come back tomorrow. **Status: in progress.**
 - **Public V1** — Ready for Play Store/App Store submission. **Status: not started.**
 
-## Current milestone: Experience Beta
+## Completed milestone: Experience Beta
 
 ### Ruthless review (panel: Apple HIG / Airbnb / CRED / OneCard / first-time Indian consumer)
 ### — what still feels unfinished
