@@ -3404,3 +3404,19 @@ List<ShoppingProduct> premiumPicks() => (allShoppingProducts.toList()
 /// Fresh-in-stock items for the "New This Week" collection.
 List<ShoppingProduct> newThisWeek() =>
     allShoppingProducts.where((p) => p.isNewArrival).toList();
+
+/// Top-rated products with a meaningful number of reviews.
+List<ShoppingProduct> bestRatedShoppingProducts() {
+  final eligible = allShoppingProducts.where((p) => p.reviewCount >= 50).toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
+/// Highly rated but under-discovered products.
+List<ShoppingProduct> hiddenGemShoppingProducts() {
+  final eligible = allShoppingProducts
+      .where((p) => p.rating >= 4.4 && p.reviewCount < 50)
+      .toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}

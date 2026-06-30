@@ -258,6 +258,22 @@ class _ShoppingHomeScreenState extends ConsumerState<ShoppingHomeScreen> {
                   );
                 },
               ),
+              _ShoppingCollectionRail(
+                title: 'Best Rated',
+                subtitle: 'Loved by hundreds of shoppers',
+                items: bestRatedShoppingProducts(),
+                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _ShoppingCollectionRail(
+                title: 'Hidden Gems',
+                subtitle: 'High ratings, still flying under the radar',
+                items: hiddenGemShoppingProducts(),
+                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
               if (savedBrands.isNotEmpty) ...[
                 _BrandRail(title: 'Saved for Later', brands: savedBrands, onTap: _openBrand),
                 const SizedBox(height: 20),
