@@ -196,6 +196,46 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                 error: (_, __) => const SizedBox.shrink(),
               ),
               const SizedBox(height: 20),
+              if (travelMustHaves().isNotEmpty) ...[
+                _TravelCollectionRail(
+                  title: 'Travel Must-Haves',
+                  subtitle: 'Bestselling stays travellers love',
+                  items: travelMustHaves(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (romanticGetaways().isNotEmpty) ...[
+                _TravelCollectionRail(
+                  title: 'Romantic Getaways',
+                  subtitle: 'Set the mood for two',
+                  items: romanticGetaways(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Colors.pinkAccent,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (poolAndSpaEscapes().isNotEmpty) ...[
+                _TravelCollectionRail(
+                  title: 'Pool & Spa Escapes',
+                  subtitle: 'Unwind in style',
+                  items: poolAndSpaEscapes(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Colors.tealAccent.shade700,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (flexiblePlans().isNotEmpty) ...[
+                _TravelCollectionRail(
+                  title: 'Flexible Plans',
+                  subtitle: 'Free cancellation, zero stress',
+                  items: flexiblePlans(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Theme.of(context).colorScheme.tertiary,
+                ),
+                const SizedBox(height: 20),
+              ],
               if (savedStays.isNotEmpty) ...[
                 _StayRail(title: 'Saved for Later', stays: savedStays, onTap: _openStay),
                 const SizedBox(height: 20),
@@ -483,6 +523,79 @@ class _OfferCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TravelCollectionRail extends ConsumerWidget {
+  const _TravelCollectionRail({
+    required this.title,
+    required this.subtitle,
+    required this.items,
+    required this.categoryId,
+    required this.accentColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<TravelRoom> items;
+  final String categoryId;
+  final Color Function(BuildContext) accentColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.outline)),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 130,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Material(
+                color: colors.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () async {
+                    await RecentlyViewedTravelStay().recordView(item.stayId);
+                    ref.read(personalizationProvider.notifier).recordPriceView(item.pricePaise);
+                    if (context.mounted) {
+                      context.push('/travel/$categoryId/stay/${item.stayId}');
+                    }
+                  },
+                  child: Container(
+                    width: 170,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: accentColor(context), width: 3)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                        const Spacer(),
+                        Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

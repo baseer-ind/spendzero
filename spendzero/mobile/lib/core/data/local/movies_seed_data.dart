@@ -424,6 +424,23 @@ List<CinemaBrand> trendingCinemaBrands() =>
 List<Movie> bestSellerMovies() =>
     allMovies.where((m) => m.isBestSeller).toList();
 
+/// Fresh-on-screen titles — the "New Releases" collection.
+List<Movie> newReleases() => allMovies.where((m) => m.isNewArrival).toList();
+
+/// Family-friendly genres for a group outing.
+List<Movie> familyWatch() =>
+    allMovies.where((m) => m.genre == 'Family' || m.tags.contains('Family')).toList();
+
+/// High-octane picks for the thrill-seekers.
+List<Movie> actionPacked() => allMovies
+    .where((m) => m.genre == 'Action' || m.tags.contains('Action'))
+    .toList();
+
+/// Big-format premium experiences (IMAX / 4DX).
+List<Movie> premiumExperience() => allMovies
+    .where((m) => m.tags.contains('IMAX') || m.tags.contains('4DX'))
+    .toList();
+
 extension _FirstOrNull<T> on Iterable<T> {
   T? get firstOrNull => isEmpty ? null : first;
 }

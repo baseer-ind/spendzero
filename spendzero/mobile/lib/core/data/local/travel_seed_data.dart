@@ -657,4 +657,20 @@ List<TravelRoom> travelTodaysOffers() =>
 
 List<TravelStay> trendingTravelStays() => allTravelStays.where((s) => s.isTrending).toList();
 
+/// Bestseller rooms — the "Travel Must-Haves" collection.
+List<TravelRoom> travelMustHaves() => allTravelRooms.where((r) => r.isBestSeller).toList();
+
+/// Rooms tagged for couples — the "Romantic Getaways" collection.
+List<TravelRoom> romanticGetaways() =>
+    allTravelRooms.where((r) => r.tags.contains('Romantic setup')).toList();
+
+/// Pool or spa amenity rooms — the "Pool & Spa Escapes" collection.
+List<TravelRoom> poolAndSpaEscapes() => allTravelRooms
+    .where((r) => r.tags.contains('Pool access') || r.tags.contains('Spa access'))
+    .toList();
+
+/// Free-cancellation rooms for the indecisive planner.
+List<TravelRoom> flexiblePlans() =>
+    allTravelRooms.where((r) => r.tags.contains('Free cancellation')).toList();
+
 List<TravelRoom> bestSellerTravelRooms() => allTravelRooms.where((r) => r.isBestSeller).toList();

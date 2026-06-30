@@ -196,6 +196,46 @@ class _MoviesHomeScreenState extends ConsumerState<MoviesHomeScreen> {
                 error: (_, __) => const SizedBox.shrink(),
               ),
               const SizedBox(height: 20),
+              if (newReleases().isNotEmpty) ...[
+                _MovieCollectionRail(
+                  title: 'New Releases',
+                  subtitle: 'Fresh on the big screen',
+                  items: newReleases(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (actionPacked().isNotEmpty) ...[
+                _MovieCollectionRail(
+                  title: 'Action Packed',
+                  subtitle: 'Edge-of-the-seat thrills',
+                  items: actionPacked(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Colors.orangeAccent,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (familyWatch().isNotEmpty) ...[
+                _MovieCollectionRail(
+                  title: 'Family Watch',
+                  subtitle: 'Something for everyone',
+                  items: familyWatch(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Colors.tealAccent.shade700,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (premiumExperience().isNotEmpty) ...[
+                _MovieCollectionRail(
+                  title: 'Premium Experience',
+                  subtitle: 'IMAX & 4DX for the full effect',
+                  items: premiumExperience(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Theme.of(context).colorScheme.tertiary,
+                ),
+                const SizedBox(height: 20),
+              ],
               if (savedStays.isNotEmpty) ...[
                 _StayRail(title: 'Saved for Later', stays: savedStays, onTap: _openStay),
                 const SizedBox(height: 20),
@@ -483,6 +523,79 @@ class _OfferCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MovieCollectionRail extends ConsumerWidget {
+  const _MovieCollectionRail({
+    required this.title,
+    required this.subtitle,
+    required this.items,
+    required this.categoryId,
+    required this.accentColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<Movie> items;
+  final String categoryId;
+  final Color Function(BuildContext) accentColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.outline)),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 130,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Material(
+                color: colors.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () async {
+                    await RecentlyViewedCinemaBrand().recordView(item.cinemaId);
+                    ref.read(personalizationProvider.notifier).recordPriceView(item.pricePaise);
+                    if (context.mounted) {
+                      context.push('/movies/$categoryId/cinema/${item.cinemaId}');
+                    }
+                  },
+                  child: Container(
+                    width: 170,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: accentColor(context), width: 3)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                        const Spacer(),
+                        Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
