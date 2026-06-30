@@ -95,4 +95,15 @@ The sandbox cannot download GitHub Actions artifacts directly (outbound network 
 `blob.core.windows.net`) — APKs are delivered as GitHub Actions run links rather than file
 attachments. Standing environment constraint, not a development blocker.
 
-**Last Updated:** 2026-06-30 (IA restructure CI-verified; Stage 2 language pass complete)
+## Visual Redesign — Midnight + Champagne Gold (see `docs/DESIGN_TOKENS.md`)
+
+All 5 phases of the Lovable-reference-driven visual redesign are complete: theme foundation,
+core components, primary screens (Home/My Future/Journey/Cart/Profile/craving-completed), all
+vertical screens (Food, Grocery, Shopping, Beauty, Travel, Movies) plus the vertical launcher,
+and final CI verification. `flutter analyze --no-pub` reports "No issues found!" and
+`flutter test` passes 3/3 on the full project as of commit `7f32e5c`. Business logic, routing,
+offline storage, and all fictional-app seed data were untouched per the founder's scope —
+only colors, typography, spacing, and component visuals changed.
+
+**Last Updated:** 2026-06-30 (IA restructure CI-verified; Stage 2 language pass complete; visual
+redesign Phases 1–5 complete and CI-clean)

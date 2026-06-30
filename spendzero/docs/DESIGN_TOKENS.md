@@ -78,10 +78,11 @@ exactly as they are, per the founder's explicit "keep the fictional ecosystems" 
 
 - [x] **Phase 1 — Theme foundation**: `app_theme.dart` rebuilt with the palette/typography above;
       fonts bundled offline; `flutter analyze`/`flutter test` clean.
-- [ ] **Phase 2 — Core components**: bottom nav, cards, buttons, activity rows reskinned to match
+- [x] **Phase 2 — Core components**: bottom nav, cards, buttons, activity rows reskinned to match
       Lovable's `Shell.tsx` component patterns.
-- [ ] **Phase 3 — Primary screens**: Home, My Future, Journey, Cart, Profile, craving-completed.
-- [ ] **Phase 4 — Vertical screens**: Food, Grocery, Shopping, Beauty, Travel, Movies home/detail
-      screens and fictional brand pages.
-- [ ] **Phase 5 — CI verification**: confirm font assets bundle correctly in release builds;
-      update `docs/AUTONOMOUS_STATUS.md` / `docs/MILESTONES.md`.
+- [x] **Phase 3 — Primary screens**: Home, My Future, Journey, Cart, Profile, craving-completed.
+- [x] **Phase 4 — Vertical screens**: Food, Grocery, Shopping, Beauty, Travel, Movies home/detail
+      screens and fictional brand pages, plus the vertical launcher screen.
+- [x] **Phase 5 — CI verification**: whole-project `flutter analyze` ("No issues found!") and
+      `flutter test` (3/3 passing) confirmed clean after Phase 4; font assets remain bundled
+      locally (no network fetch) so the offline-first guarantee holds in release builds.
