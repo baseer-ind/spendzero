@@ -12,6 +12,16 @@ import 'confetti_burst.dart';
 
 const _streakMilestones = [3, 7, 14, 30, 60, 100];
 
+const _affirmations = [
+  'That was a smart decision.',
+  'Future you says thank you.',
+  'Small choice, real progress.',
+  'You\'re building a great habit.',
+  'Discipline beats impulse — nice work.',
+];
+
+String _affirmationFor(int amountPaise) => _affirmations[amountPaise % _affirmations.length];
+
 /// Shown after every simulated checkout. Never "Order Successful" — the
 /// celebration is always framed around the money the user chose not to
 /// spend, and (when a dream/goal is picked) around how much closer that
@@ -52,17 +62,36 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('🎉', style: TextStyle(fontSize: 48)),
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: 1),
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.elasticOut,
+                      builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
+                      child: const Text('🎉', style: TextStyle(fontSize: 48)),
+                    ),
                     const SizedBox(height: 12),
                     Text('Craving Completed', style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 8),
                     Text('You chose not to spend', style: Theme.of(context).textTheme.bodyMedium),
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: widget.result.amountNotSpentPaise.toDouble()),
+                      duration: const Duration(milliseconds: 900),
+                      curve: Curves.easeOutExpo,
+                      builder: (context, value, _) => Text(
+                        formatPaise(value.round()),
+                        style: Theme.of(context)
+                            .textTheme
+                            .displaySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     Text(
-                      formatPaise(widget.result.amountNotSpentPaise),
-                      style: Theme.of(context)
-                          .textTheme
-                          .displaySmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      _affirmationFor(widget.result.amountNotSpentPaise),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
                     _StatsRow(result: widget.result),
