@@ -162,6 +162,8 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
+          const SizedBox(height: 24),
+          _SimilarRestaurantsRail(restaurant: restaurant, categoryId: widget.categoryId),
         ],
       ),
       bottomNavigationBar: _quantities.isEmpty ? null : _buildCartBar(context, menuAsync.value ?? const []),
@@ -493,6 +495,113 @@ class _QuantityStepper extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Closes the loop on the food journey: after browsing a restaurant, give
+/// the user somewhere to go next instead of a dead end at the bottom of
+/// the menu — surfaces other restaurants sharing a cuisine, ranked by rating.
+class _SimilarRestaurantsRail extends StatelessWidget {
+  const _SimilarRestaurantsRail({required this.restaurant, required this.categoryId});
+
+  final Restaurant restaurant;
+  final String categoryId;
+
+  @override
+  Widget build(BuildContext context) {
+    final similar = allRestaurants
+        .where((r) =>
+            r.id != restaurant.id &&
+            r.cuisines.any((c) => restaurant.cuisines.contains(c)))
+        .toList()
+      ..sort((a, b) => b.avgRating.compareTo(a.avgRating));
+    if (similar.isEmpty) return const SizedBox.shrink();
+    final items = similar.take(8).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('You might also like', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 168,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final r = items[index];
+              final gradient = _gradientForSeed(r.id);
+              return GestureDetector(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  context.pushReplacement('/food/$categoryId/restaurant/${r.id}');
+                },
+                child: Container(
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 80,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: gradient,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          r.name.substring(0, 1),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              r.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                Icon(Icons.star_rounded,
+                                    size: 13, color: Colors.amber.shade800),
+                                const SizedBox(width: 2),
+                                Text(r.avgRating.toStringAsFixed(1),
+                                    style: Theme.of(context).textTheme.labelSmall),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
