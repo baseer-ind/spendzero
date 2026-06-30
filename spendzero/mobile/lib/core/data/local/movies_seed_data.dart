@@ -424,6 +424,20 @@ List<CinemaBrand> trendingCinemaBrands() =>
 List<Movie> bestSellerMovies() =>
     allMovies.where((m) => m.isBestSeller).toList();
 
+List<Movie> bestRatedMovies() {
+  final eligible = allMovies.where((m) => m.reviewCount >= 50).toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
+List<Movie> hiddenGemMovies() {
+  final eligible = allMovies
+      .where((m) => m.rating >= 4.4 && m.reviewCount < 50)
+      .toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
 /// Fresh-on-screen titles — the "New Releases" collection.
 List<Movie> newReleases() => allMovies.where((m) => m.isNewArrival).toList();
 

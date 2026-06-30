@@ -562,3 +562,17 @@ List<BeautyProduct> haircarePicks() =>
 /// Newly launched products across all brands.
 List<BeautyProduct> newArrivalsBeauty() =>
     allBeautyProducts.where((p) => p.isNewArrival).toList();
+
+List<BeautyProduct> bestRatedBeautyProducts() {
+  final eligible = allBeautyProducts.where((p) => p.reviewCount >= 50).toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
+List<BeautyProduct> hiddenGemBeautyProducts() {
+  final eligible = allBeautyProducts
+      .where((p) => p.rating >= 4.4 && p.reviewCount < 50)
+      .toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}

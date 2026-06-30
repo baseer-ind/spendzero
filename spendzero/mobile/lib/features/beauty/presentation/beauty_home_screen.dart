@@ -259,6 +259,26 @@ class _BeautyHomeScreenState extends ConsumerState<BeautyHomeScreen> {
                   );
                 },
               ),
+              if (bestRatedBeautyProducts().isNotEmpty) ...[
+                _BeautyCollectionRail(
+                  title: 'Best Rated',
+                  subtitle: 'Loved by hundreds of regulars',
+                  items: bestRatedBeautyProducts(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (hiddenGemBeautyProducts().isNotEmpty) ...[
+                _BeautyCollectionRail(
+                  title: 'Hidden Gems',
+                  subtitle: 'High ratings, still flying under the radar',
+                  items: hiddenGemBeautyProducts(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Colors.deepPurpleAccent,
+                ),
+                const SizedBox(height: 20),
+              ],
               if (savedBrands.isNotEmpty) ...[
                 _BrandRail(title: 'Saved for Later', brands: savedBrands, onTap: _openBrand),
                 const SizedBox(height: 20),

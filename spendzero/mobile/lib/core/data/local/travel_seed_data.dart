@@ -674,3 +674,17 @@ List<TravelRoom> flexiblePlans() =>
     allTravelRooms.where((r) => r.tags.contains('Free cancellation')).toList();
 
 List<TravelRoom> bestSellerTravelRooms() => allTravelRooms.where((r) => r.isBestSeller).toList();
+
+List<TravelRoom> bestRatedTravelRooms() {
+  final eligible = allTravelRooms.where((r) => r.reviewCount >= 50).toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}
+
+List<TravelRoom> hiddenGemTravelRooms() {
+  final eligible = allTravelRooms
+      .where((r) => r.rating >= 4.4 && r.reviewCount < 50)
+      .toList()
+    ..sort((a, b) => b.rating.compareTo(a.rating));
+  return eligible.take(12).toList();
+}

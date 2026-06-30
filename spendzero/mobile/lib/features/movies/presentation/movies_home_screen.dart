@@ -259,6 +259,26 @@ class _MoviesHomeScreenState extends ConsumerState<MoviesHomeScreen> {
                   );
                 },
               ),
+              if (bestRatedMovies().isNotEmpty) ...[
+                _MovieCollectionRail(
+                  title: 'Best Rated',
+                  subtitle: 'Loved by hundreds of moviegoers',
+                  items: bestRatedMovies(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (hiddenGemMovies().isNotEmpty) ...[
+                _MovieCollectionRail(
+                  title: 'Hidden Gems',
+                  subtitle: 'High ratings, still flying under the radar',
+                  items: hiddenGemMovies(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Colors.deepPurpleAccent,
+                ),
+                const SizedBox(height: 20),
+              ],
               if (savedStays.isNotEmpty) ...[
                 _StayRail(title: 'Saved for Later', stays: savedStays, onTap: _openStay),
                 const SizedBox(height: 20),

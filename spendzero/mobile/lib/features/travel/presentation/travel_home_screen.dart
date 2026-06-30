@@ -259,6 +259,26 @@ class _TravelHomeScreenState extends ConsumerState<TravelHomeScreen> {
                   );
                 },
               ),
+              if (bestRatedTravelRooms().isNotEmpty) ...[
+                _TravelCollectionRail(
+                  title: 'Best Rated',
+                  subtitle: 'Loved by hundreds of travelers',
+                  items: bestRatedTravelRooms(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (hiddenGemTravelRooms().isNotEmpty) ...[
+                _TravelCollectionRail(
+                  title: 'Hidden Gems',
+                  subtitle: 'High ratings, still flying under the radar',
+                  items: hiddenGemTravelRooms(),
+                  categoryId: widget.category.id,
+                  accentColor: (context) => Colors.deepPurpleAccent,
+                ),
+                const SizedBox(height: 20),
+              ],
               if (savedStays.isNotEmpty) ...[
                 _StayRail(title: 'Saved for Later', stays: savedStays, onTap: _openStay),
                 const SizedBox(height: 20),
