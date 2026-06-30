@@ -141,6 +141,13 @@ class _DashboardBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        _HeroHeader(
+          totalPaise: stats.totalAmountNotSpentPaise,
+          currentStreakDays: stats.currentStreakDays,
+          longestStreakDays: stats.longestStreakDays,
+          topDream: topDream,
+        ),
+        const SizedBox(height: 16),
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -149,14 +156,12 @@ class _DashboardBody extends StatelessWidget {
           crossAxisSpacing: 12,
           childAspectRatio: 1.7,
           children: [
-            _StatCard(index: 0, label: 'Total saved', value: formatPaise(stats.totalAmountNotSpentPaise), emoji: '💰'),
-            _StatCard(index: 1, label: "Today", value: formatPaise(_sumSince(today)), emoji: '☀️'),
-            _StatCard(index: 2, label: 'This week', value: formatPaise(_sumSince(weekStart)), emoji: '📅'),
-            _StatCard(index: 3, label: 'This month', value: formatPaise(_sumSince(monthStart)), emoji: '🗓'),
-            _StatCard(index: 4, label: 'This year', value: formatPaise(_sumSince(yearStart)), emoji: '📈'),
-            _StatCard(index: 5, label: 'Cravings defeated', value: '${stats.cravingsCompleted}', emoji: '🛡'),
-            _StatCard(index: 6, label: 'Current streak', value: '${stats.currentStreakDays} days', emoji: '🔥'),
-            _StatCard(index: 7, label: 'Longest streak', value: '${stats.longestStreakDays} days', emoji: '🏆'),
+            _StatCard(index: 0, label: "Today", value: formatPaise(_sumSince(today)), emoji: '☀️'),
+            _StatCard(index: 1, label: 'This week', value: formatPaise(_sumSince(weekStart)), emoji: '📅'),
+            _StatCard(index: 2, label: 'This month', value: formatPaise(_sumSince(monthStart)), emoji: '🗓'),
+            _StatCard(index: 3, label: 'This year', value: formatPaise(_sumSince(yearStart)), emoji: '📈'),
+            _StatCard(index: 4, label: 'Cravings defeated', value: '${stats.cravingsCompleted}', emoji: '🛡'),
+            _StatCard(index: 5, label: 'Longest streak', value: '${stats.longestStreakDays} days', emoji: '🏆'),
           ],
         ),
         const SizedBox(height: 16),
@@ -230,6 +235,146 @@ class _DashboardBody extends StatelessWidget {
         else
           ...history.take(10).map((e) => _ActivityRow(entry: e)),
       ],
+    );
+  }
+}
+
+class _HeroHeader extends StatelessWidget {
+  const _HeroHeader({
+    required this.totalPaise,
+    required this.currentStreakDays,
+    required this.longestStreakDays,
+    required this.topDream,
+  });
+
+  final int totalPaise;
+  final int currentStreakDays;
+  final int longestStreakDays;
+  final SavingsGoal? topDream;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final dreamFraction = topDream == null
+        ? 0.0
+        : (topDream!.savedPaise / topDream!.targetPaise).clamp(0.0, 1.0);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [colors.primary, colors.tertiary],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: colors.primary.withOpacity(0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Total saved',
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Colors.white.withOpacity(0.85)),
+          ),
+          const SizedBox(height: 4),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: totalPaise.toDouble()),
+            duration: const Duration(milliseconds: 900),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) => Text(
+              formatPaise(value.round()),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: currentStreakDays > 0 ? 1 : 0.4),
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.elasticOut,
+                      builder: (context, scale, child) =>
+                          Transform.scale(scale: 0.7 + 0.3 * scale, child: child),
+                      child: const Text('🔥', style: TextStyle(fontSize: 26)),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$currentStreakDays day${currentStreakDays == 1 ? '' : 's'}',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        Text(
+                          'Current streak · best $longestStreakDays',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.white.withOpacity(0.85)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (topDream != null)
+                Column(
+                  children: [
+                    SizedBox(
+                      width: 52,
+                      height: 52,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: dreamFraction),
+                            duration: const Duration(milliseconds: 900),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, value, _) => CircularProgressIndicator(
+                              value: value,
+                              strokeWidth: 5,
+                              backgroundColor: Colors.white.withOpacity(0.25),
+                              valueColor: const AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          ),
+                          Text(topDream!.emoji, style: const TextStyle(fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${(dreamFraction * 100).round()}%',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
