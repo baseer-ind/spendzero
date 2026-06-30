@@ -1,9 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/theme/app_theme.dart';
+import '../design_system/blur.dart';
+import '../design_system/colors.dart';
+import '../design_system/gradients.dart';
+import '../design_system/shadows.dart';
+import '../design_system/typography.dart';
 
 /// Persistent bottom navigation per the Experience Blueprint's information
 /// architecture: Home, My Future, Journey, Profile. "My Future" — not
@@ -16,12 +18,7 @@ class RootShell extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  static const _items = [
-    (icon: Icons.home_outlined, selectedIcon: Icons.home, label: 'Today'),
-    (icon: Icons.flag_outlined, selectedIcon: Icons.flag, label: 'Future'),
-    (icon: Icons.timeline_outlined, selectedIcon: Icons.timeline, label: 'Journey'),
-    (icon: Icons.person_outline, selectedIcon: Icons.person, label: 'Me'),
-  ];
+  static const _items = ['Today', 'Future', 'Journey', 'Me'];
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +30,21 @@ class RootShell extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(999),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+            filter: DSBlur.filter(DSBlur.xl),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               decoration: BoxDecoration(
-                color: AppTheme.background.withOpacity(0.7),
+                gradient: DSGradients.navGlass,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: DSColors.whiteOpacity(0.1)),
+                boxShadow: DSShadows.bottomNav,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   for (var i = 0; i < _items.length; i++)
                     _NavItem(
-                      icon: _items[i].icon,
-                      selectedIcon: _items[i].selectedIcon,
-                      label: _items[i].label,
+                      label: _items[i],
                       selected: navigationShell.currentIndex == i,
                       onTap: () => navigationShell.goBranch(
                         i,
@@ -67,39 +63,39 @@ class RootShell extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   const _NavItem({
-    required this.icon,
-    required this.selectedIcon,
     required this.label,
     required this.selected,
     required this.onTap,
   });
 
-  final IconData icon;
-  final IconData selectedIcon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppTheme.gold : AppTheme.foreground.withOpacity(0.45);
-    return InkWell(
+    final color = selected ? DSColors.foreground : DSColors.mutedForegroundOpacity(0.7);
+    return GestureDetector(
       onTap: onTap,
-      customBorder: const CircleBorder(),
+      behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(selected ? selectedIcon : icon, size: 20, color: color),
-            const SizedBox(height: 4),
             Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontSize: 10,
-                    letterSpacing: 0.3,
-                  ),
+              label.toUpperCase(),
+              style: DSType.sans_(11, weight: FontWeight.w500, letterSpacing: 1.98, color: color),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              height: 4,
+              width: 4,
+              child: selected
+                  ? const DecoratedBox(
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: DSColors.gold),
+                    )
+                  : null,
             ),
           ],
         ),

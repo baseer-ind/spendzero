@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show Icons, Icon, RefreshIndicator;
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,8 +7,18 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/category.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
+import '../../../design_system/colors.dart';
+import '../../../design_system/components/dream_atmosphere.dart';
+import '../../../design_system/components/dream_card.dart';
+import '../../../design_system/components/falling_petals.dart';
+import '../../../design_system/components/premium_progress_ring.dart';
+import '../../../design_system/components/rise_in.dart';
+import '../../../design_system/components/shimmer_gold_text.dart';
+import '../../../design_system/gradients.dart';
+import '../../../design_system/motion.dart';
+import '../../../design_system/spacing.dart';
+import '../../../design_system/typography.dart';
 import '../../feedback/presentation/feedback_sheet.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -24,66 +35,175 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final stats = ref.watch(statsProvider);
     final goals = ref.watch(goalsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Project Future'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            tooltip: 'Send feedback',
-            onPressed: () => showFeedbackSheet(context),
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: DSColors.background),
+      child: Stack(
+        children: [
+          const Positioned(
+            top: -120,
+            right: -80,
+            child: _AmbientGlow(color: DSGradients.ambientGold, size: 320),
+          ),
+          const Positioned(
+            bottom: 80,
+            left: -100,
+            child: _AmbientGlow(color: DSGradients.ambientFuture, size: 280),
+          ),
+          SafeArea(
+            bottom: false,
+            child: RefreshIndicator(
+              color: DSColors.gold,
+              backgroundColor: DSColors.surfaceElevated,
+              onRefresh: () async {
+                ref.invalidate(categoriesProvider);
+                ref.invalidate(goalsProvider);
+                ref.invalidate(statsProvider);
+              },
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                    DSSpace.x5, DSSpace.x4, DSSpace.x5, 140),
+                children: [
+                  _TopBar(onFeedback: () => showFeedbackSheet(context)),
+                  const SizedBox(height: DSSpace.x6),
+                  const _Greeting(),
+                  const SizedBox(height: DSSpace.x6),
+                  stats.when(
+                    data: (s) => goals.when(
+                      data: (g) => RiseIn(
+                        child: _HeroDream(
+                          topDream: _topDream(g),
+                          totalSavedPaise: s.totalAmountNotSpentPaise,
+                          streakDays: s.currentStreakDays,
+                          onTap: () => context.push('/dashboard'),
+                        ),
+                      ),
+                      loading: () => const _HeroSkeleton(),
+                      error: (_, __) => const _HeroSkeleton(),
+                    ),
+                    loading: () => const _HeroSkeleton(),
+                    error: (_, __) => const _HeroSkeleton(),
+                  ),
+                  if (goals.valueOrNull != null &&
+                      goals.value!.where((g) => !g.archived).isEmpty) ...[
+                    const SizedBox(height: DSSpace.x4),
+                    _NoDreamYetCard(onTap: () => context.push('/goals')),
+                  ],
+                  const SizedBox(height: DSSpace.x9),
+                  RiseIn(
+                    delayMs: DSMotion.riseDelayCollection,
+                    child: goals.when(
+                      data: (g) => _CollectionRow(
+                        goals: g.where((d) => !d.archived).toList(),
+                        onAdd: () => context.push('/goals'),
+                        onOpenDream: () => context.push('/dashboard'),
+                      ),
+                      loading: () => const SizedBox(height: 300),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ),
+                  const SizedBox(height: DSSpace.x9),
+                  RiseIn(
+                    delayMs: DSMotion.riseDelayCollection,
+                    child: Text('Where to today?',
+                        style: DSType.display_(18, color: DSColors.foreground)),
+                  ),
+                  const SizedBox(height: DSSpace.x4),
+                  RiseIn(
+                    delayMs: DSMotion.riseDelayCollection,
+                    child: categories.when(
+                      data: (list) => _CategoryGrid(categories: list),
+                      loading: () => const _CategoryGridSkeleton(),
+                      error: (error, _) => _ErrorState(
+                        message: "Couldn't load categories. Pull down to retry.",
+                        onRetry: () => ref.invalidate(categoriesProvider),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(categoriesProvider);
-          ref.invalidate(goalsProvider);
-          ref.invalidate(statsProvider);
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            stats.when(
-              data: (s) => GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  context.push('/dashboard');
-                },
-                child: _SavingsBanner(
-                  totalSavedPaise: s.totalAmountNotSpentPaise,
-                  streakDays: s.currentStreakDays,
-                  topDream: goals.valueOrNull != null ? _topDream(goals.value!) : null,
-                ),
-              ),
-              loading: () => const _SavingsBannerSkeleton(),
-              error: (error, _) => const _SavingsBannerSkeleton(),
-            ),
-            if (goals.valueOrNull != null && goals.value!.where((g) => !g.archived).isEmpty) ...[
-              const SizedBox(height: 12),
-              _NoDreamYetCard(onTap: () => context.push('/goals')),
-            ],
-            if (goals.valueOrNull != null && goals.value!.where((g) => !g.archived).isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _DailyCheckInCard(
-                dream: _topDream(goals.value!)!,
-                streakDays: stats.valueOrNull?.currentStreakDays ?? 0,
-                onTap: () => context.push('/dashboard'),
-              ),
-            ],
-            const SizedBox(height: 20),
-            Text('Where to today?', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 12),
-            categories.when(
-              data: (list) => _CategoryGrid(categories: list),
-              loading: () => const _CategoryGridSkeleton(),
-              error: (error, _) => _ErrorState(
-                message: 'Couldn\'t load categories. Pull down to retry.',
-                onRetry: () => ref.invalidate(categoriesProvider),
-              ),
-            ),
-          ],
+    );
+  }
+}
+
+class _AmbientGlow extends StatelessWidget {
+  const _AmbientGlow({required this.color, required this.size});
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(colors: [color, color.withOpacity(0)]),
         ),
+      ),
+    );
+  }
+}
+
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.onFeedback});
+
+  final VoidCallback onFeedback;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('PROJECT FUTURE',
+            style: DSType.eyebrow(size: 11, trackingEm: 0.24, color: DSColors.mutedForegroundOpacity(0.6))),
+        GestureDetector(
+          onTap: onFeedback,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: DSColors.whiteOpacity(0.06),
+              border: Border.all(color: DSColors.whiteOpacity(0.1)),
+            ),
+            child: Icon(Icons.chat_bubble_outline,
+                size: 16, color: DSColors.mutedForegroundOpacity(0.8)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Greeting extends StatelessWidget {
+  const _Greeting();
+
+  String get _line {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RiseIn(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_line, style: DSType.sans_(15, color: DSColors.mutedForegroundOpacity(0.7))),
+          const SizedBox(height: 2),
+          ShimmerGoldText('Your future, today.',
+              style: DSType.display_(28, weight: FontWeight.w600, color: DSColors.foreground)),
+        ],
       ),
     );
   }
@@ -100,143 +220,112 @@ SavingsGoal? _topDream(List<SavingsGoal> goals) {
   return any.isEmpty ? null : any.first;
 }
 
-class _SavingsBanner extends StatelessWidget {
-  const _SavingsBanner({
+/// Reproduces `index.tsx`'s `HeroDream`: a tall atmosphere card with falling
+/// petals, a centered progress ring, and the running total beneath it.
+class _HeroDream extends StatelessWidget {
+  const _HeroDream({
+    required this.topDream,
     required this.totalSavedPaise,
     required this.streakDays,
-    this.topDream,
+    required this.onTap,
   });
 
+  final SavingsGoal? topDream;
   final int totalSavedPaise;
   final int streakDays;
-  final SavingsGoal? topDream;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final dream = topDream;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutCubic,
-      builder: (context, entrance, child) => Opacity(
-        opacity: entrance,
-        child: Transform.translate(offset: Offset(0, (1 - entrance) * 12), child: child),
-      ),
+    final percent = dream != null ? (dream.progress * 100).round() : 0;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
       child: Container(
-        padding: const EdgeInsets.all(22),
+        height: 320,
+        width: double.infinity,
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppTheme.gold, AppTheme.goldSoft],
-          ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.gold.withOpacity(0.25),
-              blurRadius: 24,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(DSRadius.xxl),
+          border: Border.all(color: DSColors.whiteOpacity(0.1)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  dream != null
-                      ? '${dream.emoji} Building toward ${dream.title}'
-                      : 'Redirected toward your future so far',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: colors.onPrimary.withOpacity(0.85)),
+            DreamAtmosphere(seed: dream?.title ?? 'future'),
+            const Positioned.fill(child: FallingPetals()),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: DSGradients.heroScrim,
+                  stops: DSGradients.heroScrimStops,
                 ),
-                if (streakDays > 0)
-                  Semantics(
-                    label: '$streakDays day saving streak',
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: colors.onPrimary.withOpacity(0.18),
-                        borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: PremiumProgressRing(percent: percent, size: 108),
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(DSSpace.x5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      dream != null ? dream.title : 'Set your first dream',
+                      style: DSType.display_(22, color: DSColors.foreground),
+                    ),
+                    const SizedBox(height: 4),
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: totalSavedPaise.toDouble()),
+                      duration: const Duration(milliseconds: 1100),
+                      curve: Curves.easeOutExpo,
+                      builder: (context, value, _) => Text(
+                        '${formatPaise(value.round())} saved so far',
+                        style: DSType.sans_(13, color: DSColors.mutedForegroundOpacity(0.75)),
                       ),
-                      child: Row(
+                    ),
+                    if (streakDays > 0) ...[
+                      const SizedBox(height: 6),
+                      Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('🔥', style: TextStyle(fontSize: 14)),
+                          Text('🔥', style: DSType.sans_(13)),
                           const SizedBox(width: 4),
-                          Text(
-                            '$streakDays day streak',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(color: colors.onPrimary),
-                          ),
+                          Text('$streakDays day streak',
+                              style: DSType.sans_(12, color: DSColors.gold)),
                         ],
                       ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: totalSavedPaise.toDouble()),
-              duration: const Duration(milliseconds: 1100),
-              curve: Curves.easeOutExpo,
-              builder: (context, value, _) => Text(
-                formatPaise(value.round()),
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: colors.onPrimary,
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            if (dream != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: dream.progress),
-                  duration: const Duration(milliseconds: 900),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, _) => LinearProgressIndicator(
-                    value: value,
-                    minHeight: 8,
-                    backgroundColor: colors.onPrimary.withOpacity(0.18),
-                    valueColor: AlwaysStoppedAnimation(colors.onPrimary),
-                  ),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                '${(dream.progress * 100).round()}% of the way to ${dream.title} — '
-                '${formatPaise(dream.targetPaise - dream.savedPaise)} to go',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelSmall
-                    ?.copyWith(color: colors.onPrimary.withOpacity(0.85)),
-              ),
-            ] else
-              Row(
-                children: [
-                  Icon(Icons.bar_chart_rounded,
-                      size: 14, color: colors.onPrimary.withOpacity(0.75)),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Tap to see your dashboard',
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelSmall
-                        ?.copyWith(color: colors.onPrimary.withOpacity(0.75)),
-                  ),
-                ],
-              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _HeroSkeleton extends StatelessWidget {
+  const _HeroSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 320,
+      decoration: BoxDecoration(
+        color: DSColors.surface,
+        borderRadius: BorderRadius.circular(DSRadius.xxl),
       ),
     );
   }
@@ -252,42 +341,38 @@ class _NoDreamYetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
+    return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         onTap();
       },
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(DSSpace.x4),
         decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          color: DSColors.surface,
+          borderRadius: BorderRadius.circular(DSRadius.lg),
+          border: Border.all(color: DSColors.whiteOpacity(0.08)),
         ),
         child: Row(
           children: [
-            const Text('🌱', style: TextStyle(fontSize: 22)),
-            const SizedBox(width: 12),
+            Text('🌱', style: DSType.sans_(22)),
+            const SizedBox(width: DSSpace.x3),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('What are you saving for?',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(fontWeight: FontWeight.bold)),
+                      style: DSType.display_(15, color: DSColors.foreground)),
                   const SizedBox(height: 2),
                   Text(
                     'Set a dream and every save you make starts counting toward it.',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: DSType.sans_(12, color: DSColors.mutedForegroundOpacity(0.7)),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 14, color: colors.onSurfaceVariant),
+            Icon(Icons.arrow_forward_ios, size: 14, color: DSColors.mutedForegroundOpacity(0.5)),
           ],
         ),
       ),
@@ -295,87 +380,54 @@ class _NoDreamYetCard extends StatelessWidget {
   }
 }
 
-/// A "your dream needs you today" nudge — framed as a daily ritual moment
-/// rather than pure streak math, so opening the app each day has an
-/// emotional reason to come back, addressing the "no return tomorrow hook"
-/// finding. Purely local/in-app; no push notifications or new infra.
-class _DailyCheckInCard extends StatelessWidget {
-  const _DailyCheckInCard({
-    required this.dream,
-    required this.streakDays,
-    required this.onTap,
+/// Reproduces `index.tsx`'s `CollectionRow`: a horizontal scroller of dream
+/// cards, each backed by a deterministic atmosphere image, plus the
+/// dashed-border "add dream" ghost card.
+class _CollectionRow extends StatelessWidget {
+  const _CollectionRow({
+    required this.goals,
+    required this.onAdd,
+    required this.onOpenDream,
   });
 
-  final SavingsGoal dream;
-  final int streakDays;
-  final VoidCallback onTap;
-
-  String get _message {
-    if (streakDays == 0) {
-      return '${dream.title} is waiting. Skip one craving today to start a streak.';
-    }
-    return '${dream.title} needs you today — keep your $streakDays-day streak alive.';
-  }
+  final List<SavingsGoal> goals;
+  final VoidCallback onAdd;
+  final VoidCallback onOpenDream;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppTheme.future.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.future.withOpacity(0.24)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('YOUR FUTURES',
+            style: DSType.eyebrow(size: 11, trackingEm: 0.24, color: DSColors.mutedForegroundOpacity(0.6))),
+        const SizedBox(height: DSSpace.x3),
+        SizedBox(
+          height: 300,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: goals.length + 1,
+            separatorBuilder: (_, __) => const SizedBox(width: DSSpace.x3),
+            itemBuilder: (context, index) {
+              if (index == goals.length) {
+                return DSAddDreamCard(onTap: onAdd);
+              }
+              final dream = goals[index];
+              return DSDreamCard(
+                background: DreamAtmosphere(seed: dream.title),
+                tag: dream.category,
+                title: dream.title,
+                amount: formatPaise(dream.targetPaise - dream.savedPaise),
+                percent: (dream.progress * 100).round(),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onOpenDream();
+                },
+              );
+            },
+          ),
         ),
-        child: Row(
-          children: [
-            Text(dream.emoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Today\'s check-in',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.future,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _message,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.foreground,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.future),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SavingsBannerSkeleton extends StatelessWidget {
-  const _SavingsBannerSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 96,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      ],
     );
   }
 }
@@ -411,15 +463,15 @@ class _CategoryGrid extends StatelessWidget {
           onTap: () => _openCategory(context, featured),
         ),
         if (rest.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: DSSpace.x3),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: rest.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
+              mainAxisSpacing: DSSpace.x3,
+              crossAxisSpacing: DSSpace.x3,
               childAspectRatio: 0.9,
             ),
             itemBuilder: (context, index) {
@@ -470,76 +522,53 @@ class _FeaturedCategoryCardState extends State<_FeaturedCategoryCard> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapCancel: () => setState(() => _pressed = false),
         onTapUp: (_) => setState(() => _pressed = false),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: widget.onTap,
-          child: Container(
-            height: 132,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: widget.gradient,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: widget.gradient.last.withOpacity(0.32),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: 132,
+          padding: const EdgeInsets.all(DSSpace.x5),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: widget.gradient,
             ),
-            child: Semantics(
-              button: true,
-              label: '${widget.category.name}, featured',
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.22),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: const Text(
-                            'Popular today',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          widget.category.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Start a craving here',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.85),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+            borderRadius: BorderRadius.circular(DSRadius.lg),
+            boxShadow: [
+              BoxShadow(
+                color: widget.gradient.last.withOpacity(0.32),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: DSColors.whiteOpacity(0.22),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text('Popular today',
+                          style: DSType.sans_(11, weight: FontWeight.w600, color: DSColors.foreground)),
                     ),
-                  ),
-                  Text(widget.category.emoji, style: const TextStyle(fontSize: 48)),
-                ],
+                    const SizedBox(height: 10),
+                    Text(widget.category.name,
+                        style: DSType.display_(22, weight: FontWeight.w700, color: DSColors.foreground)),
+                    const SizedBox(height: 2),
+                    Text('Start a craving here',
+                        style: DSType.sans_(13, color: DSColors.whiteOpacity(0.85))),
+                  ],
+                ),
               ),
-            ),
+              Text(widget.category.emoji, style: DSType.sans_(48)),
+            ],
           ),
         ),
       ),
@@ -558,14 +587,14 @@ class _CategoryGridSkeleton extends StatelessWidget {
       itemCount: 6,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: DSSpace.x3,
+        crossAxisSpacing: DSSpace.x3,
         childAspectRatio: 0.9,
       ),
       itemBuilder: (context, index) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
+          color: DSColors.surface,
+          borderRadius: BorderRadius.circular(DSRadius.md),
         ),
       ),
     );
@@ -664,59 +693,50 @@ class _CategoryTileState extends State<_CategoryTile> {
         onTapDown: (_) => setState(() => _pressed = true),
         onTapCancel: () => setState(() => _pressed = false),
         onTapUp: (_) => setState(() => _pressed = false),
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
         child: AnimatedScale(
           scale: _pressed ? 0.94 : 1,
           duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(18),
-            onTap: widget.onTap,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: widget.gradient,
-                ),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: _pressed
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: widget.gradient.last.withOpacity(0.32),
-                          blurRadius: 14,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: widget.gradient,
               ),
-              child: Semantics(
-                button: true,
-                label: widget.name,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.22),
-                        shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(DSRadius.md),
+              boxShadow: _pressed
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: widget.gradient.last.withOpacity(0.32),
+                        blurRadius: 14,
+                        offset: const Offset(0, 6),
                       ),
-                      child: Text(widget.emoji, style: const TextStyle(fontSize: 20)),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.name,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                    ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: DSColors.whiteOpacity(0.22),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(widget.emoji, style: DSType.sans_(20)),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.name,
+                  style: DSType.sans_(12, weight: FontWeight.w600, color: DSColors.foreground),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
         ),
@@ -734,7 +754,9 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
-      child: Center(child: Text(message, style: Theme.of(context).textTheme.bodyMedium)),
+      child: Center(
+        child: Text(message, style: DSType.sans_(13, color: DSColors.mutedForegroundOpacity(0.7))),
+      ),
     );
   }
 }
@@ -751,9 +773,21 @@ class _ErrorState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 32),
       child: Column(
         children: [
-          Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+          Text(message,
+              style: DSType.sans_(13, color: DSColors.mutedForegroundOpacity(0.7)),
+              textAlign: TextAlign.center),
           const SizedBox(height: 12),
-          OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+          GestureDetector(
+            onTap: onRetry,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: DSColors.whiteOpacity(0.2)),
+              ),
+              child: Text('Retry', style: DSType.sans_(13, color: DSColors.foreground)),
+            ),
+          ),
         ],
       ),
     );
