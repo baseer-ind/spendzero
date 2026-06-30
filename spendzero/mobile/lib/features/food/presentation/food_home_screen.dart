@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/food_seed_data.dart';
+import '../../../core/data/local/personalization_store.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
@@ -98,6 +99,9 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
   void initState() {
     super.initState();
     _loadRecentlyViewed();
+    Future.microtask(
+      () => ref.read(personalizationProvider.notifier).recordCategoryView(widget.category.id),
+    );
   }
 
   Future<void> _loadRecentlyViewed() async {
@@ -119,6 +123,9 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       setState(() => _searchQuery = value.trim());
+      if (value.trim().length >= 3) {
+        ref.read(personalizationProvider.notifier).recordSearch(value);
+      }
     });
   }
 
@@ -129,6 +136,7 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
 
   void _openRestaurant(Restaurant restaurant) async {
     await RecentlyViewedFoodStore().recordView(restaurant.id);
+    ref.read(personalizationProvider.notifier).recordAppView(_appIdFor(restaurant.id));
     if (!mounted) return;
     context.push('/food/${widget.category.id}/restaurant/${restaurant.id}');
   }
@@ -139,6 +147,14 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
     final trendingAsync = ref.watch(foodTrendingProvider);
     final offersAsync = ref.watch(foodTodaysOffersProvider);
     final wishlist = ref.watch(wishlistProvider);
+    final signals = ref.watch(personalizationProvider);
+    final preferredDiet = signals.preferredDietTag();
+    final recommended = preferredDiet == null
+        ? const <MenuItem>[]
+        : allMenuItemsFull
+            .where((m) => m.dietaryTag.name == preferredDiet && m.isBestSeller)
+            .take(10)
+            .toList();
     final savedRestaurants = wishlist
         .where((e) => e.categoryId == widget.category.id)
         .map((e) => findRestaurantById(e.entityId))
@@ -170,6 +186,16 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
             if (_searchQuery.isNotEmpty)
               _SearchResults(query: _searchQuery, categoryId: widget.category.id)
             else ...[
+              if (recommended.isNotEmpty) ...[
+                _CollectionRail(
+                  title: 'Recommended for You',
+                  subtitle: 'Based on what you usually order',
+                  items: recommended,
+                  accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                  categoryId: widget.category.id,
+                ),
+                const SizedBox(height: 20),
+              ],
               trendingAsync.when(
                 data: (restaurants) => restaurants.isEmpty
                     ? const SizedBox.shrink()
@@ -190,7 +216,37 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                 error: (_, __) => const SizedBox.shrink(),
               ),
               const SizedBox(height: 20),
-              _WeekendSpecialsRail(specials: weekendSpecials()),
+              _CollectionRail(
+                title: 'Weekend Specials',
+                subtitle: 'Hand-picked for slow Saturday mornings',
+                items: weekendSpecials(),
+                accentColor: (c) => Theme.of(c).colorScheme.tertiaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _CollectionRail(
+                title: 'Late Night Cravings',
+                subtitle: 'For when the kitchen calls after 9pm',
+                items: lateNightCravings(),
+                accentColor: (c) => Theme.of(c).colorScheme.surfaceContainerHighest,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _CollectionRail(
+                title: 'Healthy Week',
+                subtitle: 'Lighter dishes that still hit the spot',
+                items: healthyWeekPicks(),
+                accentColor: (c) => Theme.of(c).colorScheme.secondaryContainer,
+                categoryId: widget.category.id,
+              ),
+              const SizedBox(height: 20),
+              _CollectionRail(
+                title: 'Quick Office Lunch',
+                subtitle: 'Bestsellers ready in 15 minutes or less',
+                items: quickOfficeLunch(),
+                accentColor: (c) => Theme.of(c).colorScheme.primaryContainer,
+                categoryId: widget.category.id,
+              ),
               const SizedBox(height: 20),
               if (savedRestaurants.isNotEmpty) ...[
                 _RestaurantRail(
@@ -480,42 +536,74 @@ class _OfferCard extends StatelessWidget {
   }
 }
 
-class _WeekendSpecialsRail extends StatelessWidget {
-  const _WeekendSpecialsRail({required this.specials});
+/// Generic horizontal rail for a curated [MenuItem] collection (Weekend
+/// Specials, Late Night Cravings, Healthy Week, Quick Office Lunch, ...).
+/// Each card opens the dish's restaurant, recording it as recently viewed
+/// like every other entry point into a restaurant.
+class _CollectionRail extends ConsumerWidget {
+  const _CollectionRail({
+    required this.title,
+    required this.subtitle,
+    required this.items,
+    required this.accentColor,
+    required this.categoryId,
+  });
 
-  final List<MenuItem> specials;
+  final String title;
+  final String subtitle;
+  final List<MenuItem> items;
+  final Color Function(BuildContext) accentColor;
+  final String categoryId;
 
   @override
-  Widget build(BuildContext context) {
-    if (specials.isEmpty) return const SizedBox.shrink();
-    final colors = Theme.of(context).colorScheme;
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (items.isEmpty) return const SizedBox.shrink();
+    final colors = accentColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Weekend Specials', style: Theme.of(context).textTheme.titleMedium),
+        Text(title, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          subtitle,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 110,
+          height: 120,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: specials.length,
+            itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
-              final item = specials[index];
-              return Container(
-                width: 150,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colors.tertiaryContainer,
+              final item = items[index];
+              return Material(
+                color: colors,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
                   borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
-                    const Spacer(),
-                    Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
-                  ],
+                  onTap: () async {
+                    await RecentlyViewedFoodStore().recordView(item.restaurantId);
+                    final personalization = ref.read(personalizationProvider.notifier);
+                    personalization.recordDietaryView(item.dietaryTag.name);
+                    personalization.recordPriceView(item.pricePaise);
+                    if (context.mounted) {
+                      context.push('/food/$categoryId/restaurant/${item.restaurantId}');
+                    }
+                  },
+                  child: Container(
+                    width: 150,
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall),
+                        const Spacer(),
+                        Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },

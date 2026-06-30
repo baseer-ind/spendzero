@@ -1705,3 +1705,17 @@ List<MenuItem> weekendSpecials() {
   ];
   return ids.map(findFoodMenuItemById).whereType<MenuItem>().toList();
 }
+
+/// Late-night-friendly dishes — surfaced after 9pm browsing patterns, but
+/// always available so the rail isn't empty during the day.
+List<MenuItem> lateNightCravings() =>
+    allMenuItemsFull.where((m) => m.tags.contains('late night')).toList();
+
+/// Lighter, better-for-you dishes for the "Healthy Week" collection.
+List<MenuItem> healthyWeekPicks() =>
+    allMenuItemsFull.where((m) => m.tags.contains('healthy')).toList();
+
+/// Fast-turnaround dishes (≤15 min prep) for a desk-lunch break.
+List<MenuItem> quickOfficeLunch() => allMenuItemsFull
+    .where((m) => m.prepTimeMins <= 15 && m.tags.contains('bestseller'))
+    .toList();
