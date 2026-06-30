@@ -2,7 +2,7 @@
 
 **Execution State:** 🟢 Working
 
-**Latest Commit:** (pending — about to commit restaurant-rail emoji-identity fix)
+**Latest Commit:** (pending — about to commit home-grid featured-hero fix)
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
@@ -15,17 +15,18 @@ Experience Alpha → Experience Beta → Launch Candidate → Public V1).
 **Current CI Run:** none triggered yet for the pending commit.
 
 **Current Task:** Working through the ruthless-review findings in `docs/MILESTONES.md`.
-Just fixed: restaurant "similar items" rail cards showed a plain first-letter monogram on a
-gradient — replaced with a cuisine-matched emoji glyph (biryani → 🍛, pizza → 🍕, cafe → ☕,
-etc.) via local keyword lookup, same pattern already used for product thumbnails. Reviewed
-the restaurant detail banner too — already shows name/tagline/rating/distance, judged
-sufficiently rich, no change made there.
+Just fixed: the home screen's category grid was a flat uniform 3-col grid with no visual
+hierarchy. The top category is now promoted to a wide "Popular today" hero card above the
+remaining grid, giving the home screen a clear featured entry point instead of reading as an
+undifferentiated catalog.
 
-**Last Completed Task:** Restaurant similar-items-rail identity fix (`restaurant_screen.dart`).
+**Last Completed Task:** Home grid featured-hero card (`home_screen.dart`,
+`_FeaturedCategoryCard`).
 
-**Next Planned Task:** Generic browsing screens read as a "catalog" not a "discovery surface"
-— weak visual hierarchy (uniform grid, no featured/hero items). Next item on the Experience
-Beta findings list.
+**Next Planned Task:** No onboarding moment — first-time users land straight on the home grid
+with only a one-time dismissible hint; needs the core-loop framing ("skip a craving → fund a
+dream") CRED/Airbnb-caliber apps use before dropping users into the grid. Next item on the
+Experience Beta findings list.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's correction —
 tracking via the Experience Beta findings checklist in `docs/MILESTONES.md` instead.

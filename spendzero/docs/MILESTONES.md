@@ -33,8 +33,10 @@ engineering checklist.
       etc.) via local keyword lookup, same pattern as product thumbnails. The restaurant detail
       banner was reviewed and already shows name/tagline/rating/distance — no change needed
       there. (`restaurant_screen.dart`)
-- [ ] Generic browsing screens read as a "catalog," not a "discovery surface" — weak visual
-      hierarchy (uniform grid, no featured/hero items).
+- [x] **Home grid read as a flat "catalog," not a "discovery surface."** Fixed: the top
+      category is now promoted to a wide "Popular today" hero card above the remaining 3-col
+      grid, breaking the uniform-tile pattern and giving the home screen a clear entry point.
+      (`home_screen.dart`, `_FeaturedCategoryCard`)
 - [ ] No onboarding moment — first-time users land straight on the home grid with only a
       one-time dismissible hint. CRED/Airbnb-caliber apps frame the core loop ("skip a
       craving → fund a dream") before dropping users into the grid.

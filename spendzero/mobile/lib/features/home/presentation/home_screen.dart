@@ -383,39 +383,164 @@ class _CategoryGrid extends StatelessWidget {
 
   final List<SpendCategory> categories;
 
+  void _openCategory(BuildContext context, SpendCategory category) {
+    HapticFeedback.selectionClick();
+    final vertical = _verticalForCategory(category.id, category.slug);
+    if (vertical != null) {
+      context.push('/vertical/$vertical/${category.id}');
+    } else {
+      context.push('/checkout/${category.id}', extra: category);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (categories.isEmpty) {
       return const _EmptyState(message: 'No categories yet — check back soon.');
     }
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: categories.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.9,
+    final featured = categories.first;
+    final rest = categories.skip(1).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _FeaturedCategoryCard(
+          category: featured,
+          gradient: _categoryGradient(featured.slug, 0),
+          onTap: () => _openCategory(context, featured),
+        ),
+        if (rest.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: rest.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.9,
+            ),
+            itemBuilder: (context, index) {
+              final category = rest[index];
+              return _CategoryTile(
+                index: index + 1,
+                emoji: category.emoji,
+                name: category.name,
+                gradient: _categoryGradient(category.slug, index + 1),
+                onTap: () => _openCategory(context, category),
+              );
+            },
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// A wide hero tile for the top category, so the home grid reads as a
+/// curated "discovery surface" with a clear starting point rather than a
+/// flat, uniform catalog grid.
+class _FeaturedCategoryCard extends StatefulWidget {
+  const _FeaturedCategoryCard({
+    required this.category,
+    required this.gradient,
+    required this.onTap,
+  });
+
+  final SpendCategory category;
+  final List<Color> gradient;
+  final VoidCallback onTap;
+
+  @override
+  State<_FeaturedCategoryCard> createState() => _FeaturedCategoryCardState();
+}
+
+class _FeaturedCategoryCardState extends State<_FeaturedCategoryCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: _pressed ? 0.97 : 1,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeOut,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTapUp: (_) => setState(() => _pressed = false),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: widget.onTap,
+          child: Container(
+            height: 132,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: widget.gradient,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.gradient.last.withOpacity(0.32),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Semantics(
+              button: true,
+              label: '${widget.category.name}, featured',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.22),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: const Text(
+                            'Popular today',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          widget.category.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Start a craving here',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(widget.category.emoji, style: const TextStyle(fontSize: 48)),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
-      itemBuilder: (context, index) {
-        final category = categories[index];
-        return _CategoryTile(
-          index: index,
-          emoji: category.emoji,
-          name: category.name,
-          gradient: _categoryGradient(category.slug, index),
-          onTap: () {
-            HapticFeedback.selectionClick();
-            final vertical = _verticalForCategory(category.id, category.slug);
-            if (vertical != null) {
-              context.push('/vertical/$vertical/${category.id}');
-            } else {
-              context.push('/checkout/${category.id}', extra: category);
-            }
-          },
-        );
-      },
     );
   }
 }
