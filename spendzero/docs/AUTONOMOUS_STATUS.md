@@ -1,35 +1,39 @@
 # SpendZero Autonomous Status
 
-**Execution State:** 🟢 V1 Complete
+**Execution State:** 🟢 Working
 
-**Latest Commit:** `5d19e6d` — "Close Dashboard Journey loop with browse-again CTA; add
-autonomous status tracking" (confirmed by the green CI run below; status-doc-only commits
-`72723ff` etc. followed on top and do not affect app behavior).
+**Latest Commit:** (pending — about to commit product-thumbnail fix + milestone reframe)
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
-**Current APK Version:** `spendzero-release-apk` from CI run `28435140150`, commit `5d19e6d`.
-Download from https://github.com/baseer-ind/spendzero/actions/runs/28435140150
+**Current Milestone:** Experience Beta (the prior "V1 complete" claim was rejected as
+premature — see `docs/MILESTONES.md` for the redefined milestone ladder: Experience Alpha →
+Experience Beta → Launch Candidate → Public V1).
 
-**Current CI Run:** `28435140150` — ✅ success. Artifacts: `spendzero-release-apk`
-(23.8 MB), `spendzero-release-aab` (24.0 MB), `spendzero-debug-apk` (89.2 MB).
+**Current APK Version:** `spendzero-release-apk` from CI run `28435140150`, commit `5d19e6d`
+— now stale relative to the in-progress thumbnail fix; a fresh build will follow this commit.
 
-**Current Task:** None — V1 Definition of Done (`docs/V1_CHECKLIST.md`) is fully satisfied.
-Awaiting further direction.
+**Current CI Run:** none triggered yet for the pending commit.
 
-**Last Completed Task:** Confirmed CI green for the final Dashboard Journey commit; verified
-all four journeys (Home, Food, Dream, Dashboard) have complete redesign passes with no
-dangling navigation.
+**Current Task:** Working through the ruthless-review findings in `docs/MILESTONES.md`.
+Just fixed: generic shopping-bag-icon-on-flat-color product thumbnails (Food Journey cart/
+checkout) replaced with keyword-matched emoji glyphs on two-tone gradients — items now read
+as recognizable products instead of interchangeable placeholder blocks.
 
-**Next Planned Task:** None mandatory. Candidate follow-ups are listed as "Remaining Future
-Ideas" in the V1 final report — none are required for V1.
+**Last Completed Task:** Product/menu thumbnail identity fix (`product_card.dart`).
 
-**Estimated Completion %:** 100%
+**Next Planned Task:** Restaurant/store banner identity (currently single-letter-on-gradient,
+needs richer treatment) — next item on the Experience Beta findings list.
+
+**Estimated Completion %:** N/A under feature-checklist framing per the user's correction —
+tracking via the Experience Beta findings checklist in `docs/MILESTONES.md` instead.
 
 ## Known Blockers
 
-None. The sandbox cannot download GitHub Actions artifacts directly (outbound network policy
-blocks `blob.core.windows.net`) — APKs are delivered as GitHub Actions run links rather than
-file attachments. This is a standing environment constraint and does not block V1 sign-off.
+None. Continuing through the findings list while CI runs in the background once triggered.
 
-**Last Updated:** 2026-06-30 (V1 sign-off)
+The sandbox cannot download GitHub Actions artifacts directly (outbound network policy blocks
+`blob.core.windows.net`) — APKs are delivered as GitHub Actions run links rather than file
+attachments. Standing environment constraint, not a development blocker.
+
+**Last Updated:** 2026-06-30 (Experience Beta work, post V1-rejection)

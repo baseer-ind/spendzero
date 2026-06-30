@@ -37,7 +37,7 @@ class ProductCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Thumbnail(seed: listing.id),
+            _Thumbnail(seed: listing.id, title: listing.title),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -101,24 +101,58 @@ class ProductCard extends StatelessWidget {
   }
 }
 
+/// Maps a product title to a recognizable emoji glyph via local keyword
+/// matching — no AI/network calls, just a rule-based lookup — so items read
+/// as "that's a pizza" / "that's a kurta" at a glance instead of every card
+/// showing the same generic shopping-bag icon.
+const _titleEmojiKeywords = <String, String>{
+  'pizza': '🍕', 'burger': '🍔', 'biryani': '🍛', 'cake': '🍰',
+  'coffee': '☕', 'tea': '🍵', 'chai': '🍵', 'juice': '🧃',
+  'salad': '🥗', 'sandwich': '🥪', 'noodle': '🍜', 'rice': '🍚',
+  'ice cream': '🍦', 'paneer': '🧀', 'chicken': '🍗', 'fish': '🐟',
+  'soup': '🍲', 'roll': '🌯', 'dosa': '🥞', 'idli': '🍙', 'momo': '🥟',
+  'pasta': '🍝', 'fries': '🍟', 'donut': '🍩', 'cookie': '🍪',
+  'shirt': '👕', 'kurta': '👘', 'jeans': '👖', 'shoe': '👟', 'sneaker': '👟',
+  'dress': '👗', 'jacket': '🧥', 'bag': '👜', 'watch': '⌚', 'saree': '🥻',
+  'phone': '📱', 'laptop': '💻', 'headphone': '🎧', 'earbud': '🎧',
+  'speaker': '🔊', 'charger': '🔌', 'camera': '📷', 'tv': '📺',
+  'sofa': '🛋️', 'chair': '🪑', 'lamp': '💡', 'table': '🛋️',
+  'milk': '🥛', 'bread': '🍞', 'egg': '🥚', 'fruit': '🍎', 'vegetable': '🥦',
+  'lipstick': '💄', 'perfume': '🧴', 'cream': '🧴', 'shampoo': '🧴',
+};
+
+String _emojiForTitle(String title) {
+  final lower = title.toLowerCase();
+  for (final entry in _titleEmojiKeywords.entries) {
+    if (lower.contains(entry.key)) return entry.value;
+  }
+  return '🛍️';
+}
+
 class _Thumbnail extends StatelessWidget {
-  const _Thumbnail({required this.seed});
+  const _Thumbnail({required this.seed, required this.title});
 
   final String seed;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     final hue = (seed.codeUnits.fold<int>(0, (a, b) => a + b) % 360).toDouble();
-    final color = HSLColor.fromAHSL(1, hue, 0.45, 0.85).toColor();
+    final start = HSLColor.fromAHSL(1, hue, 0.55, 0.82).toColor();
+    final end = HSLColor.fromAHSL(1, (hue + 28) % 360, 0.55, 0.68).toColor();
     return Container(
       width: 64,
       height: 64,
       decoration: BoxDecoration(
-        color: color,
+        gradient: LinearGradient(
+          colors: [start, end],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(Icons.shopping_bag_outlined, color: colors.onSurfaceVariant),
+      alignment: Alignment.center,
+      child: Text(_emojiForTitle(title), style: const TextStyle(fontSize: 28)),
     );
   }
 }
