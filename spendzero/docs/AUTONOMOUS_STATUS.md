@@ -2,70 +2,95 @@
 
 **Execution State:** 🟢 Working
 
-**Latest Commit:** pending — Project Future rebrand + language pass (this update, CI not yet
-verified for the new commits)
+**Latest Commit:** `165185b` — Add persistent bottom-nav IA per Experience Blueprint
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
-**Current Milestone:** Experience Beta — complete. Launch Candidate — in progress. A new
-`docs/PRODUCT_FOUNDATION.md` was delivered by the user, repositioning the product as
-"Project Future," an Intentional Living platform (not a finance/budgeting/expense/shopping app).
-User explicitly chose full rebrand scope (name, package id, docs, CI artifacts) plus a copy/
-language pass aligning all user-facing text with the foundation doc's language table
-(Savings→Redirected, Goal→My Future, Achievement→Victory/Milestone, Statistics→Progress).
+**Current Milestone:** Experience Beta — complete. Launch Candidate — in progress. The user
+delivered two product docs in sequence: `docs/PRODUCT_FOUNDATION.md` (the **why** — repositioning
+as "Project Future," an Intentional Living platform) and `docs/EXPERIENCE_BLUEPRINT.md` (the
+**how** — Core Experience Pillars, mandatory Information Architecture, screen-by-screen specs,
+UX/motion principles, Founder Review Checklist). User explicitly chose "IA restructure first" when
+asked to prioritize against finishing the in-progress language/copy pass.
 
-**Rebrand work done this session:**
-- App identity: package id / bundle id → `com.projectfuture.app`, app display name → "Project
-  Future" (`scripts/setup_mobile_platforms.sh` rewritten — this is the actual source of truth,
-  since `mobile/android/` and `mobile/ios/` are gitignored and regenerated fresh by CI on every
-  run).
-- Dart-level rename: `SpendZeroApp` → `ProjectFutureApp`, MaterialApp title, splash screen
-  wordmark, pubspec name (`project_future`), test import path.
-- SharedPreferences key prefixes: `spendzero_*` → `project_future_*` (device id, cart,
-  personalization, wishlist, achievements-seen, intro-seen). Safe lossless rename — no
-  production users yet.
-- Env API base URLs (`staging.json`/`production.json`): `spendzero.app` → `projectfuture.app`.
-- CI artifact names: `spendzero-*-apk/aab` → `project-future-*-apk/aab`.
-- **Deliberately left unchanged** (scoped as backend/infra-internal, not user-facing app
-  branding): top-level repo folder name `spendzero/`, Postgres DB name `spendzero`,
-  `SPENDZERO_DATABASE_URL`/`SPENDZERO_REDIS_URL` env var names in `ci.yml`/backend config.
-- Language pass (Stage 2, in progress): dashboard AppBar title, hero "Redirected toward your
-  future" stat, "Redirected by category" section, momentum-story headline copy, badges-card
-  "victories unlocked" copy, activity-row "Redirected ₹X from {category}" copy, home screen
-  banner copy, craving-completed screen's "Victory!" headline and "I Redirected It" CTA, cart
-  screen's checkout nudge copy. Remaining: goals_screen.dart and achievements_screen.dart were
-  reviewed and already use dream/badge framing consistent with the foundation doc, so left as-is;
-  seed-data files (product/brand names) were judged out of scope since they're catalog content,
-  not framing language.
+**Rebrand work (Stage 1) — CI-verified:**
+- App identity: package id → `com.projectfuture.app`, app display name → "Project Future"
+  (`scripts/setup_mobile_platforms.sh` rewritten — the actual source of truth, since
+  `mobile/android/`/`mobile/ios/` are gitignored and regenerated fresh by CI every run).
+- Dart-level rename: `SpendZeroApp` → `ProjectFutureApp`, MaterialApp title, splash wordmark,
+  pubspec name (`project_future`), test import path.
+- SharedPreferences key prefixes: `spendzero_*` → `project_future_*`.
+- Env API base URLs: `spendzero.app` → `projectfuture.app`. CI artifact names: `project-future-*`.
+- **Deliberately left unchanged** (backend/infra-internal, not user-facing branding): repo folder
+  name `spendzero/`, Postgres DB name `spendzero`, `SPENDZERO_DATABASE_URL`/`SPENDZERO_REDIS_URL`.
+- **CI run `28441492563`** (commit `6815eaef`) — `conclusion: success`. All 3 artifacts confirmed
+  present via `list_workflow_run_artifacts`: `project-future-debug-apk` (89.2MB),
+  `project-future-release-apk` (23.8MB), `project-future-release-aab` (24.1MB). The new
+  `--org com.projectfuture --project-name app` scaffolding flow and `applicationId` build cleanly
+  end-to-end. **Rebrand is fully CI-verified.**
 
-**Current APK Version:** `project-future-release-apk` — not yet built; CI has not been triggered
-since the rebrand changes (package id, app name) were made. This is the next verification step:
-confirm `flutter build apk`/`appbundle` succeed end-to-end with the new
-`--org com.projectfuture --project-name app` scaffolding flow and the new `applicationId`.
+**Language pass (Stage 2) — partial, paused for IA restructure:**
+Done: dashboard hero stat, "Redirected by category," momentum-story headline, badges-card copy,
+activity-row copy, home screen banner, craving-completed screen ("Victory!" / "I Redirected It"),
+cart screen's redirect nudge + "Choose My Future" CTA. Reviewed and left as-is (already aligned):
+`goals_screen.dart`, `achievements_screen.dart`. Seed-data product/brand names judged out of scope
+(catalog content, not framing language). **Remaining:** broader 27-file grep surface — remaining
+vertical home/detail screens (shopping/beauty/movies/food/grocery/travel), to resume now that the
+IA restructure has landed.
 
-**Current CI Run:** none triggered yet for the rebrand commits — about to trigger.
+**IA restructure (per Experience Blueprint, "IA restructure first") — done, CI run in progress:**
+- New persistent bottom navigation via `StatefulShellRoute.indexedStack`: **Home / My Future /
+  Journey / Profile** (`mobile/lib/app/root_shell.dart`, wired into `router.dart`).
+- Dashboard repositioned and renamed "My Future" (never "Dashboard") — the app's emotional center,
+  reached via its own bottom-nav tab instead of an AppBar icon.
+- New `JourneyScreen` (`features/journey/presentation/journey_screen.dart`) — full chronological
+  record of every redirected craving, grouped by month; "My Future" shows only the 5 most recent
+  with a "View Journey" link.
+- New `ProfileScreen` (`features/profile/presentation/profile_screen.dart`) — minimal, offline-
+  first: victories/badges, manage My Future, feedback, privacy note, about.
+- Cart's primary CTA renamed `'Checkout'` → `'Choose My Future'` per the blueprint's "Choosing My
+  Future" reframing of checkout.
+- Extracted shared `core/utils/category_labels.dart` and `core/widgets/activity_row.dart` from
+  dashboard internals so Journey/My Future can both reuse them without duplication.
+- Home screen's AppBar dropped its standalone Dashboard/My Future icon buttons (both now reachable
+  via the bottom nav or Profile menu); kept only the feedback button.
+- **Scope-reduction judgment call (flagging transparently, not yet user-confirmed):** implemented
+  **4** bottom-nav tabs (Home, My Future, Journey, Profile), not the blueprint's literal 5
+  (Home, Browse, My Future, Journey, Profile). Reasoning: the existing Home screen already
+  functions as the "Browse" surface (it's the category grid); a separate Browse tab would
+  duplicate Home's content without clear differentiation given the current screen inventory. Will
+  revisit if the user wants a literal 5-tab structure.
+- `flutter analyze --no-pub` clean, `flutter test` 3/3 passing after every edit in this batch.
+- **CI run `28441851823`** (commit `165185b4`) — triggered automatically, currently `in_progress`.
+  This is the first CI verification of the new `StatefulShellRoute`-based router structure; not
+  yet confirmed green.
 
-**Current Task:** Verify the rebrand builds cleanly via CI (package id change is the highest-risk
-part — first time this scaffolding flow has been exercised with the new org/project-name), then
-continue the language pass and Launch Candidate readiness work.
+**Current CI Run:** `28441851823` (commit `165185b4`, IA restructure) — in progress, awaiting
+result.
 
-**Last Completed Task:** Committed and pushed Stage 1 (app identity) and Stage 2 (language pass,
-partial) rebrand work; `flutter analyze`/`flutter test` clean throughout.
+**Current Task:** Confirm CI run `28441851823` succeeds (validates the new navigation shell builds
+cleanly against freshly-scaffolded android/ios platforms), then resume the Stage 2 language pass
+on the remaining vertical home/detail screens.
 
-**Next Planned Task:** Trigger CI, verify all 3 artifacts build successfully with the new
-package id/app name. If clean, continue Launch Candidate readiness pass per
-`docs/MILESTONES.md`'s definition.
+**Last Completed Task:** Verified Stage 1 rebrand CI run (`28441492563`) succeeded with all 3
+artifacts present; implemented and pushed the full IA restructure (`165185b`) per the user's "IA
+restructure first" decision.
+
+**Next Planned Task:** Verify IA-restructure CI run, then continue Stage 2 language pass on
+remaining vertical screens; later, revisit `docs/MILESTONES.md`'s Launch Candidate definition to
+reflect the Experience Blueprint-driven IA.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's standing
-correction — tracking via milestone definitions and ruthless-panel review findings instead.
+correction — tracking via milestone definitions and ruthless-panel/Founder Review Checklist
+findings instead.
 
 ## Known Blockers
 
-None. The package id / app name change via `scripts/setup_mobile_platforms.sh` is unverified by
-CI as of this status update — flagged as the immediate next verification step, not a blocker.
+None. CI run `28441851823` for the IA-restructure commit is in progress and unconfirmed as of this
+update — flagged as the immediate next verification step, not a blocker.
 
 The sandbox cannot download GitHub Actions artifacts directly (outbound network policy blocks
 `blob.core.windows.net`) — APKs are delivered as GitHub Actions run links rather than file
 attachments. Standing environment constraint, not a development blocker.
 
-**Last Updated:** 2026-06-30 (Project Future rebrand + language pass, post-foundation-doc)
+**Last Updated:** 2026-06-30 (IA restructure per Experience Blueprint; Stage 1 rebrand CI-verified)
