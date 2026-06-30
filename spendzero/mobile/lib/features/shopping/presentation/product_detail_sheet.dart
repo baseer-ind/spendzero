@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/local/shopping_seed_data.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 
 /// Bottom sheet shown when tapping a product row — description, variant,
@@ -80,7 +81,7 @@ class _ProductDetailSheetState extends ConsumerState<ProductDetailSheet> {
                     Text(
                       '${product.discountPercent}% off',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colors.primary,
+                            color: AppTheme.gold,
                             fontWeight: FontWeight.w600,
                           ),
                     ),

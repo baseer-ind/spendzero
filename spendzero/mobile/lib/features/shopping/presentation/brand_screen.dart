@@ -9,6 +9,7 @@ import '../../../core/data/local/shopping_seed_data.dart';
 import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import 'product_detail_sheet.dart';
 
@@ -288,7 +289,7 @@ class _ProductSections extends StatelessWidget {
         for (final entry in byCategory.entries)
           _ProductSection(title: entry.key, items: entry.value, quantities: quantities, onAdd: onAdd, onQuantityChanged: onQuantityChanged),
         const SizedBox(height: 8),
-        Text('Frequently Bought Together', style: Theme.of(context).textTheme.titleMedium),
+        Text('Frequently Bought Together', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
           height: 70,
@@ -329,7 +330,7 @@ class _ProductSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          Text(title, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           ...items.map((item) => _ProductRow(
                 item: item,
@@ -431,7 +432,7 @@ class _QuantityStepper extends StatelessWidget {
     return Container(
       height: 36,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: AppTheme.gold,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -439,10 +440,10 @@ class _QuantityStepper extends StatelessWidget {
         children: [
           InkWell(
             onTap: () => onChanged(quantity - 1),
-            child: SizedBox(
+            child: const SizedBox(
               width: 32,
               height: 36,
-              child: Icon(Icons.remove, size: 16, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(Icons.remove, size: 16, color: AppTheme.background),
             ),
           ),
           SizedBox(
@@ -450,15 +451,15 @@ class _QuantityStepper extends StatelessWidget {
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.background),
             ),
           ),
           InkWell(
             onTap: () => onChanged(quantity + 1),
-            child: SizedBox(
+            child: const SizedBox(
               width: 32,
               height: 36,
-              child: Icon(Icons.add, size: 16, color: Theme.of(context).colorScheme.onPrimary),
+              child: Icon(Icons.add, size: 16, color: AppTheme.background),
             ),
           ),
         ],
@@ -481,7 +482,7 @@ class _ReviewsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Reviews', style: Theme.of(context).textTheme.titleMedium),
+        Text('Reviews', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         ...visible.map((r) => _ReviewTile(review: r)),
         if (!showAll && reviews.length > 3)
@@ -503,8 +504,9 @@ class _ReviewTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
