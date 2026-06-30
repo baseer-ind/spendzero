@@ -401,7 +401,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF0D47A1), Color(0xFF1565C0)],
     heroBadge: '📱 Today\'s tech deals',
     heroOffer: 'Exchange your old phone, get ₹10,000 off',
-    entityIds: [],
+    entityIds: ['sb-voltbyte-electronics', 'sb-circuit-and-co'],
   ),
   FictionalApp(
     id: 'electrohub',
@@ -415,7 +415,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF006064), Color(0xFF00838F)],
     heroBadge: '🔌 Official warranty',
     heroOffer: 'Extra 2-year warranty on all products',
-    entityIds: [],
+    entityIds: ['sb-nimbus-home', 'sb-glasslight-optics'],
   ),
   FictionalApp(
     id: 'gadgetnest',
@@ -429,7 +429,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF212121), Color(0xFF424242)],
     heroBadge: '🎮 Gaming week sale',
     heroOffer: 'Pre-orders open: next-gen gaming gear',
-    entityIds: [],
+    entityIds: ['sb-pulsecore'],
   ),
   FictionalApp(
     id: 'devicekart',
@@ -443,7 +443,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
     heroBadge: '🤖 AI & Smart home',
     heroOffer: 'Smart home starter kit at 30% off',
-    entityIds: [],
+    entityIds: ['sb-echonest-audio'],
   ),
 ];
 
