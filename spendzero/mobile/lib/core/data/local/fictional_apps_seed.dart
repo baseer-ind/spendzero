@@ -113,7 +113,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF00796B), Color(0xFF00897B)],
     heroBadge: '⚡ 10-min delivery',
     heroOffer: 'Fresh fruits & veggies at farm prices',
-    entityIds: ['gs-quickbasket'],
+    entityIds: ['gs-freshkart-express', 'gs-quickshelf', 'gs-snack-stop-24'],
   ),
   FictionalApp(
     id: 'freshkart',
@@ -127,7 +127,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF558B2F), Color(0xFF689F38)],
     heroBadge: '🌿 Organic certified',
     heroOffer: 'Buy 2 get 1 free on all organic items',
-    entityIds: ['gs-freshkart'],
+    entityIds: ['gs-orchard-organics', 'gs-pantry-pulse', 'gs-the-corner-grocer'],
   ),
   FictionalApp(
     id: 'greencart',
@@ -141,7 +141,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF1B5E20), Color(0xFF2E7D32)],
     heroBadge: '♻️ Zero waste packing',
     heroOffer: '5% cashback on every order',
-    entityIds: ['gs-greencart'],
+    entityIds: ['gs-greencart-10', 'gs-wellness-wagon'],
   ),
   FictionalApp(
     id: 'dailydrop',
@@ -155,7 +155,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF0277BD), Color(0xFF0288D1)],
     heroBadge: '📦 Daily subscription',
     heroOffer: 'Subscribe & save up to 20%',
-    entityIds: ['gs-dailydrop'],
+    entityIds: ['gs-dailybasket', 'gs-dairy-dock'],
   ),
   FictionalApp(
     id: 'rapidmart',
@@ -169,7 +169,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFFD84315), Color(0xFFE64A19)],
     heroBadge: '🛒 Best prices',
     heroOffer: 'Weekend mega sale — up to 40% off',
-    entityIds: ['gs-rapidmart'],
+    entityIds: ['gs-spice-route-bazaar', 'gs-nightowl-needs', 'gs-homeline-mart'],
   ),
 
   // ── SHOPPING ─────────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFFFF6F00), Color(0xFFFFA000)],
     heroBadge: '📦 Prime 1-day delivery',
     heroOffer: '₹0 delivery on orders above ₹499',
-    entityIds: ['sb-amazing-fashion', 'sb-amazing-electronics'],
+    entityIds: ['sb-urban-thread-co', 'sb-voltbyte-electronics', 'sb-luma-accessories'],
   ),
   FictionalApp(
     id: 'flippingkart',
@@ -199,7 +199,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF1565C0), Color(0xFF1976D2)],
     heroBadge: '💙 Big Billion Sale',
     heroOffer: 'Exchange offers on 10,000+ products',
-    entityIds: ['sb-flippingkart-fashion', 'sb-flippingkart-electronics'],
+    entityIds: ['sb-streetloom', 'sb-pulsecore', 'sb-circuit-and-co'],
   ),
   FictionalApp(
     id: 'megacart',
@@ -213,7 +213,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF6A1B9A), Color(0xFF7B1FA2)],
     heroBadge: '🏷️ Best deals guaranteed',
     heroOffer: 'No-cost EMI on orders above ₹2,999',
-    entityIds: ['sb-megacart-fashion'],
+    entityIds: ['sb-stridewell', 'sb-pocket-square'],
   ),
   FictionalApp(
     id: 'buynest',
@@ -227,7 +227,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFF4E342E), Color(0xFF6D4C41)],
     heroBadge: '🏠 Home & lifestyle',
     heroOffer: 'Interior décor from ₹199',
-    entityIds: ['sb-buynest-home'],
+    entityIds: ['sb-nimbus-home', 'sb-veranda-weaves'],
   ),
   FictionalApp(
     id: 'shopverse',
@@ -241,7 +241,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFFAD1457), Color(0xFFC2185B)],
     heroBadge: '✨ Trending now',
     heroOffer: 'New arrivals every Monday',
-    entityIds: ['sb-shopverse-fashion'],
+    entityIds: ['sb-frame-and-fit', 'sb-glasslight-optics'],
   ),
   FictionalApp(
     id: 'cartbee',
@@ -255,7 +255,7 @@ const allFictionalApps = <FictionalApp>[
     logoBgGradient: [Color(0xFFF9A825), Color(0xFFFFB300)],
     heroBadge: '🐝 Honey deals daily',
     heroOffer: 'Cashback on every purchase',
-    entityIds: ['sb-cartbee-electronics'],
+    entityIds: ['sb-echonest-audio'],
   ),
 
   // ── TRAVEL ───────────────────────────────────────────────────────────────
@@ -458,4 +458,14 @@ FictionalApp? findFictionalAppById(String id) {
   } catch (_) {
     return null;
   }
+}
+
+/// Reverse lookup: given a restaurant/store/brand id, finds which fictional
+/// app it belongs to. Used to attribute cart items to the right app when
+/// navigating from a detail screen back to the persistent cart.
+String? findAppIdForEntity(String entityId) {
+  for (final app in allFictionalApps) {
+    if (app.entityIds.contains(entityId)) return app.id;
+  }
+  return null;
 }

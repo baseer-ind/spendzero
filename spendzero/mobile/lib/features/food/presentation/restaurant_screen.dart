@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 
+import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/food_seed_data.dart';
+import '../../../core/data/local/persistent_cart_store.dart';
+import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
 import 'menu_item_detail_sheet.dart';
@@ -40,7 +43,17 @@ class RestaurantScreen extends ConsumerStatefulWidget {
 class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
   final Map<String, int> _quantities = {};
   bool _showAllReviews = false;
-  bool _isCheckingOut = false;
+  bool _restoredFromCart = false;
+
+  String get _appId => findAppIdForEntity(widget.restaurantId) ?? widget.restaurantId;
+
+  void _restoreFromCartOnce() {
+    if (_restoredFromCart) return;
+    _restoredFromCart = true;
+    final items = ref.read(cartProvider.notifier).itemsForApp(_appId);
+    if (items.isEmpty) return;
+    _quantities.addAll({for (final e in items) e.listingId: e.quantity});
+  }
 
   void _setQuantity(MenuItem item, int quantity) {
     setState(() {
@@ -50,6 +63,25 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
         _quantities[item.id] = quantity;
       }
     });
+    final notifier = ref.read(cartProvider.notifier);
+    final alreadyInCart = ref
+        .read(cartProvider)
+        .any((e) => e.listingId == item.id && e.appId == _appId);
+    if (quantity <= 0) {
+      if (alreadyInCart) notifier.removeItem(item.id, _appId);
+    } else if (alreadyInCart) {
+      notifier.setQuantity(item.id, _appId, quantity);
+    } else {
+      notifier.addItem(CartItem(
+        listingId: item.id,
+        name: item.name,
+        unitPricePaise: item.pricePaise,
+        quantity: quantity,
+        appId: _appId,
+        categoryId: widget.categoryId,
+        imageColorSeed: item.id,
+      ));
+    }
   }
 
   @override
@@ -64,6 +96,7 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
 
     final menuAsync = ref.watch(menuItemsForRestaurantProvider(widget.restaurantId));
     final reviewsAsync = ref.watch(reviewsForProvider(widget.restaurantId));
+    _restoreFromCartOnce();
 
     return Scaffold(
       appBar: AppBar(title: Text(restaurant.name)),
@@ -136,46 +169,14 @@ class _RestaurantScreenState extends ConsumerState<RestaurantScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: FilledButton(
-          onPressed: _isCheckingOut ? null : () => _checkout(itemsById),
-          child: _isCheckingOut
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('Place order · $count items · ${formatPaise(total)}'),
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            context.push('/cart');
+          },
+          child: Text('View cart · $count items · ${formatPaise(total)}'),
         ),
       ),
     );
-  }
-
-  Future<void> _checkout(Map<String, MenuItem> itemsById) async {
-    HapticFeedback.mediumImpact();
-    setState(() => _isCheckingOut = true);
-    try {
-      final repo = await ref.read(cravingRepositoryProvider.future);
-      final result = await repo.checkout(
-        categoryId: widget.categoryId,
-        items: _quantities.entries
-            .where((e) => itemsById.containsKey(e.key))
-            .map((e) => {
-                  'listing_id': e.key,
-                  'quantity': e.value,
-                  'unit_price_paise': itemsById[e.key]!.pricePaise,
-                })
-            .toList(),
-      );
-      if (!mounted) return;
-      setState(() => _quantities.clear());
-      context.push('/craving-completed', extra: result);
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Couldn't complete your order. Please try again.")),
-      );
-    } finally {
-      if (mounted) setState(() => _isCheckingOut = false);
-    }
   }
 }
 
