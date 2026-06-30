@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/models/achievement.dart';
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
@@ -157,6 +159,8 @@ class _DashboardBody extends StatelessWidget {
             _StatCard(index: 7, label: 'Longest streak', value: '${stats.longestStreakDays} days', emoji: '🏆'),
           ],
         ),
+        const SizedBox(height: 16),
+        _BadgesCard(stats: stats),
         const SizedBox(height: 24),
         Text('Last 7 days', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
@@ -226,6 +230,53 @@ class _DashboardBody extends StatelessWidget {
         else
           ...history.take(10).map((e) => _ActivityRow(entry: e)),
       ],
+    );
+  }
+}
+
+class _BadgesCard extends StatelessWidget {
+  const _BadgesCard({required this.stats});
+
+  final dynamic stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final unlockedCount = allAchievements.where((a) => a.isUnlocked(stats)).length;
+    final colors = Theme.of(context).colorScheme;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => context.push('/achievements'),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.secondaryContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            const Text('🏅', style: TextStyle(fontSize: 28)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$unlockedCount of ${allAchievements.length} badges unlocked',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  Text('Tap to see your badge cabinet', style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: colors.onSecondaryContainer),
+          ],
+        ),
+      ),
     );
   }
 }

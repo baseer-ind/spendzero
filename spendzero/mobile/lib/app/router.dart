@@ -13,6 +13,7 @@ import '../features/checkout/presentation/checkout_screen.dart';
 import '../features/checkout/presentation/craving_completed_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/diagnostics/presentation/diagnostics_screen.dart';
+import '../features/achievements/presentation/achievements_screen.dart';
 import '../features/food/presentation/food_home_screen.dart';
 import '../features/food/presentation/restaurant_screen.dart';
 import '../features/goals/presentation/goals_screen.dart';
@@ -172,6 +173,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/diagnostics',
       pageBuilder: (c, s) => _slide(c, s, const DiagnosticsScreen()),
+    ),
+    GoRoute(
+      path: '/achievements',
+      pageBuilder: (c, s) => _slide(c, s, const AchievementsScreen()),
     ),
     // ── App-within-app: vertical launcher ──────────────────────────────────
     GoRoute(

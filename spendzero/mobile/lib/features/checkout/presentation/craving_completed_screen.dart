@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/data/local/achievements_store.dart';
+import '../../../core/models/achievement.dart';
 import '../../../core/models/craving_completed.dart';
 import '../../../core/models/goal.dart';
+import '../../../core/models/user_stats.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
@@ -171,13 +174,19 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
 
       if (outcome == 'saved' && mounted) {
         int newStreak = previousStreak;
+        UserStats? newStats;
         try {
-          newStreak = (await ref.read(statsProvider.future)).currentStreakDays;
+          final fetched = await ref.read(statsProvider.future);
+          newStats = fetched;
+          newStreak = fetched.currentStreakDays;
         } catch (_) {
           // Keep previousStreak; milestone check below will simply no-op.
         }
         if (_streakMilestones.contains(newStreak) && newStreak > previousStreak && mounted) {
           await _showStreakMilestone(newStreak);
+        }
+        if (newStats != null && mounted) {
+          await _showNewlyUnlockedAchievements(newStats);
         }
       }
     } catch (_) {
@@ -185,6 +194,31 @@ class _CravingCompletedScreenState extends ConsumerState<CravingCompletedScreen>
       // network write shouldn't block the user from returning home.
     } finally {
       if (mounted) context.go('/');
+    }
+  }
+
+  Future<void> _showNewlyUnlockedAchievements(UserStats stats) async {
+    final unlockedIds = allAchievements
+        .where((a) => a.isUnlocked(stats))
+        .map((a) => a.id)
+        .toList();
+    final newlySeen = ref.read(seenAchievementsProvider.notifier).markSeen(unlockedIds);
+    if (newlySeen.isEmpty) return;
+
+    for (final id in newlySeen) {
+      if (!mounted) return;
+      final achievement = allAchievements.firstWhere((a) => a.id == id);
+      HapticFeedback.heavyImpact();
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('${achievement.emoji} Badge unlocked!'),
+          content: Text('${achievement.title} — ${achievement.description}'),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Nice!')),
+          ],
+        ),
+      );
     }
   }
 
