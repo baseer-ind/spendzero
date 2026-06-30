@@ -537,6 +537,7 @@ class _ShoppingCollectionRail extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () async {
+                    HapticFeedback.selectionClick();
                     await RecentlyViewedShoppingBrand().recordView(item.brandId);
                     final personalization = ref.read(personalizationProvider.notifier);
                     personalization.recordPriceView(item.pricePaise);

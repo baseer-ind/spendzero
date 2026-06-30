@@ -601,6 +601,7 @@ class _BeautyCollectionRail extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () async {
+                    HapticFeedback.selectionClick();
                     await RecentlyViewedBeautyBrand().recordView(item.brandId);
                     ref.read(personalizationProvider.notifier).recordPriceView(item.pricePaise);
                     if (context.mounted) {

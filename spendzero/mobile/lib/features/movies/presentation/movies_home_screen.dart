@@ -608,6 +608,7 @@ class _MovieCollectionRail extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () async {
+                    HapticFeedback.selectionClick();
                     await RecentlyViewedCinemaBrand().recordView(item.cinemaId);
                     ref.read(personalizationProvider.notifier).recordPriceView(item.pricePaise);
                     if (context.mounted) {

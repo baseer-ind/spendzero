@@ -600,6 +600,7 @@ class _CollectionRail extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () async {
+                    HapticFeedback.selectionClick();
                     await RecentlyViewedFoodStore().recordView(item.restaurantId);
                     final personalization = ref.read(personalizationProvider.notifier);
                     personalization.recordDietaryView(item.dietaryTag.name);

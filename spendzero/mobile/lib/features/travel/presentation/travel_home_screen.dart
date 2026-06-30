@@ -608,6 +608,7 @@ class _TravelCollectionRail extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () async {
+                    HapticFeedback.selectionClick();
                     await RecentlyViewedTravelStay().recordView(item.stayId);
                     ref.read(personalizationProvider.notifier).recordPriceView(item.pricePaise);
                     if (context.mounted) {
