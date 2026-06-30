@@ -2,7 +2,7 @@
 
 **Execution State:** 🟢 Working
 
-**Latest Commit:** (pending — about to commit first-launch intro/onboarding flow)
+**Latest Commit:** (pending — about to commit achievements storytelling pass)
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
@@ -15,20 +15,16 @@ Experience Alpha → Experience Beta → Launch Candidate → Public V1).
 **Current CI Run:** none triggered yet for the pending commit.
 
 **Current Task:** Working through the ruthless-review findings in `docs/MILESTONES.md`.
-Just fixed: there was no onboarding moment — first-time users landed straight on the home grid
-with only a one-time dismissible hint. Added a 3-page first-launch intro
-(`intro_screen.dart`, routed at `/intro` between `/splash` and `/`) framing the core loop
-before the home grid: "skip a craving, fund a dream" → "shop freely, nothing ever charges
-you" → "watch your dream get closer." Shown once via a SharedPreferences flag, skippable.
-Removed the old dismissible hint card from `home_screen.dart` since the intro now covers that
-framing more substantially.
+Just fixed: the Achievements/Badges screen was purely statistical — a flat "X of Y unlocked"
+counter. Replaced it with a `_StoryBanner` that shows a dynamic headline reacting to progress,
+an animated progress bar, and a "Next up: {badge} — {progress}" highlight, bringing it in line
+with the narrative treatment already used on Home/Dashboard.
 
-**Last Completed Task:** First-launch intro/onboarding flow (`intro_screen.dart`,
-`splash_screen.dart`, `router.dart`).
+**Last Completed Task:** Achievements screen storytelling pass (`achievements_screen.dart`,
+`_StoryBanner`).
 
-**Next Planned Task:** Achievements screen hasn't had the storytelling pass the other four
-journeys got — still statistical rather than celebratory. Next item on the Experience Beta
-findings list.
+**Next Planned Task:** No "return tomorrow" hook beyond streak counting — nothing proactively
+nudges a user back the next day. Next item on the Experience Beta findings list.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's correction —
 tracking via the Experience Beta findings checklist in `docs/MILESTONES.md` instead.

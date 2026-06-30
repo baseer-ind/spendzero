@@ -42,8 +42,12 @@ engineering checklist.
       framing the core loop — "skip a craving, fund a dream" → "shop freely, nothing ever
       charges you" → "watch your dream get closer" — shown once via SharedPreferences flag,
       skippable, replacing the old dismissible hint card on the home grid itself.
-- [ ] Achievements screen hasn't had the storytelling pass the other four journeys got — still
-      statistical rather than celebratory.
+- [x] **Achievements screen hadn't had the storytelling pass.** Fixed: the flat "X of Y
+      unlocked" counter is replaced with a dynamic-headline `_StoryBanner` ("Off to a solid
+      start" → "Building real momentum" → "So close to a full cabinet" → "Every badge,
+      unlocked. Legend status.") plus an animated progress bar and a "Next up: {badge} —
+      {progress}" highlight, matching the narrative treatment used on Dashboard/Home.
+      (`achievements_screen.dart`)
 - [ ] No "return tomorrow" hook beyond streak counting — nothing proactively nudges a user
       back the next day (e.g. a daily check-in moment, "your dream needs you" framing).
 - [ ] Cart screen hasn't been reviewed yet against the same "feels premium" bar as checkout
