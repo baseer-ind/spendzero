@@ -7,10 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/food_seed_data.dart';
+import '../../../core/data/local/wishlist_store.dart';
 import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
+
+String _appIdFor(String restaurantId) => findAppIdForEntity(restaurantId) ?? restaurantId;
 
 const _recentlyViewedKey = 'food_recently_viewed_restaurants_v1';
 const _maxRecentlyViewed = 8;
@@ -53,12 +57,42 @@ class FoodHomeScreen extends ConsumerStatefulWidget {
   ConsumerState<FoodHomeScreen> createState() => _FoodHomeScreenState();
 }
 
+enum _SortOption { relevance, ratingDesc, deliveryTimeAsc, priceAsc }
+
+extension on _SortOption {
+  String get label => switch (this) {
+        _SortOption.relevance => 'Relevance',
+        _SortOption.ratingDesc => 'Rating: High to Low',
+        _SortOption.deliveryTimeAsc => 'Delivery Time',
+        _SortOption.priceAsc => 'Price: Low to High',
+      };
+}
+
 class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
   String _searchQuery = '';
   String? _selectedCuisine;
+  _SortOption _sortOption = _SortOption.relevance;
   List<Restaurant> _recentlyViewed = [];
+
+  List<Restaurant> _applySort(List<Restaurant> list) {
+    final sorted = [...list];
+    switch (_sortOption) {
+      case _SortOption.relevance:
+        break;
+      case _SortOption.ratingDesc:
+        sorted.sort((a, b) => b.avgRating.compareTo(a.avgRating));
+        break;
+      case _SortOption.deliveryTimeAsc:
+        sorted.sort((a, b) => a.deliveryTimeMins.compareTo(b.deliveryTimeMins));
+        break;
+      case _SortOption.priceAsc:
+        sorted.sort((a, b) => a.priceTier.compareTo(b.priceTier));
+        break;
+    }
+    return sorted;
+  }
 
   @override
   void initState() {
@@ -104,6 +138,12 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
     final restaurantsAsync = ref.watch(foodRestaurantsProvider);
     final trendingAsync = ref.watch(foodTrendingProvider);
     final offersAsync = ref.watch(foodTodaysOffersProvider);
+    final wishlist = ref.watch(wishlistProvider);
+    final savedRestaurants = wishlist
+        .where((e) => e.categoryId == widget.category.id)
+        .map((e) => findRestaurantById(e.entityId))
+        .whereType<Restaurant>()
+        .toList();
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.category.name)),
@@ -152,6 +192,14 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
               const SizedBox(height: 20),
               _WeekendSpecialsRail(specials: weekendSpecials()),
               const SizedBox(height: 20),
+              if (savedRestaurants.isNotEmpty) ...[
+                _RestaurantRail(
+                  title: 'Saved for Later',
+                  restaurants: savedRestaurants,
+                  onTap: _openRestaurant,
+                ),
+                const SizedBox(height: 20),
+              ],
               if (_recentlyViewed.isNotEmpty) ...[
                 _RestaurantRail(
                   title: 'Recently Viewed',
@@ -168,18 +216,36 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                   for (final r in restaurants) {
                     cuisines.addAll(r.cuisines);
                   }
-                  final filtered = _selectedCuisine == null
+                  final filtered = _applySort(_selectedCuisine == null
                       ? restaurants
                       : restaurants
                           .where((r) => r.cuisines.contains(_selectedCuisine))
-                          .toList();
+                          .toList());
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _CuisineChipRow(
-                        cuisines: cuisines.toList()..sort(),
-                        selected: _selectedCuisine,
-                        onSelected: _onCuisineSelected,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _CuisineChipRow(
+                              cuisines: cuisines.toList()..sort(),
+                              selected: _selectedCuisine,
+                              onSelected: _onCuisineSelected,
+                            ),
+                          ),
+                          PopupMenuButton<_SortOption>(
+                            icon: const Icon(Icons.sort_rounded),
+                            tooltip: 'Sort',
+                            initialValue: _sortOption,
+                            onSelected: (option) {
+                              HapticFeedback.selectionClick();
+                              setState(() => _sortOption = option);
+                            },
+                            itemBuilder: (context) => _SortOption.values
+                                .map((o) => PopupMenuItem(value: o, child: Text(o.label)))
+                                .toList(),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       if (filtered.isEmpty)
@@ -188,7 +254,11 @@ class _FoodHomeScreenState extends ConsumerState<FoodHomeScreen> {
                         ...filtered.map(
                           (r) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
-                            child: _RestaurantCard(restaurant: r, onTap: () => _openRestaurant(r)),
+                            child: _RestaurantCard(
+                              restaurant: r,
+                              categoryId: widget.category.id,
+                              onTap: () => _openRestaurant(r),
+                            ),
                           ),
                         ),
                     ],
@@ -230,6 +300,7 @@ class _SearchResults extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _RestaurantCard(
                   restaurant: result,
+                  categoryId: categoryId,
                   onTap: () async {
                     await RecentlyViewedFoodStore().recordView(result.id);
                     if (context.mounted) {
@@ -484,16 +555,21 @@ class _CuisineChipRow extends StatelessWidget {
   }
 }
 
-class _RestaurantCard extends StatelessWidget {
-  const _RestaurantCard({required this.restaurant, required this.onTap});
+class _RestaurantCard extends ConsumerWidget {
+  const _RestaurantCard({required this.restaurant, required this.onTap, this.categoryId = 'food'});
 
   final Restaurant restaurant;
   final VoidCallback onTap;
+  final String categoryId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final gradient = _gradientForSeed(restaurant.bannerColorSeed);
+    final appId = _appIdFor(restaurant.id);
+    final saved = ref.watch(
+      wishlistProvider.select((list) => list.any((e) => e.entityId == restaurant.id && e.appId == appId)),
+    );
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -546,6 +622,16 @@ class _RestaurantCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            IconButton(
+              icon: Icon(
+                saved ? Icons.favorite : Icons.favorite_border,
+                color: saved ? colors.error : colors.onSurfaceVariant,
+              ),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(wishlistProvider.notifier).toggle(restaurant.id, appId, categoryId);
+              },
             ),
           ],
         ),
