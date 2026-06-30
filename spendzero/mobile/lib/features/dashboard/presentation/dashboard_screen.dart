@@ -147,6 +147,14 @@ class _DashboardBody extends StatelessWidget {
           longestStreakDays: stats.longestStreakDays,
           topDream: topDream,
         ),
+        const SizedBox(height: 14),
+        _MomentumStory(
+          thisWeekPaise: _sumSince(weekStart),
+          lastWeekPaise: _sumSince(weekStart.subtract(const Duration(days: 7))) -
+              _sumSince(weekStart),
+          stats: stats,
+          topDream: topDream,
+        ),
         const SizedBox(height: 16),
         GridView.count(
           shrinkWrap: true,
@@ -373,6 +381,69 @@ class _HeroHeader extends StatelessWidget {
                 ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The narrative line: turns raw stats into "here's how far you've come
+/// and what's next" so the dashboard reads as a story, not a spreadsheet.
+class _MomentumStory extends StatelessWidget {
+  const _MomentumStory({
+    required this.thisWeekPaise,
+    required this.lastWeekPaise,
+    required this.stats,
+    required this.topDream,
+  });
+
+  final int thisWeekPaise;
+  final int lastWeekPaise;
+  final dynamic stats;
+  final SavingsGoal? topDream;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final nextAchievement = allAchievements.firstWhere(
+      (a) => !a.isUnlocked(stats),
+      orElse: () => allAchievements.last,
+    );
+    final allUnlocked = allAchievements.every((a) => a.isUnlocked(stats));
+
+    String headline;
+    if (thisWeekPaise > 0 && lastWeekPaise > 0 && thisWeekPaise > lastWeekPaise) {
+      final times = (thisWeekPaise / lastWeekPaise).toStringAsFixed(1);
+      headline = "You've saved ${times}x more this week than last — keep the momentum.";
+    } else if (thisWeekPaise > 0) {
+      headline = topDream != null
+          ? "Every save this week moved you closer to ${topDream!.title}."
+          : "You've saved ${formatPaise(thisWeekPaise)} this week. Nice discipline.";
+    } else {
+      headline = "A fresh week — skip your next craving to start the streak.";
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.tertiaryContainer.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(headline, style: Theme.of(context).textTheme.bodyMedium),
+          if (!allUnlocked) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Next up: ${nextAchievement.emoji} ${nextAchievement.title} — '
+              '${nextAchievement.progressLabel(stats)}',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: colors.onTertiaryContainer.withOpacity(0.85)),
+            ),
+          ],
         ],
       ),
     );
