@@ -299,6 +299,7 @@ class _CategoryGrid extends StatelessWidget {
           index: index,
           emoji: category.emoji,
           name: category.name,
+          gradient: _categoryGradient(category.slug, index),
           onTap: () {
             HapticFeedback.selectionClick();
             final vertical = _verticalForCategory(category.id, category.slug);
@@ -363,17 +364,50 @@ String? _verticalForCategory(String categoryId, String slug) {
   return null;
 }
 
+/// Distinct two-tone gradients per category so the home grid reads as
+/// vivid, branded destinations rather than flat identical gray tiles.
+const _categoryPalette = <List<Color>>[
+  [Color(0xFFFF6B6B), Color(0xFFFF8E53)], // food — warm coral
+  [Color(0xFF38B89A), Color(0xFF1A9B82)], // grocery — fresh green
+  [Color(0xFFB06AB3), Color(0xFF8B5CF6)], // fashion — violet
+  [Color(0xFF3B82F6), Color(0xFF2563EB)], // electronics — blue
+  [Color(0xFF06B6D4), Color(0xFF0891B2)], // travel — teal
+  [Color(0xFF7C3AED), Color(0xFF5B21B6)], // movies — deep purple
+  [Color(0xFFEC4899), Color(0xFFDB2777)], // beauty — pink
+  [Color(0xFFD97706), Color(0xFFB45309)], // furniture — amber/brown
+];
+
+List<Color> _categoryGradient(String slug, int index) {
+  const slugIndex = {
+    'food': 0,
+    'grocery': 1,
+    'groceries': 1,
+    'fashion': 2,
+    'shopping': 2,
+    'electronics': 3,
+    'travel': 4,
+    'entertainment': 5,
+    'movies': 5,
+    'beauty': 6,
+    'furniture': 7,
+  };
+  final i = slugIndex[slug] ?? (index % _categoryPalette.length);
+  return _categoryPalette[i];
+}
+
 class _CategoryTile extends StatefulWidget {
   const _CategoryTile({
     required this.index,
     required this.emoji,
     required this.name,
+    required this.gradient,
     required this.onTap,
   });
 
   final int index;
   final String emoji;
   final String name;
+  final List<Color> gradient;
   final VoidCallback onTap;
 
   @override
@@ -407,15 +441,19 @@ class _CategoryTileState extends State<_CategoryTile> {
             onTap: widget.onTap,
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: widget.gradient,
+                ),
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: _pressed
                     ? []
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                          color: widget.gradient.last.withOpacity(0.32),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
                         ),
                       ],
               ),
@@ -425,9 +463,25 @@ class _CategoryTileState extends State<_CategoryTile> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(widget.emoji, style: const TextStyle(fontSize: 28)),
-                    const SizedBox(height: 6),
-                    Text(widget.name, style: Theme.of(context).textTheme.labelMedium),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.22),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(widget.emoji, style: const TextStyle(fontSize: 20)),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.name,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
