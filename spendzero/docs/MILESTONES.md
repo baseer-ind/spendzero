@@ -62,10 +62,43 @@ engineering checklist.
       "you're resisting this craving" framing) was already at the same quality bar as checkout.
       (`cart_screen.dart`, `product_card.dart`, `product_emoji.dart`)
 
-All seven Experience Beta findings from the ruthless panel review are now resolved. Before
-declaring Experience Beta complete, a fresh ruthless-panel pass should be done across the
-whole app to check for anything the original review missed — completion is judged by that
-review, not by this checklist being empty.
+All seven Experience Beta findings from the original ruthless panel review are now resolved.
+
+### Fresh ruthless-panel pass (second review, post-7-fix)
+
+A second review (Apple HIG / Airbnb / CRED / OneCard / first-time Indian consumer) was run
+across Home, Food, Cart, Checkout, Dashboard, Goals, Achievements, and Intro to catch what the
+first pass missed.
+
+- [x] **Intro flow's final CTA was generic ("Get started"), undercutting the rich onboarding
+      copy.** Fixed: now reads "Skip my first craving," echoing the core loop framed on the
+      previous pages. (`intro_screen.dart`)
+- [x] **Cart empty state's "Browse apps" button just popped the route — a dead end if cart was
+      opened directly with nothing to pop back to.** Fixed: falls back to `context.go('/')`
+      when there's no back stack. (`cart_screen.dart`)
+- [x] **Checkout search "no results" state was a flat dead-end message with no recovery
+      action.** Fixed: added a "Browse all {category}" button that clears the search and
+      returns to the full listing. (`checkout_screen.dart`)
+- [x] **Goal cards' edit action was only reachable via a hidden long-press (or burying it in
+      the overflow menu) — no first-time user would discover it.** Fixed: cards now also
+      respond to a single tap (in addition to long-press) with `InkWell` ripple feedback, so
+      the affordance is visible and discoverable. (`goals_screen.dart`)
+
+### Backlog for a future polish pass (found, not yet fixed — lower severity)
+
+- [ ] Restaurant "Frequently ordered together" chips look decorative, not tappable — needs a
+      proper card treatment or pressed-state styling.
+- [ ] Product cards have no reserved badge slot for future sale/limited-stock treatments.
+- [ ] Dashboard "Recent activity" hard-stops at 10 items with no "view all" link.
+- [ ] Achievements unlocked cards don't show *when* a badge was unlocked.
+- [ ] Cart coupon hint ("Try: ZERO10 · SAVE20 · ...") reads as static seed copy rather than
+      dynamic, personalized microcopy.
+- [ ] Restaurant menu "Add" sometimes opens a detail sheet and sometimes acts as an inline
+      stepper — inconsistent interaction pattern versus checkout/cart.
+
+None of these backlog items block Experience Beta — they're tracked for the next pass rather
+than blocking this milestone, since none of them are placeholder-card-level failures like the
+original seven.
 
 ## Engineering quality bar (necessary, not sufficient on its own)
 

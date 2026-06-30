@@ -2,7 +2,7 @@
 
 **Execution State:** 🟢 Working
 
-**Latest Commit:** `560111c` — "Fix cart screen thumbnail placeholders; extract shared product-emoji util"
+**Latest Commit:** `46f03c6` — "Fresh ruthless-panel review pass: fix 4 polish gaps"
 
 **Current Branch:** `claude/spendzero-mobile-app-vudvnb`
 
@@ -10,25 +10,27 @@
 Experience Alpha → Experience Beta → Launch Candidate → Public V1).
 
 **Current APK Version:** `spendzero-release-apk` from CI run `28438518354`, commit `560111c`
-(also `spendzero-release-aab` and `spendzero-debug-apk` from the same run — all verified
-present, `conclusion: success`).
+— now stale relative to the fresh-review fixes since; a new CI run has been triggered for
+`46f03c6`.
 
-**Current CI Run:** `28438518354` — completed, success.
+**Current CI Run:** triggering for commit `46f03c6` on `ci.yml`.
 
-**Current Task:** CI for commit `560111c` (final Experience Beta code fix, cart thumbnails)
-verified green with all three artifacts present. All seven Experience Beta ruthless-review
-findings are now code-complete and CI-verified. Starting a fresh ruthless-panel review (Apple
-HIG / Airbnb / CRED / OneCard / first-time Indian consumer) across the whole app — Home, Food,
-Dream/Goals, Dashboard, Cart, Checkout, Achievements, Intro flow — to check for anything the
-original 7-item review missed, per the standing instruction that milestone completion is
-judged by that review, not by an empty checklist.
+**Current Task:** Ran a second ruthless-panel review (Apple HIG / Airbnb / CRED / OneCard /
+first-time Indian consumer) across Home, Food, Cart, Checkout, Dashboard, Goals, Achievements,
+and Intro, via a dedicated review pass, to catch what the original 7-item review missed. Fixed
+the 4 most severe findings: generic intro CTA copy, cart empty-state dead end, checkout
+no-results dead end, and goal-card edit-affordance discoverability. Logged 6 lower-severity
+backlog items in `docs/MILESTONES.md` (chip affordance, product badge slot, dashboard
+pagination, achievement timestamps, coupon hint copy, inconsistent stepper pattern) that don't
+block this milestone but are tracked for a future pass.
 
-**Last Completed Task:** Verified CI run `28438518354` (commit `560111c`) succeeded with
-`spendzero-release-apk`, `spendzero-release-aab`, and `spendzero-debug-apk` artifacts present.
+**Last Completed Task:** Committed and pushed the 4 fresh-review fixes (`46f03c6`); verified
+`flutter analyze --no-pub` clean and `flutter test` 3/3 passing before commit.
 
-**Next Planned Task:** Conduct the fresh ruthless-panel review across the whole app; document
-any new findings in `docs/MILESTONES.md`; fix what's found; only declare Experience Beta
-complete once that review turns up nothing further.
+**Next Planned Task:** Verify the CI run for `46f03c6` succeeds with all 3 artifacts, then
+decide whether Experience Beta is genuinely complete (all findings code-complete + CI-verified
++ no further severe issues from two review passes) or whether another review pass is warranted
+before moving to Launch Candidate.
 
 **Estimated Completion %:** N/A under feature-checklist framing per the user's correction —
 tracking via the Experience Beta findings checklist in `docs/MILESTONES.md` instead.
