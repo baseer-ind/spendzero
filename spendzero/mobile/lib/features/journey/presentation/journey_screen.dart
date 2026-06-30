@@ -47,7 +47,7 @@ class JourneyScreen extends ConsumerWidget {
               for (final group in grouped.entries) ...[
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10, top: 6),
-                  child: Text(group.key, style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(group.key, style: Theme.of(context).textTheme.headlineSmall),
                 ),
                 ...group.value.map((e) => ActivityRow(entry: e)),
                 const SizedBox(height: 8),

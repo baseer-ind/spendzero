@@ -7,6 +7,7 @@ import '../../../core/data/local/fictional_apps_seed.dart';
 import '../../../core/data/local/persistent_cart_store.dart';
 import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/product_emoji.dart';
 
@@ -206,19 +207,19 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: AppTheme.gold.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.savings_outlined,
-                        color: Theme.of(context).colorScheme.primary),
+                    const Icon(Icons.savings_outlined, color: AppTheme.gold),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Checking out means you\'re resisting this craving — and redirecting ${formatPaise(finalTotal)} toward your future!',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: AppTheme.gold,
                             ),
                       ),
                     ),
@@ -312,8 +313,9 @@ class _CartItemTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Row(
         children: [
@@ -441,8 +443,9 @@ class _CouponSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,8 +538,9 @@ class _BillSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

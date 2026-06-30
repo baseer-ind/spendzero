@@ -73,7 +73,7 @@ class _ProfileHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Your Future', style: Theme.of(context).textTheme.titleMedium),
+                Text('Your Future', style: Theme.of(context).textTheme.titleLarge),
                 Text(
                   'Built one intentional choice at a time.',
                   style: Theme.of(context)
