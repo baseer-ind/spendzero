@@ -13,6 +13,7 @@ const _categoryLabels = {
   'demo-travel': 'Travel',
   'demo-entertainment': 'Entertainment',
   'demo-beauty': 'Beauty',
+  'demo-furniture': 'Furniture',
 };
 
 const _categoryEmoji = {
@@ -23,6 +24,7 @@ const _categoryEmoji = {
   'demo-travel': '✈️',
   'demo-entertainment': '🎬',
   'demo-beauty': '💄',
+  'demo-furniture': '🛋️',
 };
 
 String _labelFor(String categoryId) =>

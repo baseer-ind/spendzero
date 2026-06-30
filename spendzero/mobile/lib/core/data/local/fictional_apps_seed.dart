@@ -13,6 +13,7 @@ const _travel = 'travel';
 const _beauty = 'beauty';
 const _electronics = 'electronics';
 const _movies = 'movies';
+const _furniture = 'furniture';
 
 const allFictionalApps = <FictionalApp>[
   // ── FOOD ─────────────────────────────────────────────────────────────────
@@ -503,6 +504,36 @@ const allFictionalApps = <FictionalApp>[
     heroBadge: '🌟 Trending releases',
     heroOffer: 'Free popcorn upgrade on first booking',
     entityIds: [],
+  ),
+
+  // ── FURNITURE ────────────────────────────────────────────────────────────
+  FictionalApp(
+    id: 'woodloom',
+    vertical: _furniture,
+    name: 'WoodLoom',
+    tagline: 'Solid furniture for homes built to last',
+    primaryColor: Color(0xFF4E342E),
+    accentColor: Color(0xFFA1887F),
+    surfaceColor: Color(0xFFFBF3EE),
+    logoIcon: Icons.weekend,
+    logoBgGradient: [Color(0xFF4E342E), Color(0xFF6D4C41)],
+    heroBadge: '🪵 Solid wood, no compromise',
+    heroOffer: 'Flat 15% off on living room sets',
+    entityIds: ['sb-oakmere-living'],
+  ),
+  FictionalApp(
+    id: 'snuglane',
+    vertical: _furniture,
+    name: 'SnugLane',
+    tagline: 'Smart furniture for small spaces',
+    primaryColor: Color(0xFF37474F),
+    accentColor: Color(0xFF78909C),
+    surfaceColor: Color(0xFFF1F4F5),
+    logoIcon: Icons.chair_alt,
+    logoBgGradient: [Color(0xFF37474F), Color(0xFF455A64)],
+    heroBadge: '📦 Space-saving picks',
+    heroOffer: 'Free assembly on every order',
+    entityIds: ['sb-nestframe-interiors'],
   ),
 ];
 

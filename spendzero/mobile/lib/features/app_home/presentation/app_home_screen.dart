@@ -151,6 +151,8 @@ class _AppHomeContent extends ConsumerWidget {
         return _buildBeautyContent(context, ref);
       case 'movies':
         return _buildMoviesContent(context, ref);
+      case 'furniture':
+        return _buildShoppingContent(context, ref);
       case 'electronics':
         return _buildShoppingContent(context, ref);
       default:

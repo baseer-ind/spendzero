@@ -15,6 +15,7 @@ const seedCategories = <SpendCategory>[
   SpendCategory(id: 'demo-travel', slug: 'travel', name: 'Travel', emoji: '✈️'),
   SpendCategory(id: 'demo-entertainment', slug: 'entertainment', name: 'Movies', emoji: '🎬'),
   SpendCategory(id: 'demo-beauty', slug: 'beauty', name: 'Beauty', emoji: '💄'),
+  SpendCategory(id: 'demo-furniture', slug: 'furniture', name: 'Furniture', emoji: '🛋️'),
 ];
 
 const _seedListingsByCategory = <String, List<Listing>>{
@@ -99,6 +100,17 @@ const _seedListingsByCategory = <String, List<Listing>>{
       mrpPaise: 119900,
       rating: 4.5,
       reviewCount: 1850,
+    ),
+  ],
+  'demo-furniture': [
+    Listing(
+      id: 'demo-furniture-1',
+      brandId: 'demo-brand',
+      title: 'Oakmere 3-Seater Sofa',
+      pricePaise: 3499900,
+      mrpPaise: 4299900,
+      rating: 4.6,
+      reviewCount: 312,
     ),
   ],
 };

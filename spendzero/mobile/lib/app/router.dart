@@ -222,6 +222,8 @@ final appRouter = GoRouter(
     'travel' => ('Travel', 'Flights, hotels & holiday packages', Icons.flight_takeoff),
     'beauty' => ('Beauty', 'Skincare, makeup & wellness', Icons.face_retouching_natural),
     'electronics' => ('Electronics', 'Gadgets & smart devices', Icons.devices),
+    'movies' => ('Movies', 'Showtimes & cinema bookings', Icons.local_movies),
+    'furniture' => ('Furniture', 'Sofas, beds & home furnishings', Icons.weekend),
     _ => (vertical, 'Explore $vertical', Icons.category),
   };
 }
