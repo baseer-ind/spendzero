@@ -27,6 +27,7 @@ import { HeroDream } from "../design-system/components/HeroDream";
 import { DreamCard, AddDreamCard } from "../design-system/components/DreamCard";
 import { GlassCard } from "../design-system/components/GlassCard";
 import { BottomNavigation, NavTab } from "../design-system/components/BottomNavigation";
+import { ShimmerGoldText } from "../design-system/components/ShimmerGoldText";
 
 const kyotoHero = require("../assets/images/kyoto-hero.jpg");
 const dreamHome = require("../assets/images/dream-home.jpg");
@@ -153,10 +154,20 @@ function Greeting() {
     <RiseIn delayMs={motion.riseDelayGreeting}>
       <View style={{ paddingTop: 40, paddingBottom: 28 }}>
         <Text style={eyebrow({ size: 12, trackingEm: 0.28 })}>Good evening, Aarav</Text>
-        <Text style={[display(40, { color: colors.foreground, height: 42 }), { marginTop: 12 }]}>
-          The future you&apos;re{"\n"}
-          <Text style={display(40, { color: colors.gold, height: 42, italic: true })}>building</Text> is closer today.
-        </Text>
+        <View style={{ marginTop: 12 }}>
+          <Text style={display(40, { color: colors.foreground, height: 42 })}>
+            {"The future you’re"}
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "baseline", flexWrap: "wrap" }}>
+            <ShimmerGoldText
+              text="building"
+              style={{ ...display(40, { italic: true }), color: colors.gold }}
+              height={42}
+              width={200}
+            />
+            <Text style={display(40, { color: colors.foreground, height: 42 })}>{" is closer today."}</Text>
+          </View>
+        </View>
       </View>
     </RiseIn>
   );
@@ -240,7 +251,12 @@ function MomentumStrip({ totalSaved, streak }: { totalSaved: number; streak: num
           </Text>
         </View>
         <View style={{ alignItems: "flex-end" }}>
-          <Text style={[display(22, { color: colors.gold }), { textAlign: "right" }]}>+{formatPaise(totalSaved || 482000)}</Text>
+          <ShimmerGoldText
+            text={`+${formatPaise(totalSaved || 482000)}`}
+            style={display(22, { color: colors.gold })}
+            height={28}
+            width={140}
+          />
           <Text style={sans(11, { color: mutedForegroundOpacity(1) })}>toward dreams</Text>
         </View>
       </View>

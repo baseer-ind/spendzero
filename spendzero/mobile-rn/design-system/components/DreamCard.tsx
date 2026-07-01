@@ -52,7 +52,7 @@ export function DreamCard({
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.content}>
-        <Text style={eyebrow({ size: 10, color: whiteOpacity(0.6) })}>{tag}</Text>
+        <Text style={eyebrow({ size: 10, trackingEm: 0.22, color: whiteOpacity(0.6) })}>{tag}</Text>
         <Text style={[display(20, { color: "#FFFFFF" }), { marginTop: 4 }]}>{title}</Text>
         <View style={styles.row}>
           <Text style={sans(12, { color: whiteOpacity(0.7) })}>{amount} to go</Text>

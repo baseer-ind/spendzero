@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Image, ImageSourcePropType, Pressable, StyleSheet, useWindowDimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path, Filter, FeTurbulence, FeColorMatrix, Rect } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { colors, whiteOpacity, blackOpacity, goldOpacity } from "../colors";
 import { eyebrow, display, sans } from "../typography";
@@ -68,6 +68,15 @@ export function HeroDream({
         />
         <FallingPetals />
 
+        {/* grain texture overlay — matches .grain CSS utility (5% opacity SVG noise) */}
+        <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Filter id="grain-filter">
+            <FeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves={2} stitchTiles="stitch" />
+            <FeColorMatrix type="saturate" values="0" />
+          </Filter>
+          <Rect width="100%" height="100%" filter="url(#grain-filter)" opacity={0.05} />
+        </Svg>
+
         <View style={styles.topMeta}>
           <View style={styles.chip}>
             <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
@@ -88,7 +97,7 @@ export function HeroDream({
 
         <View style={styles.bottomContent}>
           <Text style={eyebrow({ size: 11, trackingEm: 0.3, color: goldOpacity(0.9) })}>{place}</Text>
-          <Text style={[display(34, { color: colors.foreground }), { marginTop: 8 }]}>{title}</Text>
+          <Text style={[display(34, { color: "#FFFFFF" }), { marginTop: 8 }]}>{title}</Text>
           <Text style={[sans(13.5, { color: whiteOpacity(0.7) }), { marginTop: 12, maxWidth: cardWidth * 0.72 }]}>
             {subtitle}
           </Text>
