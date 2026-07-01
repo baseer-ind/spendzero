@@ -69,6 +69,9 @@ export default function RootLayout() {
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
           <Stack.Screen name="index" />
+          <Stack.Screen name="future" />
+          <Stack.Screen name="journey" />
+          <Stack.Screen name="profile" />
         </Stack>
       </GestureHandlerRootView>
     </ErrorBoundary>

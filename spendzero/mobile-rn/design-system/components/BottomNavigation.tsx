@@ -11,6 +11,14 @@ import { blur } from "../blur";
 
 export type NavTab = "today" | "future" | "journey" | "me";
 
+/** Maps each nav tab to its expo-router route — single source of truth for tab navigation. */
+export const TAB_ROUTES: Record<NavTab, "/" | "/future" | "/journey" | "/profile"> = {
+  today: "/",
+  future: "/future",
+  journey: "/journey",
+  me: "/profile",
+};
+
 /**
  * Reproduces `index.tsx`'s `BottomNav`: a floating glass pill, centered,
  * max-width 380px, blurred translucent gradient background, ring border,

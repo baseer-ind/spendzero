@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Rect, Path, Circle } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
 
 import { colors, whiteOpacity, goldOpacity, mutedForegroundOpacity, foregroundOpacity } from "../design-system/colors";
 import { eyebrow, display, sans } from "../design-system/typography";
@@ -26,7 +27,7 @@ import { RiseIn } from "../design-system/components/RiseIn";
 import { HeroDream } from "../design-system/components/HeroDream";
 import { DreamCard, AddDreamCard } from "../design-system/components/DreamCard";
 import { GlassCard } from "../design-system/components/GlassCard";
-import { BottomNavigation, NavTab } from "../design-system/components/BottomNavigation";
+import { BottomNavigation, NavTab, TAB_ROUTES } from "../design-system/components/BottomNavigation";
 import { ShimmerGoldText } from "../design-system/components/ShimmerGoldText";
 
 const kyotoHero = require("../assets/images/kyoto-hero.jpg");
@@ -41,7 +42,13 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { goals, stats } = useHomeData();
+  const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<NavTab>("today");
+
+  const onTabPress = (tab: NavTab) => {
+    setActiveTab(tab);
+    router.push(TAB_ROUTES[tab]);
+  };
 
   const topDream = goals.find((g) => !g.archived && goalProgress(g) < 1) ?? goals[0];
   const percent = topDream ? Math.round(goalProgress(topDream) * 100) : 72;
@@ -83,7 +90,10 @@ export default function Home() {
                 percent={percent}
                 milestones={MILESTONES}
                 activeMilestoneIndex={2}
-                onPress={() => {}}
+                // TODO: no dedicated dream-detail route exists yet (task #26)
+                // — navigate to the Future tab as the closest reasonable
+                // destination until a per-dream detail screen is built.
+                onPress={() => router.push("/future")}
               />
             </RiseIn>
           </View>
@@ -108,7 +118,7 @@ export default function Home() {
 
       <BottomNavigation
         active={activeTab}
-        onTabPress={setActiveTab}
+        onTabPress={onTabPress}
         onCenterPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
       />
     </View>
@@ -131,6 +141,7 @@ function DeviceStatusBar({ topInset }: { topInset: number }) {
 }
 
 function TopBar() {
+  const router = useRouter();
   return (
     <View style={styles.topBar}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -142,7 +153,7 @@ function TopBar() {
           <Text style={sans(13, { color: foregroundOpacity(0.9) })}>Tuesday, June 30</Text>
         </View>
       </View>
-      <Pressable style={styles.avatarA}>
+      <Pressable style={styles.avatarA} onPress={() => router.push("/profile")}>
         <Text style={display(14, { color: foregroundOpacity(0.8) })}>A</Text>
       </Pressable>
     </View>
@@ -204,6 +215,7 @@ function CollectionRow({
   dreamMacbook: any;
 }) {
   const hasRealData = otherDreams.length > 0;
+  const router = useRouter();
   return (
     <View style={{ marginTop: 40 }}>
       <View style={styles.collectionHeader}>
@@ -211,7 +223,7 @@ function CollectionRow({
           <Text style={eyebrow({ size: 11, trackingEm: 0.24 })}>Your collection</Text>
           <Text style={[display(22, { color: colors.foreground }), { marginTop: 4 }]}>Other futures</Text>
         </View>
-        <Pressable>
+        <Pressable onPress={() => router.push("/future")}>
           <Text style={sans(12, { color: goldOpacity(0.9) })}>View all</Text>
         </Pressable>
       </View>
