@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, Component, ReactNode } from "react";
+import React, { useEffect, Component, ReactNode } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
@@ -8,9 +8,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "../design-system/colors";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
-
-console.log(`[Init] _layout module evaluating @ ${Date.now()}`);
-
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -51,74 +48,24 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 }
 
 export default function RootLayout() {
-  console.log(`[Init] RootLayout render start @ ${Date.now()}`);
+  console.log(`[Init] RootLayout function invoked @ ${Date.now()}`);
 
   const [fontsLoaded, fontError] = useFonts({
     "Fraunces-Variable": require("../assets/fonts/Fraunces-Variable.ttf"),
     "Inter-Variable": require("../assets/fonts/Inter-Variable.ttf"),
   });
 
-  console.log(`[Init] useFonts state: loaded=${fontsLoaded} error=${!!fontError} @ ${Date.now()}`);
-
-  // Root view onLayout fires on EVERY layout pass, not just the first one —
-  // without a guard, calling hideAsync() unconditionally on each firing
-  // triggers its own native view-removal + redraw, which re-enters onLayout
-  // and calls hideAsync() again, looping indefinitely (seen in logcat as a
-  // repeating "performTraversals: cancelAndRedraw" tied to
-  // SplashScreenManager). hasHidden ensures the native hide call fires
-  // exactly once regardless of how many times onLayout or the fallback
-  // timer runs.
-  const hasHidden = useRef(false);
-
-  const hideSplash = useCallback(async () => {
-    if (hasHidden.current) return;
-    hasHidden.current = true;
-    console.log(`[Init] hideSplash invoked @ ${Date.now()}`);
-    await SplashScreen.hideAsync().catch((e) => console.error("[Init] hideAsync failed:", e));
-    console.log(`[Init] hideAsync settled @ ${Date.now()}`);
-  }, []);
-
-  // Firing hideAsync() from a plain mount effect can be a silent no-op: if it
-  // runs before the root view's first native layout pass, there's nothing
-  // rendered yet to reveal, so the promise resolves with no visible effect
-  // and no error. The reliable trigger is the root view's own onLayout event
-  // (fires only after the native view has actually laid out), matching
-  // Expo's own template pattern. Kept as a native View prop below, plus a
-  // useEffect fallback in case onLayout never fires for some reason.
-  const onLayoutRootView = useCallback(() => {
-    if (hasHidden.current) return;
-    console.log(`[Init] root view onLayout fired @ ${Date.now()}`);
-    if (fontsLoaded || fontError) {
-      if (fontError) console.error("[Fonts] load error:", fontError);
-      hideSplash();
-    }
-  }, [fontsLoaded, fontError, hideSplash]);
-
   useEffect(() => {
-    if (!fontsLoaded && !fontError) return;
-    if (hasHidden.current) return;
-    // Fallback: if onLayout somehow never fires, still hide once fonts settle.
-    const fallback = setTimeout(() => {
-      if (hasHidden.current) return;
-      console.log(`[Init] fallback hideAsync fired @ ${Date.now()}`);
-      hideSplash();
-    }, 500);
-    return () => clearTimeout(fallback);
-  }, [fontsLoaded, fontError, hideSplash]);
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
-    console.log(`[Init] fonts not ready yet, rendering null @ ${Date.now()}`);
-    return null;
-  }
-
-  console.log(`[Init] rendering full tree @ ${Date.now()}`);
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView
-        style={{ flex: 1, backgroundColor: colors.background }}
-        onLayout={onLayoutRootView}
-      >
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
           <Stack.Screen name="index" />
