@@ -1,7 +1,12 @@
-import { createMMKV } from "react-native-mmkv";
+import { createMMKV, MMKV } from "react-native-mmkv";
 
-const storage = createMMKV({ id: "spendzero-device" });
+let _storage: MMKV | null = null;
 const DEVICE_ID_KEY = "project_future_device_id";
+
+function getStorage(): MMKV {
+  if (!_storage) _storage = createMMKV({ id: "spendzero-device" });
+  return _storage;
+}
 
 /**
  * Stable per-install identity used for guest mode — no sign-in required.
@@ -9,6 +14,7 @@ const DEVICE_ID_KEY = "project_future_device_id";
  * `X-Device-Id` header. Mirrors mobile/lib/core/network/device_id.dart.
  */
 export function getOrCreateDeviceId(): string {
+  const storage = getStorage();
   const existing = storage.getString(DEVICE_ID_KEY);
   if (existing) return existing;
   const generated = generateUuidV4();
