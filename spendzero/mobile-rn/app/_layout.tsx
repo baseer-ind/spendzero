@@ -60,19 +60,36 @@ export default function RootLayout() {
 
   console.log(`[Init] useFonts state: loaded=${fontsLoaded} error=${!!fontError} @ ${Date.now()}`);
 
-  const onLayout = useCallback(async () => {
+  const hideSplash = useCallback(async () => {
+    console.log(`[Init] hideSplash invoked @ ${Date.now()}`);
+    await SplashScreen.hideAsync().catch((e) => console.error("[Init] hideAsync failed:", e));
+    console.log(`[Init] hideAsync settled @ ${Date.now()}`);
+  }, []);
+
+  // Firing hideAsync() from a plain mount effect can be a silent no-op: if it
+  // runs before the root view's first native layout pass, there's nothing
+  // rendered yet to reveal, so the promise resolves with no visible effect
+  // and no error. The reliable trigger is the root view's own onLayout event
+  // (fires only after the native view has actually laid out), matching
+  // Expo's own template pattern. Kept as a native View prop below, plus a
+  // useEffect fallback in case onLayout never fires for some reason.
+  const onLayoutRootView = useCallback(() => {
+    console.log(`[Init] root view onLayout fired @ ${Date.now()}`);
     if (fontsLoaded || fontError) {
-      console.log(`[Init] fonts settled, hiding splash @ ${Date.now()}`);
       if (fontError) console.error("[Fonts] load error:", fontError);
-      await SplashScreen.hideAsync().catch((e) => console.error("[Init] hideAsync failed:", e));
-      console.log(`[Init] splash hidden @ ${Date.now()}`);
+      hideSplash();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, hideSplash]);
 
   useEffect(() => {
-    console.log(`[Init] useEffect fired @ ${Date.now()}`);
-    onLayout();
-  }, [onLayout]);
+    if (!fontsLoaded && !fontError) return;
+    // Fallback: if onLayout somehow never fires, still hide once fonts settle.
+    const fallback = setTimeout(() => {
+      console.log(`[Init] fallback hideAsync fired @ ${Date.now()}`);
+      hideSplash();
+    }, 500);
+    return () => clearTimeout(fallback);
+  }, [fontsLoaded, fontError, hideSplash]);
 
   if (!fontsLoaded && !fontError) {
     console.log(`[Init] fonts not ready yet, rendering null @ ${Date.now()}`);
@@ -83,7 +100,10 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+      <GestureHandlerRootView
+        style={{ flex: 1, backgroundColor: colors.background }}
+        onLayout={onLayoutRootView}
+      >
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
           <Stack.Screen name="index" />
