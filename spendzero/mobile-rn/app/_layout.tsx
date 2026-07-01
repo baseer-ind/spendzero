@@ -9,7 +9,7 @@ import { colors } from "../design-system/colors";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-console.error("[_layout] module evaluating...");
+console.log(`[Init] _layout module evaluating @ ${Date.now()}`);
 
 
 interface ErrorBoundaryState {
@@ -51,23 +51,35 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 }
 
 export default function RootLayout() {
+  console.log(`[Init] RootLayout render start @ ${Date.now()}`);
+
   const [fontsLoaded, fontError] = useFonts({
     "Fraunces-Variable": require("../assets/fonts/Fraunces-Variable.ttf"),
     "Inter-Variable": require("../assets/fonts/Inter-Variable.ttf"),
   });
 
+  console.log(`[Init] useFonts state: loaded=${fontsLoaded} error=${!!fontError} @ ${Date.now()}`);
+
   const onLayout = useCallback(async () => {
     if (fontsLoaded || fontError) {
+      console.log(`[Init] fonts settled, hiding splash @ ${Date.now()}`);
       if (fontError) console.error("[Fonts] load error:", fontError);
-      await SplashScreen.hideAsync().catch(() => {});
+      await SplashScreen.hideAsync().catch((e) => console.error("[Init] hideAsync failed:", e));
+      console.log(`[Init] splash hidden @ ${Date.now()}`);
     }
   }, [fontsLoaded, fontError]);
 
   useEffect(() => {
+    console.log(`[Init] useEffect fired @ ${Date.now()}`);
     onLayout();
   }, [onLayout]);
 
-  if (!fontsLoaded && !fontError) return null;
+  if (!fontsLoaded && !fontError) {
+    console.log(`[Init] fonts not ready yet, rendering null @ ${Date.now()}`);
+    return null;
+  }
+
+  console.log(`[Init] rendering full tree @ ${Date.now()}`);
 
   return (
     <ErrorBoundary>

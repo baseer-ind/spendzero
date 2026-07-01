@@ -15,4 +15,8 @@ if (typeof ErrorUtils !== "undefined") {
   });
 }
 
+console.log(`[Init] index.ts start @ ${Date.now()}`);
+
 import "expo-router/entry";
+
+console.log(`[Init] expo-router/entry imported @ ${Date.now()}`);
