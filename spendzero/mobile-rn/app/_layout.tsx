@@ -9,6 +9,9 @@ import { colors } from "../design-system/colors";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+console.error("[_layout] module evaluating...");
+
+
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
