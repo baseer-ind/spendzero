@@ -14,7 +14,7 @@
     "expo-splash-screen": "^56.0.10",
     "expo-status-bar": "~56.0.4",
     "moti": "^0.30.0",
-    "react": "19.2.7",
+    "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-gesture-handler": "^3.0.2",
     "react-native-mmkv": "^4.3.2",
