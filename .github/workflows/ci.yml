@@ -78,7 +78,7 @@ jobs:
           distribution: temurin
           java-version: "17"
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - name: TypeScript check
         run: npx tsc --noEmit
       - name: Expo prebuild (Android)
