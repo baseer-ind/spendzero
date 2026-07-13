@@ -1,0 +1,72 @@
+# Render Blueprint for the whole SpendZero stack: web app + backend API +
+# Postgres + Redis. Deploy via https://dashboard.render.com -> New ->
+# Blueprint -> pick the baseer-ind/spendzero repo. Render reads this file
+# from the repo root and provisions everything below in one shot.
+#
+# Free-tier notes:
+#   - Web (static) and the API web service have generous free tiers.
+#   - Free Postgres is available but expires after ~30 days; a paid
+#     instance is needed for anything long-lived.
+#   - Free Redis ("Key Value") has a small memory cap, fine for rate limits.
+services:
+  # ---- FastAPI backend -------------------------------------------------
+  - type: web
+    name: spendzero-api
+    runtime: python
+    rootDir: spendzero/backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Run migrations + seed on each deploy, then boot uvicorn. Seeding is
+    # idempotent (upserts fictional catalog + demo user), matching what
+    # scripts/dev.sh does locally.
+    startCommand: >-
+      alembic upgrade head &&
+      python -m app.db.seed &&
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SPENDZERO_ENV
+        value: production
+      - key: SPENDZERO_DATABASE_URL
+        fromDatabase:
+          name: spendzero-db
+          property: connectionString
+      - key: SPENDZERO_REDIS_URL
+        fromService:
+          type: keyvalue
+          name: spendzero-redis
+          property: connectionString
+      # Lock CORS to the deployed web origin once it exists. Start with "*"
+      # so the first deploy works; tighten to the web app's URL afterwards.
+      - key: SPENDZERO_CORS_ORIGINS
+        value: "*"
+
+  # ---- Web app (static Vite build) ------------------------------------
+  - type: web
+    name: spendzero-web
+    runtime: static
+    rootDir: spendzero/web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    # Point the web app at the API. This must be the FULL base URL incl.
+    # protocol and /api/v1 path (Render's fromService only exposes the bare
+    # host, which isn't enough), so set it by hand in the dashboard after
+    # the API's URL is known, e.g. https://spendzero-api.onrender.com/api/v1
+    # Then trigger a redeploy of the web service (Vite inlines env at build).
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+    # SPA fallback so client-side routes (/future, /journey, ...) resolve.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # ---- Redis (Render "Key Value") -------------------------------------
+  - type: keyvalue
+    name: spendzero-redis
+    plan: free
+    ipAllowList: []   # only reachable from within Render's private network
+
+databases:
+  - name: spendzero-db
+    plan: free
