@@ -1,13 +1,11 @@
-# Render Blueprint for the whole SpendZero stack: web app + backend API +
-# Postgres + Redis. Deploy via https://dashboard.render.com -> New ->
-# Blueprint -> pick the baseer-ind/spendzero repo. Render reads this file
-# from the repo root and provisions everything below in one shot.
+# Render Blueprint for the SpendZero beta: FastAPI backend + the static web
+# app. The database is Supabase Postgres (set DATABASE_URL by hand, below),
+# not a Render-managed DB. Redis is intentionally omitted — the rate limiter
+# fails open when Redis is unreachable (see app/core/rate_limit.py), so the
+# beta runs fine without it; add one later if you want enforced limits.
 #
-# Free-tier notes:
-#   - Web (static) and the API web service have generous free tiers.
-#   - Free Postgres is available but expires after ~30 days; a paid
-#     instance is needed for anything long-lived.
-#   - Free Redis ("Key Value") has a small memory cap, fine for rate limits.
+# Deploy: https://dashboard.render.com -> New -> Blueprint -> pick the
+# baseer-ind/spendzero repo. Render reads this file from the repo root.
 services:
   # ---- FastAPI backend -------------------------------------------------
   - type: web
@@ -16,9 +14,9 @@ services:
     rootDir: spendzero/backend
     plan: free
     buildCommand: pip install -r requirements.txt
-    # Run migrations + seed on each deploy, then boot uvicorn. Seeding is
-    # idempotent (upserts fictional catalog + demo user), matching what
-    # scripts/dev.sh does locally.
+    # Migrate, seed the fictional CATALOG only (no demo user — see the
+    # SPENDZERO_SEED_DEMO_USER=false below), then boot. Catalog seeding is
+    # idempotent, so re-running on every deploy is safe.
     startCommand: >-
       alembic upgrade head &&
       python -m app.db.seed &&
@@ -26,19 +24,22 @@ services:
     envVars:
       - key: SPENDZERO_ENV
         value: production
+      # Supabase Postgres connection string. Use the "Connection Pooling"
+      # (Transaction, port 6543) URI from Supabase -> Project Settings ->
+      # Database, and change the scheme to postgresql+asyncpg://. The app
+      # strips sslmode/channel_binding and enables SSL automatically
+      # (see app/db/session.py), so paste it as-is otherwise.
       - key: SPENDZERO_DATABASE_URL
-        fromDatabase:
-          name: spendzero-db
-          property: connectionString
-      - key: SPENDZERO_REDIS_URL
-        fromService:
-          type: keyvalue
-          name: spendzero-redis
-          property: connectionString
-      # Lock CORS to the deployed web origin once it exists. Start with "*"
-      # so the first deploy works; tighten to the web app's URL afterwards.
+        sync: false
+      # Real beta data: do NOT create the fake "Demo Saver" user. Every
+      # real guest device starts empty and builds its own dreams.
+      - key: SPENDZERO_SEED_DEMO_USER
+        value: "false"
+      # Lock CORS to the deployed web origin. Set to your Vercel URL, e.g.
+      # https://spendzero-five.vercel.app (start as "*" if unsure, then
+      # tighten).
       - key: SPENDZERO_CORS_ORIGINS
-        value: "*"
+        sync: false
 
   # ---- Web app (static Vite build) ------------------------------------
   - type: web
@@ -47,26 +48,15 @@ services:
     rootDir: spendzero/web
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
-    # Point the web app at the API. This must be the FULL base URL incl.
-    # protocol and /api/v1 path (Render's fromService only exposes the bare
-    # host, which isn't enough), so set it by hand in the dashboard after
-    # the API's URL is known, e.g. https://spendzero-api.onrender.com/api/v1
-    # Then trigger a redeploy of the web service (Vite inlines env at build).
+    # Full API base URL incl. protocol + /api/v1 path, e.g.
+    # https://spendzero-api.onrender.com/api/v1  (set after the API is up;
+    # Vite inlines env at build time, so redeploy the web service after
+    # setting this). If you're keeping the web app on Vercel instead, ignore
+    # this service and set VITE_API_BASE_URL in Vercel's project settings.
     envVars:
       - key: VITE_API_BASE_URL
         sync: false
-    # SPA fallback so client-side routes (/future, /journey, ...) resolve.
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
-
-  # ---- Redis (Render "Key Value") -------------------------------------
-  - type: keyvalue
-    name: spendzero-redis
-    plan: free
-    ipAllowList: []   # only reachable from within Render's private network
-
-databases:
-  - name: spendzero-db
-    plan: free
