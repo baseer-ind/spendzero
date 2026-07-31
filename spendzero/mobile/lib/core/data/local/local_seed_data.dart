@@ -130,28 +130,19 @@ Listing? findSeedListingById(String id) {
   return null;
 }
 
-const seedGoals = <SavingsGoal>[
-  SavingsGoal(
-    id: 'demo-goal-1',
-    title: 'New Headphones',
-    emoji: '🎧',
-    targetPaise: 500000,
-    savedPaise: 180000,
-  ),
-  SavingsGoal(
-    id: 'demo-goal-2',
-    title: 'Weekend Trip',
-    emoji: '🏖️',
-    targetPaise: 2000000,
-    savedPaise: 350000,
-  ),
-];
+// New users start with a clean slate — no pre-made dreams. They create
+// their own first dream via the app's empty state. (The fictional catalog
+// above is kept; that's browsable content the app needs, not user data.)
+const seedGoals = <SavingsGoal>[];
 
+// Zeroed stats so a brand-new user sees a genuine "nothing yet" state
+// instead of a fabricated streak/savings tally. Real stats are computed
+// from the user's own craving history as they use the app.
 const seedStats = UserStats(
-  totalAmountNotSpentPaise: 530000,
-  cravingsCompleted: 7,
+  totalAmountNotSpentPaise: 0,
+  cravingsCompleted: 0,
   goalsCompleted: 0,
-  currentStreakDays: 3,
-  longestStreakDays: 5,
-  categoriesExplored: ['demo-food', 'demo-groceries'],
+  currentStreakDays: 0,
+  longestStreakDays: 0,
+  categoriesExplored: [],
 );

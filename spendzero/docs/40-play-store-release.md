@@ -79,12 +79,20 @@ base64 upload-keystore.jks | tr -d '\n'   # macOS
 
 ---
 
-## 2. Point the app at the production backend — **You**
+## 2. Backend — not required for this launch
 
-`env/production.json` holds the `--dart-define` values (API base URL, etc.)
-baked into the release build. Confirm its API URL points at your deployed
-backend (the Supabase-backed API from the beta setup), not localhost, before
-building the AAB you upload.
+The beta ships **local-first**: `useLocalBackend = true` in
+`lib/core/providers/providers.dart`, so all data lives on-device
+(SharedPreferences) and the app makes **no network calls** for its core data.
+This means:
+
+- `env/production.json`'s API URL is irrelevant for the launch build — the
+  app never calls it. No backend needs to be deployed for the app to work.
+- New users start with a **clean slate** (no pre-made dreams, zeroed stats —
+  see `local_seed_data.dart`); the fictional catalog remains browsable.
+- Trade-off: no cross-device sync. To switch to the Supabase-backed server
+  later, flip `useLocalBackend = false`, deploy the backend, and point
+  `env/production.json` at it — then rebuild.
 
 ---
 
