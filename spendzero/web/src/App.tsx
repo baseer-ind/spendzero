@@ -8,6 +8,7 @@ import Continue from "./routes/continue";
 import Order from "./routes/order";
 import Restaurant from "./routes/restaurant";
 import Restaurants from "./routes/restaurants";
+import Privacy from "./routes/privacy";
 
 function NotFound() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="/order" element={<Order />} />
         <Route path="/restaurant" element={<Restaurant />} />
         <Route path="/restaurants" element={<Restaurants />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
