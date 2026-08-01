@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
+import '../../../design_system/components/dream_cover.dart';
 
 const _presetGoals = <(String, String)>[
   ('🏖', 'Goa Trip'),
@@ -53,6 +54,7 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
   late String _category = widget.editing?.category ?? 'General';
   late GoalPriority _priority = widget.editing?.priority ?? GoalPriority.medium;
   late DateTime? _targetDate = widget.editing?.targetDate;
+  late String? _coverRef = widget.editing?.imageSeed;
   bool _isSaving = false;
   String? _error;
 
@@ -106,6 +108,7 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
           notes: _notesController.text.trim(),
           category: _category,
           priority: _priority,
+          imageSeed: _coverRef,
         ));
       } else {
         await repo.createGoal(
@@ -116,6 +119,7 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
           notes: _notesController.text.trim(),
           category: _category,
           priority: _priority,
+          imageSeed: _coverRef,
         );
       }
       ref.invalidate(goalsProvider);
@@ -173,6 +177,55 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Cover',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    letterSpacing: 0.4,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 76,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: dreamCoverOptions.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, i) {
+                  final opt = dreamCoverOptions[i];
+                  final ref = 'asset:${opt.key}';
+                  final selected = _coverRef == ref;
+                  return GestureDetector(
+                    onTap: () => setState(() => _coverRef = selected ? null : ref),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: selected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.outlineVariant,
+                              width: selected ? 2 : 1,
+                            ),
+                            image: DecorationImage(
+                              image: AssetImage(opt.asset),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(opt.label, style: Theme.of(context).textTheme.labelSmall),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 12),
             TextField(

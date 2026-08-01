@@ -9,7 +9,7 @@ import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/money.dart';
 import '../../../design_system/colors.dart';
-import '../../../design_system/components/dream_atmosphere.dart';
+import '../../../design_system/components/dream_cover.dart';
 import '../../../design_system/components/dream_card.dart';
 import '../../../design_system/components/falling_petals.dart';
 import '../../../design_system/components/premium_progress_ring.dart';
@@ -255,7 +255,7 @@ class _HeroDream extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            DreamAtmosphere(seed: dream?.title ?? 'future'),
+            DreamCover(imageRef: dream?.imageSeed, fallbackSeed: dream?.title ?? 'future'),
             const Positioned.fill(child: FallingPetals()),
             const DecoratedBox(
               decoration: BoxDecoration(
@@ -414,7 +414,7 @@ class _CollectionRow extends StatelessWidget {
               }
               final dream = goals[index];
               return DSDreamCard(
-                background: DreamAtmosphere(seed: dream.title),
+                background: DreamCover(imageRef: dream.imageSeed, fallbackSeed: dream.title),
                 tag: dream.category,
                 title: dream.title,
                 amount: formatPaise(dream.targetPaise - dream.savedPaise),
