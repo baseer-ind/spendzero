@@ -1,0 +1,13 @@
+# Explicit, version-independent lint config.
+#
+# Previously there was no ruff config, so CI relied on ruff's *default* rule
+# set — which drifts between ruff releases. `ruff` was unpinned
+# (`ruff>=0.4`), so a newer release silently enabled extra rules (import
+# sorting, line length, etc.) and turned the backend job red on code that
+# hadn't changed. Pinning the selected rules here (to ruff's long-standing
+# default of E4/E7/E9 + F) keeps `ruff check` deterministic no matter which
+# ruff version is installed.
+line-length = 100
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
