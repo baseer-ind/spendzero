@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
@@ -83,6 +88,27 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
       lastDate: DateTime.now().add(const Duration(days: 3650)),
     );
     if (picked != null) setState(() => _targetDate = picked);
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1600,
+        imageQuality: 85,
+      );
+      if (picked == null) return;
+      // The picker returns a cache path that can be purged; copy the image
+      // into the app's documents dir so the cover persists with the dream.
+      final dir = await getApplicationDocumentsDirectory();
+      final dest = File('${dir.path}/dream_cover_${const Uuid().v4()}.jpg');
+      await File(picked.path).copy(dest.path);
+      if (mounted) setState(() => _coverRef = 'file:${dest.path}');
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = "Couldn't add that photo. Try another one.");
+      }
+    }
   }
 
   Future<void> _save() async {
@@ -191,10 +217,48 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
               height: 76,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: dreamCoverOptions.length,
+                itemCount: dreamCoverOptions.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(width: 10),
                 itemBuilder: (context, i) {
-                  final opt = dreamCoverOptions[i];
+                  final scheme = Theme.of(context).colorScheme;
+                  // First tile: pick from the user's gallery.
+                  if (i == 0) {
+                    final fileSelected = _coverRef?.startsWith('file:') ?? false;
+                    return GestureDetector(
+                      onTap: _pickFromGallery,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 64,
+                            height: 52,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: fileSelected ? scheme.primary : scheme.outlineVariant,
+                                width: fileSelected ? 2 : 1,
+                              ),
+                              image: fileSelected
+                                  ? DecorationImage(
+                                      image: FileImage(File(_coverRef!.substring(5))),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            ),
+                            child: fileSelected
+                                ? null
+                                : Icon(Icons.add_photo_alternate_outlined,
+                                    color: scheme.onSurfaceVariant),
+                          ),
+                          const SizedBox(height: 4),
+                          Text('Gallery', style: Theme.of(context).textTheme.labelSmall),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final opt = dreamCoverOptions[i - 1];
                   final ref = 'asset:${opt.key}';
                   final selected = _coverRef == ref;
                   return GestureDetector(
@@ -208,9 +272,7 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: selected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.outlineVariant,
+                              color: selected ? scheme.primary : scheme.outlineVariant,
                               width: selected ? 2 : 1,
                             ),
                             image: DecorationImage(

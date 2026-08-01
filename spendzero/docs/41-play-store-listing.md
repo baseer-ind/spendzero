@@ -75,7 +75,14 @@ Start with one intention today. One more intentional day.
 - **Can users request deletion?** Yes — provide a contact email / in-app path.
 - **Financial info / payment info collected?** **No.** (Critical — the app
   never touches real money or payment instruments.)
-- **Location, contacts, messages, photos, audio:** No.
+- **Photos:** The app can use a photo the user *explicitly picks* from their
+  gallery as a dream cover (via Android's system photo picker — no broad
+  photo-library permission is requested). That image is copied into the
+  app's own storage and **stays on the device — never uploaded**. Under
+  Google's definition (collection = data leaving the device) this is **not
+  "collected"**; if asked, declare photos are accessed for app functionality,
+  stored on-device only, not shared.
+- **Location, contacts, messages, audio:** No.
 
 ## App access
 - No login required — full app usable in guest mode. Tell reviewers: "No
