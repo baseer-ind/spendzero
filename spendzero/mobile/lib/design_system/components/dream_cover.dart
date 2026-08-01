@@ -69,8 +69,8 @@ class DreamCover extends StatelessWidget {
       children: [
         image,
         // Scrim so title/amount text over the photo stays readable.
-        DecoratedBox(
-          decoration: const BoxDecoration(
+        const DecoratedBox(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
