@@ -31,6 +31,12 @@ services:
       # (see app/db/session.py), so paste it as-is otherwise.
       - key: SPENDZERO_DATABASE_URL
         sync: false
+      # Supabase JWT secret (Supabase -> Project Settings -> API -> JWT
+      # Settings -> JWT Secret). Lets the API verify the access tokens
+      # signed-in users present as `Authorization: Bearer <token>`. Without
+      # it, only guest (X-Device-Id) mode works.
+      - key: SPENDZERO_SUPABASE_JWT_SECRET
+        sync: false
       # Real beta data: do NOT create the fake "Demo Saver" user. Every
       # real guest device starts empty and builds its own dreams.
       - key: SPENDZERO_SEED_DEMO_USER

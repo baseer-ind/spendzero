@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_or_create_guest_user
+from app.core.deps import get_current_user
 from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.goals import Goal, GoalContribution
@@ -26,7 +26,7 @@ async def _saved_amount(db: AsyncSession, goal_id: uuid.UUID) -> int:
 @router.get("", response_model=list[GoalOut])
 async def list_goals(
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_or_create_guest_user),
+    user: User = Depends(get_current_user),
 ) -> list[GoalOut]:
     result = await db.execute(select(Goal).where(Goal.user_id == user.id))
     goals = result.scalars().all()
@@ -48,7 +48,7 @@ async def list_goals(
 async def create_goal(
     payload: GoalCreate,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_or_create_guest_user),
+    user: User = Depends(get_current_user),
 ) -> GoalOut:
     goal = Goal(user_id=user.id, **payload.model_dump())
     db.add(goal)

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_or_create_guest_user
+from app.core.deps import get_current_user
 from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.catalog import Listing
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/craving-sessions", tags=["craving-sessions"])
 async def checkout(
     payload: CheckoutRequest,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_or_create_guest_user),
+    user: User = Depends(get_current_user),
 ) -> CravingCompletedOut:
     """Run the fake payment + fake tracking flow and land on 'Craving Completed'.
 
@@ -104,7 +104,7 @@ async def record_outcome(
     session_id: uuid.UUID,
     payload: SaveOutcomeRequest,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_or_create_guest_user),
+    user: User = Depends(get_current_user),
 ) -> None:
     """Record the user's own choice after 'Craving Completed' — 'I Saved It'
     or 'Maybe Later'. This never moves or implies movement of real money."""

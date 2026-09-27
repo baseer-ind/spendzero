@@ -27,9 +27,10 @@ def test_all_routes_registered() -> None:
     assert expected.issubset(paths)
 
 
-def test_checkout_requires_device_id_header() -> None:
+def test_checkout_requires_auth() -> None:
+    # With no bearer token and no X-Device-Id, the request is unauthenticated.
     response = client.post(
         "/api/v1/craving-sessions/checkout",
         json={"category_id": "00000000-0000-0000-0000-000000000000", "items": []},
     )
-    assert response.status_code == 422
+    assert response.status_code == 401

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_or_create_guest_user
+from app.core.deps import get_current_user
 from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.models.commerce import Cart, CartItem
@@ -50,7 +50,7 @@ async def _cart_out(db: AsyncSession, cart: Cart) -> CartOut:
 async def get_cart(
     category_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_or_create_guest_user),
+    user: User = Depends(get_current_user),
 ) -> CartOut:
     """Resume the open (abandoned) cart for this category, if any."""
     cart = await _get_or_create_open_cart(db, user.id, category_id)
@@ -66,7 +66,7 @@ async def replace_cart_items(
     category_id: uuid.UUID,
     items: list[CartItemIn],
     db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_or_create_guest_user),
+    user: User = Depends(get_current_user),
 ) -> CartOut:
     """Persist the current selection for this category's cart so it survives
     app restarts and can be resumed later."""
