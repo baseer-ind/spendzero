@@ -103,6 +103,32 @@ if [ -f "mobile/android/app/src/main/AndroidManifest.xml" ]; then
     sed -i.bak 's/<manifest /<manifest xmlns:tools="http:\/\/schemas.android.com\/tools" /' mobile/android/app/src/main/AndroidManifest.xml
     sed -i.bak '0,/<application/s//<uses-permission android:name="android.permission.INTERNET" \/>\n    <application/' mobile/android/app/src/main/AndroidManifest.xml
   fi
+  # Deep-link intent filter so Supabase's Google/OAuth browser flow can return
+  # to the app via com.projectfuture.app://login-callback. Injected once, right
+  # after MainActivity's launcher intent-filter closes. (Google also needs the
+  # provider enabled + this redirect URL allowlisted in the Supabase dashboard;
+  # see docs/42-auth-setup.md.)
+  if ! grep -q 'login-callback' mobile/android/app/src/main/AndroidManifest.xml; then
+    python3 - "mobile/android/app/src/main/AndroidManifest.xml" <<'PYMANIFEST'
+import sys, re
+path = sys.argv[1]
+src = open(path).read()
+oauth_filter = '''
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.projectfuture.app" android:host="login-callback" />
+            </intent-filter>'''
+# Insert right after the first </intent-filter> (the LAUNCHER one on MainActivity).
+idx = src.find('</intent-filter>')
+if idx != -1 and 'login-callback' not in src:
+    end = idx + len('</intent-filter>')
+    src = src[:end] + oauth_filter + src[end:]
+    open(path, 'w').write(src)
+    print('   oauth deep-link intent filter injected')
+PYMANIFEST
+  fi
   rm -f mobile/android/app/src/main/AndroidManifest.xml.bak
 fi
 

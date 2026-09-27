@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/models/category.dart';
 import '../core/models/craving_completed.dart';
 import '../features/app_home/presentation/app_home_screen.dart';
+import '../features/auth/presentation/login_screen.dart';
 import '../features/beauty/presentation/beauty_home_screen.dart';
 import '../features/beauty/presentation/brand_screen.dart' as beauty;
 import '../features/movies/presentation/movies_home_screen.dart';
@@ -59,6 +60,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/intro',
       pageBuilder: (c, s) => _slide(c, s, const IntroScreen()),
+    ),
+    GoRoute(
+      path: '/login',
+      pageBuilder: (c, s) => _slide(c, s, const LoginScreen()),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => RootShell(navigationShell: navigationShell),

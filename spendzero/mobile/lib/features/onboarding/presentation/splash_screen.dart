@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../auth/presentation/login_screen.dart';
 import 'intro_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -25,8 +27,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       if (!mounted) return;
       final prefs = await SharedPreferences.getInstance();
       final seenIntro = prefs.getBool(introSeenKey) ?? false;
+      final guest = prefs.getBool(guestModeKey) ?? false;
+      final signedIn = Supabase.instance.client.auth.currentSession != null;
       if (!mounted) return;
-      context.go(seenIntro ? '/' : '/intro');
+      if (signedIn || guest) {
+        context.go('/');
+      } else if (!seenIntro) {
+        context.go('/intro');
+      } else {
+        context.go('/login');
+      }
     });
   }
 

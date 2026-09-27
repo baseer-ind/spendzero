@@ -51,7 +51,7 @@ class _IntroScreenState extends State<IntroScreen> {
   Future<void> _finish() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(introSeenKey, true);
-    if (mounted) context.go('/');
+    if (mounted) context.go('/login');
   }
 
   void _next() {
