@@ -119,6 +119,9 @@ jobs:
   mobile-build:
     runs-on: ubuntu-latest
     needs: mobile
+    permissions:
+      # Needed so the "Publish testable APK" step can create/update a Release.
+      contents: write
     env:
       # Surfaced at job level so the signing step's `if:` can test it.
       # Empty when the secret isn't configured -> release build falls back
@@ -181,3 +184,26 @@ jobs:
         with:
           name: project-future-release-aab
           path: spendzero/mobile/build/app/outputs/bundle/release/app-release.aab
+      # Publish a one-tap, login-free download of the installable app on every
+      # push to main. Uses a fixed "android-latest" tag so the URL is stable:
+      #   https://github.com/baseer-ind/spendzero/releases/download/android-latest/project-future.apk
+      - name: Publish testable APK to a GitHub Release
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          cp spendzero/mobile/build/app/outputs/flutter-apk/app-debug.apk project-future.apk
+      - name: Create/update the android-latest release
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-latest
+          name: "Project Future — latest Android build"
+          body: |
+            Latest testable debug build of the Project Future app.
+
+            **Install on Android:** download `project-future.apk` below, open it,
+            and allow "install unknown apps" if prompted. Debug build — for
+            testing only, not the Play Store release.
+
+            Built from commit ${{ github.sha }}.
+          prerelease: true
+          files: project-future.apk
