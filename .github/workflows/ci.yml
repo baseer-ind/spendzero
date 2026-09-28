@@ -120,10 +120,11 @@ jobs:
           name: project-future-web-dist
           path: spendzero/web/dist
 
-  # Compile the SAME Flutter app to web and publish it to GitHub Pages, so the
-  # full app is testable in a browser (no APK install loop) at a stable URL:
-  #   https://baseer-ind.github.io/spendzero/
-  # This is true parity — identical screens to the Android build, one codebase.
+  # Compile the SAME Flutter app to web and publish the finished static site to
+  # the `vercel-web` branch, which Vercel serves directly (no build on Vercel's
+  # side — it can't run Flutter). This is true parity: identical screens to the
+  # Android build, one codebase. base-href is "/" because Vercel serves at the
+  # domain root, and a vercel.json adds SPA rewrites so client-side routes work.
   flutter-web:
     runs-on: ubuntu-latest
     needs: mobile
@@ -143,13 +144,23 @@ jobs:
         run: flutter pub get
       - name: Build web
         working-directory: spendzero/mobile
-        run: flutter build web --release --base-href /spendzero/ --dart-define-from-file=env/production.json
-      - name: Deploy to GitHub Pages
+        run: flutter build web --release --base-href / --dart-define-from-file=env/production.json
+      - name: Add Vercel static config (SPA rewrites)
+        working-directory: spendzero/mobile/build/web
+        run: |
+          cat > vercel.json <<'JSON'
+          {
+            "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+          }
+          JSON
+      - name: Publish web build to the vercel-web branch
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: spendzero/mobile/build/web
+          publish_branch: vercel-web
+          force_orphan: true
 
   mobile-build:
     runs-on: ubuntu-latest
