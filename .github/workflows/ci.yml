@@ -170,7 +170,12 @@ jobs:
           java-version: "17"
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.5"
+          # 3.29+ is required to build supabase_flutter's transitive app_links
+          # 6.x plugin on Android (older Flutter's Gradle plugin didn't expose
+          # the `flutter` extension it reads, causing "Could not get unknown
+          # property 'flutter'" / "compileSdkVersion is not specified"). Pinned
+          # only here; the analyze/test and web jobs stay on 3.24.5.
+          flutter-version: "3.29.3"
           channel: stable
       - name: Scaffold android/ios platform folders
         working-directory: spendzero
