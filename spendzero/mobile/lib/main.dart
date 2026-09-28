@@ -14,6 +14,11 @@ Future<void> main() async {
   try {
     await Supabase.initialize(
       url: SupabaseConfig.url,
+      // The anon key is still valid and functional; only the parameter name is
+      // deprecated in favor of `publishableKey` (a different key format we
+      // haven't rotated to). Suppress the info-lint so `flutter analyze`
+      // (which fails on any issue) stays green until we migrate the key.
+      // ignore: deprecated_member_use
       anonKey: SupabaseConfig.anonKey,
     );
   } catch (e) {

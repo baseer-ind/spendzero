@@ -85,6 +85,10 @@ jobs:
         run: npx expo prebuild -p android --no-install
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Don't let the action install the obsolete "tools" package (removed
+          # from the SDK), which fails with "Failed to find package 'tools'".
+          packages: ""
       - name: Build debug APK
         working-directory: spendzero/mobile-rn/android
         run: ./gradlew assembleDebug --no-daemon
