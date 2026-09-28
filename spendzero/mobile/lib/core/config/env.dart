@@ -1,6 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 
 /// Centralized environment config. Nothing in this app should hardcode a
 /// base URL, secret, or key outside this file.
@@ -25,7 +23,10 @@ class Env {
 
   static String get apiBaseUrl {
     if (_explicitApiBaseUrl.isNotEmpty) return _explicitApiBaseUrl;
-    if (!kIsWeb && Platform.isAndroid) return 'http://10.0.2.2:8000/api/v1';
+    // defaultTargetPlatform is web-safe (no dart:io), so this compiles for web.
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8000/api/v1';
+    }
     return 'http://localhost:8000/api/v1';
   }
 

@@ -1,6 +1,8 @@
-import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import '../../core/utils/cover_file.dart';
 import 'dream_atmosphere.dart';
 
 /// A selectable cover photo for a dream. `assetKey` addresses a bundled
@@ -53,10 +55,14 @@ class DreamCover extends StatelessWidget {
       if (opt != null) {
         image = Image.asset(opt.asset, fit: BoxFit.cover);
       }
+    } else if (ref != null && ref.startsWith('data:')) {
+      // Inline base64 cover — works identically on mobile and web.
+      image = Image.memory(base64Decode(ref.substring(5)), fit: BoxFit.cover);
     } else if (ref != null && ref.startsWith('file:')) {
-      final path = ref.substring(5);
-      if (File(path).existsSync()) {
-        image = Image.file(File(path), fit: BoxFit.cover);
+      // Legacy on-device path from older mobile builds (null on web).
+      final provider = fileCoverProvider(ref.substring(5));
+      if (provider != null) {
+        image = Image(image: provider, fit: BoxFit.cover);
       }
     }
 

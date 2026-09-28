@@ -1,10 +1,8 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../core/models/goal.dart';
 import '../../../core/providers/providers.dart';
@@ -98,12 +96,11 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
         imageQuality: 85,
       );
       if (picked == null) return;
-      // The picker returns a cache path that can be purged; copy the image
-      // into the app's documents dir so the cover persists with the dream.
-      final dir = await getApplicationDocumentsDirectory();
-      final dest = File('${dir.path}/dream_cover_${const Uuid().v4()}.jpg');
-      await File(picked.path).copy(dest.path);
-      if (mounted) setState(() => _coverRef = 'file:${dest.path}');
+      // Store the cover inline as base64 (`data:` ref) rather than a file path,
+      // so it persists with the dream and works identically on mobile and web
+      // without touching the filesystem.
+      final bytes = await picked.readAsBytes();
+      if (mounted) setState(() => _coverRef = 'data:${base64Encode(bytes)}');
     } catch (_) {
       if (mounted) {
         setState(() => _error = "Couldn't add that photo. Try another one.");
@@ -223,7 +220,7 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
                   final scheme = Theme.of(context).colorScheme;
                   // First tile: pick from the user's gallery.
                   if (i == 0) {
-                    final fileSelected = _coverRef?.startsWith('file:') ?? false;
+                    final photoSelected = _coverRef?.startsWith('data:') ?? false;
                     return GestureDetector(
                       onTap: _pickFromGallery,
                       child: Column(
@@ -236,17 +233,17 @@ class _CreateGoalSheetState extends ConsumerState<_CreateGoalSheet> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: fileSelected ? scheme.primary : scheme.outlineVariant,
-                                width: fileSelected ? 2 : 1,
+                                color: photoSelected ? scheme.primary : scheme.outlineVariant,
+                                width: photoSelected ? 2 : 1,
                               ),
-                              image: fileSelected
+                              image: photoSelected
                                   ? DecorationImage(
-                                      image: FileImage(File(_coverRef!.substring(5))),
+                                      image: MemoryImage(base64Decode(_coverRef!.substring(5))),
                                       fit: BoxFit.cover,
                                     )
                                   : null,
                             ),
-                            child: fileSelected
+                            child: photoSelected
                                 ? null
                                 : Icon(Icons.add_photo_alternate_outlined,
                                     color: scheme.onSurfaceVariant),
