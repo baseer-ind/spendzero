@@ -32,26 +32,22 @@ String _tagForTitle(String title) {
   return 'product';
 }
 
-/// Routes an image through the images.weserv.nl CDN, which (a) sends CORS
-/// headers so the photo loads on the canvaskit web build (plain loremflickr
-/// does not, so every image errored out to the fallback), (b) resizes/crops
-/// server-side, and (c) caches for speed/reliability.
-String _cdn(String sourceUrl, int w, int h) {
-  final enc = Uri.encodeComponent(sourceUrl);
-  return 'https://images.weserv.nl/?url=$enc&w=$w&h=$h&fit=cover&output=webp&q=80';
-}
+/// Picsum is used as the photo source because it is highly reliable and sends
+/// CORS headers, so images actually load on the web build (the previous
+/// keyword source, loremflickr, errored out, leaving every card on its
+/// fallback). A stable per-item seed means each product/store keeps the same
+/// photo. NOTE: Picsum photos are not subject-matched (a dish may show a
+/// generic photo); this is the reliable baseline — once confirmed loading,
+/// the source can be swapped for a subject-matched one.
+String _picsum(String seed, int w, int h) =>
+    'https://picsum.photos/seed/${_lock(seed)}/$w/$h';
 
 /// Square product photo for cards/thumbnails.
 String imageUrlForProductTitle(String title, {int size = 400}) {
-  final src = 'loremflickr.com/$size/$size/${_tagForTitle(title)}?lock=${_lock(title)}';
-  return _cdn(src, size, size);
+  return _picsum('$title${_tagForTitle(title)}', size, size);
 }
 
-/// Wide hero/banner photo for a store/restaurant/brand, keyed off a subject
-/// tag (e.g. a cuisine or category) plus a stable seed (the entity id).
+/// Wide hero/banner photo for a store/restaurant/brand.
 String imageUrlForBanner(String tag, String seed, {int width = 1200, int height = 640}) {
-  final clean = tag.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '');
-  final subject = clean.isEmpty ? 'storefront' : clean;
-  final src = 'loremflickr.com/$width/$height/$subject?lock=${_lock(seed)}';
-  return _cdn(src, width, height);
+  return _picsum('$seed$tag', width, height);
 }
