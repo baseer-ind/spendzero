@@ -71,10 +71,16 @@ const field = (win, key) => win.match(new RegExp(key + ':\\s*"([^"]+)"'))?.[1];
   }
 }
 
+// Launch visual catalogue set (from productImages.ts).
+const piSrc = read("src/lib/productImages.ts");
+const launchBlock = piSrc.match(/LAUNCH_IDS[^=]*=\s*\{([\s\S]*?)\};/)?.[1] ?? "";
+const LAUNCH = new Set([...launchBlock.matchAll(/"([^"]+)"/g)].map((m) => m[1]));
+
 // Enrich + detect duplicates / issues.
 const byFilename = {};
 for (const it of items) {
   it.priority = PRIORITY[it.vertical] ?? "P2";
+  it.launch = LAUNCH.has(it.productId);
   it.photoFilename = photoFile(it.vertical, it.productId);
   it.currentImage = "generated-illustration (productArt)";
   it.photoPresent = hasPhoto(it.vertical, it.productId);
@@ -83,9 +89,10 @@ for (const it of items) {
 }
 const duplicates = Object.entries(byFilename).filter(([, n]) => n > 1).map(([f]) => f);
 
-const counts = { total: items.length, P0: 0, P1: 0, P2: 0, photographs: 0, illustrations: 0, missing: 0, byVertical: {} };
+const counts = { total: items.length, launch: 0, P0: 0, P1: 0, P2: 0, photographs: 0, illustrations: 0, missing: 0, byVertical: {} };
 for (const it of items) {
   counts[it.priority]++;
+  if (it.launch) counts.launch++;
   counts.byVertical[it.vertical] = (counts.byVertical[it.vertical] || 0) + 1;
   if (it.photoPresent) counts.photographs++; else counts.illustrations++;
 }
@@ -100,7 +107,7 @@ let md = `# Product Image Manifest
 Generated from the live catalogue by \`webapp/scripts/gen-manifest.mjs\`. Re-run
 after catalogue changes. Machine-readable: \`docs/product-image-manifest.json\`.
 
-**${counts.total} products** · P0 ${counts.P0} · P1 ${counts.P1} · P2 ${counts.P2}
+**${counts.total} products** · ⭐ launch visual catalogue: ${counts.launch} · P0 ${counts.P0} · P1 ${counts.P1} · P2 ${counts.P2}
 · Photographs present: **${counts.photographs}** · Illustration fallback: ${counts.illustrations}
 · Missing (listed but file absent): ${counts.missing} · Duplicate filenames: ${duplicates.length}
 
@@ -120,7 +127,7 @@ for (const v of order) {
   md += `| productId | name | store | category | photoFilename | appears |\n|---|---|---|---|---|---|\n`;
   for (const it of list) {
     const a = `${it.appearsIn.categoryGrid ? "G" : ""}${it.appearsIn.search ? "S" : ""}${it.appearsIn.productDetail ? "D" : ""}${it.appearsIn.wishlist ? "W" : ""}${it.appearsIn.cart ? "C" : ""}${it.appearsIn.homeToday ? "H" : ""}`;
-    md += `| \`${it.productId}\` | ${it.name} | ${it.store} | ${it.category} | \`${it.photoFilename}\` | ${a} |\n`;
+    md += `| \`${it.productId}\` | ${it.name}${it.launch ? " ⭐" : ""} | ${it.store} | ${it.category} | \`${it.photoFilename}\` | ${a} |\n`;
   }
 }
 md += `\n## Issues\n`;

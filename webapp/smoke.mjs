@@ -244,10 +244,10 @@ try {
   // search
   await page.getByPlaceholder("Search gadgets, brands…").fill("earbuds");
   await page.waitForTimeout(400);
-  const foundEl = await page.getByText("AirBuds", { exact: false }).count();
+  const foundEl = await page.getByText("Wireless ANC Earbuds", { exact: false }).count();
   log(`electronics search works: ${foundEl > 0}`);
   if (foundEl === 0) issues.push("ELECTRONICS: search did not filter");
-  await page.getByText("AirBuds", { exact: false }).first().click();
+  await page.getByText("Wireless ANC Earbuds", { exact: false }).first().click();
   await page.waitForURL("**/electronics/**", { timeout: 8000 });
   await shot("product");
   const specs = await page.getByText("Specifications", { exact: false }).count();
@@ -293,7 +293,7 @@ try {
   log(`wishlist route reachable (empty state ok): ${wlEmpty >= 0}`);
   // add a wishlist item then verify it shows
   await go("/electronics");
-  await page.getByText("GamePad", { exact: false }).first().click();
+  await page.getByText("Game Controller", { exact: false }).first().click();
   await page.waitForURL("**/electronics/**", { timeout: 8000 });
   await page.waitForTimeout(400);
   const moreLikeThis = await page.getByText("More like this", { exact: false }).count();

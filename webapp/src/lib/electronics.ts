@@ -48,7 +48,7 @@ function img(kw: string, seed: string) {
 
 export const PRODUCTS: Product[] = [
   {
-    id: "soniq-airbuds-pro", name: "Soniq AirBuds Pro (ANC)", brand: "Soniq", category: "Earbuds",
+    id: "soniq-airbuds-pro", name: "Wireless ANC Earbuds", brand: "Soniq", category: "Earbuds",
     price: 2999, mrp: 4999, rating: 4.4, ratingCount: 18423, bankOffer: "10% off with UPI · up to ₹300",
     stockLeft: 3, badge: "Deal of the day", bestseller: true, trending: true,
     desc: "Active noise cancellation, 42-hour battery with case, low-latency game mode.",
@@ -65,7 +65,7 @@ export const PRODUCTS: Product[] = [
     ],
   },
   {
-    id: "voltedge-x7", name: "Voltedge X7 5G (8GB/128GB)", brand: "Voltedge", category: "Smartphones",
+    id: "voltedge-x7", name: "5G Smartphone (8GB/128GB)", brand: "Voltedge", category: "Smartphones",
     price: 18999, mrp: 23999, rating: 4.3, ratingCount: 9241, bankOffer: "₹1,500 instant discount on select cards",
     stockLeft: 7, badge: "New launch", trending: true,
     desc: "6.6\" 120Hz AMOLED, 50MP OIS camera, 5000mAh with 67W fast charge.",
@@ -82,7 +82,7 @@ export const PRODUCTS: Product[] = [
     ],
   },
   {
-    id: "pulse-fit-2", name: "Pulse Fit 2 Smartwatch", brand: "Pulse", category: "Smartwatches",
+    id: "pulse-fit-2", name: "Fitness Smartwatch", brand: "Pulse", category: "Smartwatches",
     price: 1799, mrp: 3499, rating: 4.1, ratingCount: 26110, bankOffer: "No-cost EMI from ₹300/mo",
     stockLeft: 12, bestseller: true,
     desc: "1.85\" display, SpO2 & heart-rate, 100+ sports modes, 7-day battery.",
@@ -96,7 +96,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Karthik V.", stars: 4, text: "Does everything I need for daily steps and sleep." }],
   },
   {
-    id: "aero-overear", name: "Aero Studio Over-Ear", brand: "Aero", category: "Headphones",
+    id: "aero-overear", name: "Over-Ear Headphones (ANC)", brand: "Aero", category: "Headphones",
     price: 4499, mrp: 7999, rating: 4.5, ratingCount: 5312, bankOffer: "10% off with UPI",
     stockLeft: 4, trending: true,
     desc: "40mm drivers, adaptive ANC, 60-hour battery, plush memory-foam cups.",
@@ -110,7 +110,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Meera J.", stars: 5, text: "Comfortable for long work sessions, sound is clean." }],
   },
   {
-    id: "quanta-powercell", name: "Quanta PowerCell 20000 (22.5W)", brand: "Quanta", category: "Power Banks",
+    id: "quanta-powercell", name: "20000mAh Power Bank (22.5W)", brand: "Quanta", category: "Power Banks",
     price: 1299, mrp: 2199, rating: 4.4, ratingCount: 41022, stockLeft: 20, bestseller: true,
     desc: "20000mAh, 22.5W fast charge, triple output, charges a phone ~4 times.",
     img: img("power bank", "quanta-powercell"),
@@ -122,7 +122,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Aditya P.", stars: 4, text: "Reliable for travel, a little heavy." }],
   },
   {
-    id: "orbit-boom", name: "Orbit Boom Party Speaker", brand: "Orbit", category: "Speakers",
+    id: "orbit-boom", name: "Bluetooth Party Speaker", brand: "Orbit", category: "Speakers",
     price: 3499, mrp: 5999, rating: 4.2, ratingCount: 7733, bankOffer: "₹250 off with UPI", stockLeft: 6,
     desc: "40W output, RGB lights, 24-hour playtime, IPX6 splash-proof.",
     img: img("bluetooth speaker", "orbit-boom"),
@@ -135,7 +135,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Nisha T.", stars: 4, text: "Loud enough for a terrace party." }],
   },
   {
-    id: "nimbus-ultrabook", name: "Nimbus UltraBook 14 (i5/16GB)", brand: "Nimbus", category: "Laptops",
+    id: "nimbus-ultrabook", name: "14-inch Laptop (i5 / 16GB)", brand: "Nimbus", category: "Laptops",
     price: 54990, mrp: 69990, rating: 4.3, ratingCount: 1288, bankOffer: "₹3,000 off + no-cost EMI",
     stockLeft: 5, badge: "Top rated",
     desc: "14\" 2.2K display, 16GB RAM, 512GB SSD, 1.29kg, 12-hour battery.",
@@ -149,7 +149,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Vivek A.", stars: 5, text: "Light, fast, great screen for the money." }],
   },
   {
-    id: "quanta-mon27", name: "Quanta View 27\" QHD 165Hz", brand: "Quanta", category: "Monitors",
+    id: "quanta-mon27", name: "27-inch QHD 165Hz Monitor", brand: "Quanta", category: "Monitors",
     price: 16999, mrp: 24999, rating: 4.5, ratingCount: 2041, stockLeft: 8, trending: true,
     desc: "27\" QHD IPS, 165Hz, 1ms, 95% DCI-P3, height-adjustable stand.",
     img: img("computer monitor", "quanta-mon27"),
@@ -161,7 +161,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Rohan D.", stars: 5, text: "Colours are superb for editing and gaming." }],
   },
   {
-    id: "pulse-mechkey", name: "Pulse MechKey TKL (Hot-swap)", brand: "Pulse", category: "Keyboards",
+    id: "pulse-mechkey", name: "Mechanical Keyboard (TKL)", brand: "Pulse", category: "Keyboards",
     price: 2799, mrp: 4499, rating: 4.4, ratingCount: 3550, bankOffer: "10% off with UPI", stockLeft: 9,
     desc: "Hot-swappable switches, RGB, PBT keycaps, USB-C, TKL layout.",
     img: img("mechanical keyboard", "pulse-mechkey"),
@@ -171,7 +171,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Farhan Q.", stars: 4, text: "Typing feels premium. Software could be better." }],
   },
   {
-    id: "voltedge-gpad", name: "Voltedge GamePad Elite", brand: "Voltedge", category: "Gaming",
+    id: "voltedge-gpad", name: "Wireless Game Controller", brand: "Voltedge", category: "Gaming",
     price: 2199, mrp: 3999, rating: 4.2, ratingCount: 6120, stockLeft: 15,
     desc: "Low-latency wireless, hall-effect sticks, 20-hour battery, PC & mobile.",
     img: img("game controller", "voltedge-gpad"),
@@ -180,7 +180,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Tanvi S.", stars: 4, text: "Sticks feel accurate, no drift so far." }],
   },
   {
-    id: "aero-vlogcam", name: "Aero VlogCam 4K Pocket", brand: "Aero", category: "Cameras",
+    id: "aero-vlogcam", name: "4K Pocket Vlog Camera", brand: "Aero", category: "Cameras",
     price: 21999, mrp: 28999, rating: 4.3, ratingCount: 842, bankOffer: "No-cost EMI from ₹1,833/mo",
     stockLeft: 4, badge: "New launch",
     desc: "4K60 pocket camera, gimbal stabilisation, face-track, flip screen.",
@@ -190,7 +190,7 @@ export const PRODUCTS: Product[] = [
     reviews: [{ user: "Priya N.", stars: 5, text: "Perfect for travel vlogs, super stable." }],
   },
   {
-    id: "soniq-mini", name: "Soniq Mini Bluetooth Speaker", brand: "Soniq", category: "Speakers",
+    id: "soniq-mini", name: "Mini Bluetooth Speaker", brand: "Soniq", category: "Speakers",
     price: 899, mrp: 1799, rating: 4.0, ratingCount: 15320, stockLeft: 25,
     desc: "Pocket speaker, 12-hour playtime, punchy bass, clip-on design.",
     img: img("mini speaker", "soniq-mini"),

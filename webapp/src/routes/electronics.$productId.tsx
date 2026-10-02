@@ -65,7 +65,7 @@ function ProductDetail() {
       </div>
 
       <div className="px-6 pt-4">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-foreground/40">{p.brand} · {p.category}</p>
+        <p className="text-[11px] uppercase tracking-[0.2em] text-foreground/40">{p.category}</p>
         <h1 className="mt-1 font-display text-[22px] leading-tight">{p.name}</h1>
         <div className="mt-2 flex items-center gap-2 text-[12px]">
           <span className="rounded bg-green-600/20 px-2 py-0.5 text-green-400">★ {p.rating}</span>

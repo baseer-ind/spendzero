@@ -133,7 +133,7 @@ function ElectronicsHome() {
               {p.badge && <span className="absolute right-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] text-gold backdrop-blur">{p.badge}</span>}
             </div>
             <div className="p-3">
-              <p className="text-[10.5px] uppercase tracking-wider text-foreground/40">{p.brand}</p>
+              <p className="text-[10.5px] uppercase tracking-wider text-foreground/40">{p.category}</p>
               <p className="mt-0.5 line-clamp-2 text-[13px] leading-tight text-foreground/85">{p.name}</p>
               <div className="mt-1.5 flex items-center gap-1 text-[11px]">
                 <span className="rounded bg-green-600/20 px-1.5 py-0.5 text-green-400">★ {p.rating}</span>

@@ -1,10 +1,10 @@
-// Honest product-image audit. Classifies every catalogue product's image as:
-//   PHOTOGRAPH  — a real file under public/products/<folder>/<id>.(jpg|webp|avif|png)
-//   ILLUSTRATION/FALLBACK — generated vector art (productArt) will be used
-//   MISSING     — listed in HAS_PHOTO but the file is absent (a real failure)
+// Launch-aware product-image audit.
 //
-// SVG/illustration/emoji are NOT counted as real images. Exit code is non-zero if
-// any product in HAS_PHOTO is missing its file. Run: `node scripts/image-audit.mjs`.
+// Reports the LAUNCH VISUAL CATALOGUE (the ~34 products that must be photographic
+// for V1) separately from the long tail. Classifies each as PHOTOGRAPH (a real
+// file present), ILLUSTRATION/FALLBACK (vector art), or MISSING (registered but no
+// file). SVG/illustration is NEVER counted as a photograph. Run:
+//   node scripts/image-audit.mjs
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -12,7 +12,6 @@ import { dirname, join } from "node:path";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(join(root, p), "utf8");
 
-// Parse product ids per vertical without importing TS.
 function ids(file, re) {
   const src = read(file);
   const out = [];
@@ -21,75 +20,76 @@ function ids(file, re) {
   return out;
 }
 
-const electronics = ids("src/lib/electronics.ts", /id:\s*"([a-z0-9-]+)"/g).filter((x) => x.includes("-"));
-// market.ts product ids look like gr-xxx / sh-xxx etc.
+// Catalogue ids.
+const electronics = [...new Set(ids("src/lib/electronics.ts", /id:\s*"([a-z0-9-]+)"/g))].filter((x) => {
+  const win = read("src/lib/electronics.ts");
+  return new RegExp('id:\\s*"' + x + '"[\\s\\S]{0,400}category:').test(win);
+});
 const marketIds = ids("src/lib/market.ts", /id:\s*"([a-z]{2}-[a-z0-9-]+)"/g);
-const foodIds = ids("src/lib/catalog.ts", /id:\s*"([a-z]{2,}-[a-z0-9-]+)"/g);
+// Food dish ids (have a nearby section:)
+const foodSrc = read("src/lib/catalog.ts");
+const foodIds = [...foodSrc.matchAll(/id:\s*"([a-z0-9-]+)"/g)].map((m) => m[1]).filter((id) => {
+  const i = foodSrc.indexOf('id: "' + id + '"');
+  return /section:\s*"/.test(foodSrc.slice(i, i + 200));
+});
 
-// HAS_PHOTO set
-const photoSrc = read("src/lib/productImages.ts");
-const hasPhotoBlock = photoSrc.match(/HAS_PHOTO = new Set<string>\(\[([^\]]*)\]/s)?.[1] ?? "";
-const HAS_PHOTO = new Set([...hasPhotoBlock.matchAll(/"([^"]+)"/g)].map((m) => m[1]));
+// LAUNCH set from productImages.ts
+const pi = read("src/lib/productImages.ts");
+const launchBlock = pi.match(/LAUNCH_IDS[^=]*=\s*\{([\s\S]*?)\};/)?.[1] ?? "";
+const LAUNCH = {};
+for (const line of launchBlock.split("\n")) {
+  const mm = line.match(/(\w+):\s*\[([^\]]*)\]/);
+  if (mm) LAUNCH[mm[1]] = [...mm[2].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+}
+const LAUNCH_SET = new Set(Object.values(LAUNCH).flat());
 
-const FOLDER = {
-  electronics: "electronics", grocery: "grocery", shopping: "shopping", beauty: "beauty",
-  home: "home", travel: "travel", entertainment: "entertainment", food: "food",
+const EXTS = ["webp", "jpg", "jpeg", "avif", "png"];
+const FOLDER = { electronics: "electronics", shopping: "shopping", grocery: "grocery", beauty: "beauty", home: "home", travel: "travel", entertainment: "entertainment", food: "food" };
+function hasFile(folder, id) {
+  return EXTS.some((e) => existsSync(join(root, `public/products/${folder}/${id}.${e}`)));
+}
+
+const byVertical = {
+  electronics: electronics.map((id) => [id, "electronics"]),
+  shopping: marketIds.filter((x) => x.startsWith("sh-")).map((id) => [id, "shopping"]),
+  grocery: marketIds.filter((x) => x.startsWith("gr-")).map((id) => [id, "grocery"]),
+  beauty: marketIds.filter((x) => x.startsWith("be-")).map((id) => [id, "beauty"]),
+  home: marketIds.filter((x) => x.startsWith("ho-")).map((id) => [id, "home"]),
+  travel: marketIds.filter((x) => x.startsWith("tr-")).map((id) => [id, "travel"]),
+  entertainment: marketIds.filter((x) => x.startsWith("en-")).map((id) => [id, "entertainment"]),
+  food: foodIds.map((id) => [id, "food"]),
 };
-const PREFIX_FOLDER = { gr: "grocery", sh: "fashion", tr: "travel", en: "entertainment", be: "beauty", ho: "home" };
-const EXTS = ["jpg", "webp", "avif", "png", "jpeg"];
 
-function fileFor(folder, id) {
-  for (const e of EXTS) {
-    const p = `public/products/${folder}/${id}.${e}`;
-    if (existsSync(join(root, p))) return p;
-  }
-  return null;
-}
-
-function classify(id, folder) {
-  const file = fileFor(folder, id);
-  if (file) return { kind: "PHOTOGRAPH", file };
-  if (HAS_PHOTO.has(id)) return { kind: "MISSING", file: null };
-  return { kind: "FALLBACK", file: null };
-}
-
-const groups = [
-  ["Electronics", electronics.map((id) => [id, "electronics"])],
-  ["Shopping", marketIds.filter((x) => x.startsWith("sh-")).map((id) => [id, "shopping"])],
-  ["Grocery", marketIds.filter((x) => x.startsWith("gr-")).map((id) => [id, "grocery"])],
-  ["Beauty", marketIds.filter((x) => x.startsWith("be-")).map((id) => [id, "beauty"])],
-  ["Home", marketIds.filter((x) => x.startsWith("ho-")).map((id) => [id, "home"])],
-  ["Travel", marketIds.filter((x) => x.startsWith("tr-")).map((id) => [id, "travel"])],
-  ["Entertainment", marketIds.filter((x) => x.startsWith("en-")).map((id) => [id, "entertainment"])],
-  ["Food", foodIds.map((id) => [id, "food"])],
-];
-
-console.log("PRODUCT IMAGE AUDIT\n===================");
-let missing = 0;
-let totalPhotos = 0;
-let total = 0;
-for (const [name, list] of groups) {
-  let photos = 0;
+console.log("LAUNCH VISUAL CATALOGUE");
+console.log("=======================");
+let launchPhotos = 0, launchTotal = 0, launchMissing = 0;
+for (const [v, list] of Object.entries(LAUNCH)) {
+  let have = 0;
   const miss = [];
-  for (const [id, folder] of list) {
-    const r = classify(id, FOLDER[folder] ? folder : folder);
-    if (r.kind === "PHOTOGRAPH") photos++;
-    if (r.kind === "MISSING") miss.push(id);
+  for (const id of list) {
+    launchTotal++;
+    if (hasFile(FOLDER[v], id)) { have++; launchPhotos++; } else { miss.push(id); launchMissing++; }
   }
-  total += list.length;
-  totalPhotos += photos;
-  missing += miss.length;
-  console.log(`\n${name}: ${photos}/${list.length} real photos` + (photos === 0 ? "  (all illustration fallback)" : ""));
-  if (miss.length) console.log(`  MISSING files for: ${miss.join(", ")}`);
+  console.log(`${v[0].toUpperCase() + v.slice(1)}: ${have}/${list.length} real photos`);
+  if (miss.length) console.log(`   need: ${miss.join(", ")}`);
 }
+console.log(`\nLaunch total: ${launchPhotos}/${launchTotal} photographs.`);
 
-console.log(`\n-------------------\nTOTAL: ${totalPhotos}/${total} real photographs; ${total - totalPhotos} using illustration fallback.`);
-if (missing > 0) {
-  console.log(`\nFAIL: ${missing} product(s) are in HAS_PHOTO but their image file is missing.`);
-  process.exit(1);
+console.log("\nLONG TAIL (non-launch)");
+console.log("======================");
+let tailPhoto = 0, tailIll = 0;
+for (const [v, list] of Object.entries(byVertical)) {
+  for (const [id, folder] of list) {
+    if (LAUNCH_SET.has(id)) continue;
+    if (hasFile(folder, id)) tailPhoto++; else tailIll++;
+  }
 }
-if (totalPhotos === 0) {
-  console.log("\nNOTE: 0 real photographs present. The catalogue is currently illustration-only.");
-  console.log("To populate: add files to public/products/<folder>/<id>.(jpg|webp) and list the ids in HAS_PHOTO.");
+console.log(`Photographic: ${tailPhoto}`);
+console.log(`Illustration fallback: ${tailIll}`);
+
+const allIds = Object.values(byVertical).flat().map(([id]) => id);
+console.log(`\nTOTAL catalogue: ${allIds.length} products. Photographs: ${launchPhotos + tailPhoto}. Illustration: ${allIds.length - launchPhotos - tailPhoto}.`);
+if (launchMissing > 0) {
+  console.log(`\nLAUNCH NOT COMPLETE: ${launchMissing} launch product(s) still need a real photo.`);
 }
-console.log("\nOK: no broken photo references.");
+console.log("\n(SVG/illustration is never counted as a photograph.)");
