@@ -144,7 +144,11 @@ jobs:
         run: flutter pub get
       - name: Build web
         working-directory: spendzero/mobile
-        run: flutter build web --release --base-href / --dart-define-from-file=env/production.json
+        # --web-renderer html renders network photos as <img> tags, so real
+        # product images load without canvaskit's CORS fetch restriction, and
+        # the app is lighter/faster to first paint (closer to the prototype's
+        # smoothness). Available on Flutter 3.24.x (this job is pinned to it).
+        run: flutter build web --web-renderer html --release --base-href / --dart-define-from-file=env/production.json
       - name: Add Vercel static config (SPA rewrites)
         working-directory: spendzero/mobile/build/web
         run: |

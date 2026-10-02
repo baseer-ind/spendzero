@@ -12,6 +12,8 @@ import '../../../core/models/cart_item.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/product_image.dart';
+import '../../../design_system/components/remote_image.dart';
 import 'menu_item_detail_sheet.dart';
 
 /// Local keyword lookup (no AI/network) so each restaurant's identity card
@@ -241,49 +243,69 @@ class _Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradient = _gradientForSeed(restaurant.bannerColorSeed);
-    return Container(
-      constraints: const BoxConstraints(minHeight: 140),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            restaurant.name,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            restaurant.brandTagline,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white70),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.star_rounded, size: 16, color: Colors.white),
-              const SizedBox(width: 4),
-              Text(
-                '${restaurant.avgRating.toStringAsFixed(1)} (${restaurant.reviewCount})',
-                style: const TextStyle(color: Colors.white),
+    final tag = restaurant.categories.isNotEmpty ? restaurant.categories.first : 'restaurant';
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: SizedBox(
+        height: 190,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            RemoteImage(
+              url: imageUrlForBanner(tag, restaurant.id),
+              fallbackEmoji: '🍽️',
+              fallbackSeed: restaurant.bannerColorSeed,
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x11000000), Color(0x99000000), Color(0xE6000000)],
+                  stops: [0.25, 0.65, 1.0],
+                ),
               ),
-              const SizedBox(width: 12),
-              Text(
-                '${restaurant.deliveryTimeMins} min · ${restaurant.distanceKm.toStringAsFixed(1)} km',
-                style: const TextStyle(color: Colors.white),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    restaurant.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    restaurant.brandTagline,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, size: 16, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${restaurant.avgRating.toStringAsFixed(1)} (${restaurant.reviewCount})',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '${restaurant.deliveryTimeMins} min · ${restaurant.distanceKm.toStringAsFixed(1)} km',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -460,8 +482,25 @@ class _MenuItemRow extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          _QuantityStepper(quantity: quantity, onChanged: onQuantityChanged),
+          const SizedBox(width: 10),
+          Column(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 88,
+                  height: 88,
+                  child: RemoteImage(
+                    url: imageUrlForProductTitle(item.name),
+                    fallbackEmoji: '🍴',
+                    fallbackSeed: item.id,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              _QuantityStepper(quantity: quantity, onChanged: onQuantityChanged),
+            ],
+          ),
         ],
       ),
     );

@@ -15,6 +15,8 @@ import '../../../core/models/category.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/product_image.dart';
+import '../../../design_system/components/remote_image.dart';
 
 String _appIdFor(String restaurantId) => findAppIdForEntity(restaurantId) ?? restaurantId;
 
@@ -39,15 +41,6 @@ class RecentlyViewedFoodStore {
     final trimmed = current.take(_maxRecentlyViewed).toList();
     await prefs.setString(_recentlyViewedKey, jsonEncode(trimmed));
   }
-}
-
-/// Deterministic gradient/colour derived from a seed string, extending the
-/// same hash-to-hue approach used by `product_card.dart`'s `_Thumbnail`.
-List<Color> _gradientForSeed(String seed) {
-  final hue = (seed.codeUnits.fold<int>(0, (a, b) => a + b) % 360).toDouble();
-  final start = HSLColor.fromAHSL(1, hue, 0.55, 0.55).toColor();
-  final end = HSLColor.fromAHSL(1, (hue + 40) % 360, 0.6, 0.4).toColor();
-  return [start, end];
 }
 
 class FoodHomeScreen extends ConsumerStatefulWidget {
@@ -426,7 +419,7 @@ class _RestaurantRail extends StatelessWidget {
         Text(title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
-          height: 150,
+          height: 188,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: restaurants.length,
@@ -450,36 +443,53 @@ class _RestaurantRailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _gradientForSeed(restaurant.bannerColorSeed);
+    final theme = Theme.of(context);
+    final tag = restaurant.categories.isNotEmpty ? restaurant.categories.first : 'restaurant';
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 160,
-        padding: const EdgeInsets.all(12),
+        width: 172,
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.06)),
         ),
+        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text(
-              restaurant.name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            AspectRatio(
+              aspectRatio: 16 / 10,
+              child: RemoteImage(
+                url: imageUrlForBanner(tag, restaurant.id),
+                fallbackEmoji: '🍽️',
+                fallbackSeed: restaurant.bannerColorSeed,
+              ),
             ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.star_rounded, size: 14, color: Colors.white),
-                const SizedBox(width: 2),
-                Text(
-                  '${restaurant.avgRating.toStringAsFixed(1)} · ${restaurant.deliveryTimeMins} min',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    restaurant.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, size: 14, color: AppTheme.gold),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${restaurant.avgRating.toStringAsFixed(1)} · ${restaurant.deliveryTimeMins} min',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -501,7 +511,7 @@ class _OffersRail extends StatelessWidget {
         Text("Today's Offers", style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 10),
         SizedBox(
-          height: 130,
+          height: 186,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: items.length,
@@ -524,31 +534,62 @@ class _OfferCard extends StatelessWidget {
     final discount = item.discountPercent;
     return Container(
       width: 170,
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.gold.withOpacity(0.12),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.gold.withOpacity(0.24)),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(item.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium),
-          const Spacer(),
-          Row(
+          Stack(
             children: [
-              Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
-              if (discount != null) ...[
-                const SizedBox(width: 6),
-                Text(
-                  '$discount% off',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.gold,
-                        fontWeight: FontWeight.w600,
-                      ),
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: RemoteImage(
+                  url: imageUrlForProductTitle(item.name),
+                  fallbackEmoji: '🍴',
+                  fallbackSeed: item.id,
                 ),
-              ],
+              ),
+              if (discount != null)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppTheme.gold,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '$discount% OFF',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
             ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(formatPaise(item.pricePaise), style: Theme.of(context).textTheme.titleSmall),
+              ],
+            ),
           ),
         ],
       ),
@@ -683,7 +724,6 @@ class _RestaurantCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
-    final gradient = _gradientForSeed(restaurant.bannerColorSeed);
     final appId = _appIdFor(restaurant.id);
     final saved = ref.watch(
       wishlistProvider.select((list) => list.any((e) => e.entityId == restaurant.id && e.appId == appId)),
@@ -701,14 +741,22 @@ class _RestaurantCard extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: gradient),
-                borderRadius: BorderRadius.circular(12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: 64,
+                height: 64,
+                child: RemoteImage(
+                  url: imageUrlForBanner(
+                    restaurant.categories.isNotEmpty ? restaurant.categories.first : 'restaurant',
+                    restaurant.id,
+                    width: 200,
+                    height: 200,
+                  ),
+                  fallbackEmoji: '🍽️',
+                  fallbackSeed: restaurant.bannerColorSeed,
+                ),
               ),
-              child: const Icon(Icons.restaurant, color: Colors.white),
             ),
             const SizedBox(width: 12),
             Expanded(

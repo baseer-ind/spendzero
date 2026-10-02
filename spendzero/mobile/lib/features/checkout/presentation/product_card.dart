@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../../../core/models/listing.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/product_emoji.dart';
+import '../../../core/utils/product_image.dart';
+import '../../../design_system/components/remote_image.dart';
 
 /// A real product card (image placeholder, title, rating, price/MRP,
 /// quantity stepper) replacing the plain checkbox list, per
@@ -110,22 +112,17 @@ class _Thumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hue = (seed.codeUnits.fold<int>(0, (a, b) => a + b) % 360).toDouble();
-    final start = HSLColor.fromAHSL(1, hue, 0.55, 0.82).toColor();
-    final end = HSLColor.fromAHSL(1, (hue + 28) % 360, 0.55, 0.68).toColor();
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [start, end],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 64,
+        height: 64,
+        child: RemoteImage(
+          url: imageUrlForProductTitle(title),
+          fallbackEmoji: emojiForProductTitle(title),
+          fallbackSeed: seed,
         ),
-        borderRadius: BorderRadius.circular(12),
       ),
-      alignment: Alignment.center,
-      child: Text(emojiForProductTitle(title), style: const TextStyle(fontSize: 28)),
     );
   }
 }
