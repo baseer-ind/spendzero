@@ -21,6 +21,7 @@ import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as PauseRouteImport } from './routes/pause'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SavingsRouteImport } from './routes/savings'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TodayRouteImport } from './routes/today'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as ElectronicsIndexRouteImport } from './routes/electronics.index'
@@ -93,6 +94,11 @@ const SavingsRoute = SavingsRouteImport.update({
   path: '/savings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TodayRoute = TodayRouteImport.update({
   id: '/today',
   path: '/today',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
   '/today': typeof TodayRoute
   '/wishlist': typeof WishlistRoute
   '/electronics/$productId': typeof ElectronicsProductIdRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
   '/today': typeof TodayRoute
   '/wishlist': typeof WishlistRoute
   '/electronics/$productId': typeof ElectronicsProductIdRoute
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
+  '/settings': typeof SettingsRoute
   '/today': typeof TodayRoute
   '/wishlist': typeof WishlistRoute
   '/electronics/$productId': typeof ElectronicsProductIdRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/pause'
     | '/profile'
     | '/savings'
+    | '/settings'
     | '/today'
     | '/wishlist'
     | '/electronics/$productId'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/pause'
     | '/profile'
     | '/savings'
+    | '/settings'
     | '/today'
     | '/wishlist'
     | '/electronics/$productId'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/pause'
     | '/profile'
     | '/savings'
+    | '/settings'
     | '/today'
     | '/wishlist'
     | '/electronics/$productId'
@@ -316,6 +328,7 @@ export interface RootRouteChildren {
   PauseRoute: typeof PauseRoute
   ProfileRoute: typeof ProfileRoute
   SavingsRoute: typeof SavingsRoute
+  SettingsRoute: typeof SettingsRoute
   TodayRoute: typeof TodayRoute
   WishlistRoute: typeof WishlistRoute
   ElectronicsProductIdRoute: typeof ElectronicsProductIdRoute
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SavingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/today': {
       id: '/today'
       path: '/today'
@@ -508,6 +528,7 @@ const rootRouteChildren: RootRouteChildren = {
   PauseRoute: PauseRoute,
   ProfileRoute: ProfileRoute,
   SavingsRoute: SavingsRoute,
+  SettingsRoute: SettingsRoute,
   TodayRoute: TodayRoute,
   WishlistRoute: WishlistRoute,
   ElectronicsProductIdRoute: ElectronicsProductIdRoute,

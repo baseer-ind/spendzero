@@ -375,6 +375,14 @@ try {
   log(`achievements screen: ${ach > 0}`);
   if (ach === 0) issues.push("ACHIEVEMENTS: screen not rendering");
 
+  // 10a2) SETTINGS: data export/delete + legal present
+  await go("/settings");
+  const exp = await page.getByText("Export my data", { exact: false }).count();
+  const del = await page.getByText("Delete my data", { exact: false }).count();
+  const priv = await page.getByText("Privacy Policy", { exact: false }).count();
+  log(`settings: export=${exp > 0} delete=${del > 0} privacy=${priv > 0}`);
+  if (exp === 0 || del === 0 || priv === 0) issues.push("TRUST: settings data/legal controls missing");
+
   // 10b) FEEDBACK + SUGGESTIONS
   await go("/feedback");
   const fbHead = await page.getByText("Help shape Project Future", { exact: false }).count();
@@ -408,7 +416,7 @@ try {
   await page.waitForURL("**/food", { timeout: 8000 });
 
   // 13) all live routes 200
-  for (const r of ["/", "/future", "/today", "/food", "/electronics", "/market/grocery", "/market/shopping", "/market/travel", "/market/entertainment", "/market/beauty", "/market/home", "/wishlist", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/consumption", "/learn", "/learn/discount-trap", "/feedback"]) {
+  for (const r of ["/", "/future", "/today", "/food", "/electronics", "/market/grocery", "/market/shopping", "/market/travel", "/market/entertainment", "/market/beauty", "/market/home", "/wishlist", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/consumption", "/learn", "/learn/discount-trap", "/feedback", "/settings"]) {
     const s = await go(r);
     if (s !== 200) log(`route ${r}: ${s}`);
   }

@@ -113,6 +113,7 @@ function ProfileScreen() {
 
       <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">
         <Row icon="✎" label="Feedback & suggestions" to="/feedback" />
+        <Row icon="⚙" label="Settings & privacy" to="/settings" />
       </div>
 
       <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">

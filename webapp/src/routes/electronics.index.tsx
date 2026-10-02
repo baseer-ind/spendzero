@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { NavBar, Screen } from "@/components/Shell";
 import { Img } from "@/components/Img";
 import { ProductImage } from "@/components/ProductImage";
+import { photoSrc } from "@/lib/productImages";
 import { ExploreNudge } from "@/components/ExploreNudge";
 import { useBrowseTracking } from "@/lib/tracking";
 import { EL_CATEGORIES, ELECTRONICS_APP, PRODUCTS, deals, discountPct, trending } from "@/lib/electronics";
@@ -127,7 +128,7 @@ function ElectronicsHome() {
         {results.map((p, i) => (
           <Link key={p.id} to="/electronics/$productId" params={{ productId: p.id }} className="overflow-hidden rounded-2xl border border-white/8 bg-surface animate-rise" style={{ animationDelay: `${(i % 8) * 50}ms` }}>
             <div className="relative h-36 w-full">
-              <ProductImage src={p.img} keyword={p.category} seed={p.id} alt={p.name} className="absolute inset-0 h-full w-full" />
+              <ProductImage src={photoSrc("electronics", p.id) || p.img} keyword={p.category} seed={p.id} alt={p.name} className="absolute inset-0 h-full w-full" />
               {discountPct(p) > 0 && <span className="absolute left-2 top-2 rounded-md bg-red-600 px-1.5 py-0.5 text-[11px] font-semibold text-white shadow">{discountPct(p)}% OFF</span>}
               {p.badge && <span className="absolute right-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] text-gold backdrop-blur">{p.badge}</span>}
             </div>
