@@ -32,9 +32,19 @@ String _tagForTitle(String title) {
   return 'product';
 }
 
+/// Routes an image through the images.weserv.nl CDN, which (a) sends CORS
+/// headers so the photo loads on the canvaskit web build (plain loremflickr
+/// does not, so every image errored out to the fallback), (b) resizes/crops
+/// server-side, and (c) caches for speed/reliability.
+String _cdn(String sourceUrl, int w, int h) {
+  final enc = Uri.encodeComponent(sourceUrl);
+  return 'https://images.weserv.nl/?url=$enc&w=$w&h=$h&fit=cover&output=webp&q=80';
+}
+
 /// Square product photo for cards/thumbnails.
 String imageUrlForProductTitle(String title, {int size = 400}) {
-  return 'https://loremflickr.com/$size/$size/${_tagForTitle(title)}?lock=${_lock(title)}';
+  final src = 'loremflickr.com/$size/$size/${_tagForTitle(title)}?lock=${_lock(title)}';
+  return _cdn(src, size, size);
 }
 
 /// Wide hero/banner photo for a store/restaurant/brand, keyed off a subject
@@ -42,5 +52,6 @@ String imageUrlForProductTitle(String title, {int size = 400}) {
 String imageUrlForBanner(String tag, String seed, {int width = 1200, int height = 640}) {
   final clean = tag.toLowerCase().trim().replaceAll(RegExp(r'\s+'), '');
   final subject = clean.isEmpty ? 'storefront' : clean;
-  return 'https://loremflickr.com/$width/$height/$subject?lock=${_lock(seed)}';
+  final src = 'loremflickr.com/$width/$height/$subject?lock=${_lock(seed)}';
+  return _cdn(src, width, height);
 }
