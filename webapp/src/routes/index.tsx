@@ -210,12 +210,7 @@ function Whisper() {
 }
 
 function StatusBar() {
-  return (
-    <div className="flex items-center justify-between px-7 pt-4 text-[12px] tracking-wide text-foreground/80">
-      <span className="font-medium">9:41</span>
-      <div className="flex items-center gap-1.5 opacity-80"><Signal /> <Wifi /> <Battery /></div>
-    </div>
-  );
+  return null;
 }
 
 function TopBar() {

@@ -1,18 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+// Intentionally renders nothing. A real web app shows the device's own status
+// bar — a fake "9:41 + battery" belongs only in a design mockup. Kept as an
+// export so existing imports keep working without touching every screen.
 export function StatusBar() {
-  return (
-    <div className="flex items-center justify-between px-6 pt-3 pb-1 text-[12px] font-medium tracking-wide text-foreground/80">
-      <span>9:41</span>
-      <div className="flex items-center gap-1.5">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-foreground/70" />
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-foreground/70" />
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-foreground/40" />
-        <span className="ml-1.5 inline-block h-2 w-4 rounded-[2px] border border-foreground/50" />
-      </div>
-    </div>
-  );
+  return null;
 }
 
 export function NavBar({
