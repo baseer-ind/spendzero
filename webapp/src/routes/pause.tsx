@@ -13,16 +13,18 @@ export const Route = createFileRoute("/pause")({
   component: PauseScreen,
 });
 
-// "Understand why you want it" — naming the trigger is the first step.
-const FEELINGS = [
-  "I genuinely want it",
-  "I'm hungry",
-  "I'm bored",
-  "It looked interesting",
-  "It's a great deal",
-  "I deserve a treat",
-  "I'm not sure",
-];
+// Conversational, vertical-adaptive triggers (not a clinical questionnaire).
+const TRIGGERS: Record<string, string[]> = {
+  Food: ["I'm hungry", "I really want it", "I want a treat", "The deal tempted me", "I'm just browsing", "I'm not sure"],
+  Electronics: ["I need it", "I really want it", "I'm comparing options", "The deal tempted me", "I'm just browsing", "I'm not sure"],
+  Travel: ["I really want this trip", "I need to book it", "I'm planning ahead", "The deal tempted me", "I'm just exploring", "I'm not sure"],
+  Entertainment: ["I really want to go", "I want a break", "The deal tempted me", "I'm just exploring", "I'm not sure"],
+  _default: ["I really want it", "I need it", "It caught my attention", "The deal tempted me", "I'm just browsing", "I'm not sure"],
+};
+
+function pct(d: Dream) {
+  return Math.min(100, Math.round((d.saved / d.target) * 100));
+}
 
 function PauseScreen() {
   const { amt, cat } = Route.useSearch();
@@ -30,8 +32,9 @@ function PauseScreen() {
   const { cart, cartTotal, clearCart, applySaving, activeDream, recordDecision, dreams, setActiveDream } = useStore();
 
   const amount = amt || cartTotal || 0;
-  const [step, setStep] = useState<"feel" | "decide" | "choose" | "bought">("feel");
+  const [step, setStep] = useState<"decide" | "choose" | "bought">("decide");
   const [feeling, setFeeling] = useState<string | null>(null);
+  const triggers = TRIGGERS[cat] ?? TRIGGERS._default;
 
   if (amount <= 0) {
     return (
@@ -51,10 +54,7 @@ function PauseScreen() {
   }
 
   function buildFuture() {
-    if (dreams.length === 0) {
-      navigate({ to: "/future" });
-      return;
-    }
+    if (dreams.length === 0) { navigate({ to: "/future" }); return; }
     setStep("choose");
   }
 
@@ -69,72 +69,79 @@ function PauseScreen() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground flex justify-center">
       <div className="relative w-full max-w-[440px] min-h-screen overflow-hidden grain flex flex-col">
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ background: "radial-gradient(120% 55% at 50% 0%, oklch(0.79 0.105 82 / 0.12), transparent 60%)" }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10" style={{ background: "radial-gradient(120% 55% at 50% 0%, oklch(0.79 0.105 82 / 0.14), transparent 60%)" }} />
 
-        {/* STEP 1 — understand why you want it */}
-        {step === "feel" && (
-          <div className="flex-1 flex flex-col justify-center px-7 animate-rise">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-gold/80">take a moment</p>
-            <h1 className="font-display text-[40px] leading-[1.03] mt-3">You want this.</h1>
-            <p className="mt-4 text-[15px] text-foreground/60">No judgement — just notice. What's going on right now?</p>
-            <div className="mt-7 flex flex-col gap-2.5">
-              {FEELINGS.map((f) => (
-                <button
-                  key={f}
-                  onClick={() => { setFeeling(f); setStep("decide"); }}
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-left text-[15px] text-foreground/85 hover:border-gold/40 transition"
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2 — the decision moment: craving vs. future, both legitimate */}
+        {/* DECIDE — amount + the two directions lead; trigger is secondary */}
         {step === "decide" && (
-          <div className="flex-1 overflow-y-auto px-7 py-10 animate-rise">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-gold/80">{feeling}</p>
+          <div className="flex-1 overflow-y-auto px-7 pt-12 pb-10 animate-rise">
+            <p className="text-[11px] uppercase tracking-[0.32em] text-gold/80 text-center">take a moment</p>
 
-            {/* The craving */}
-            <div className="mt-3">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-foreground/45">this craving · {cat}</p>
-              <p className="font-display text-[44px] leading-none mt-1">{formatINR(amount)}</p>
+            {/* The amount — the visual anchor */}
+            <div className="mt-5 text-center">
+              <p className="text-[13px] text-foreground/55">You're about to spend</p>
+              <p className="font-display text-[64px] leading-none mt-1">{formatINR(amount)}</p>
+              <p className="mt-2 text-[12px] uppercase tracking-[0.2em] text-foreground/40">on {cat.toLowerCase()}</p>
             </div>
 
-            {/* The future — dreams made visible, as opportunity, not guilt */}
+            {/* The two directions — prominent */}
+            <p className="mt-8 text-center font-display italic text-[15px] text-foreground/55">One choice. Two directions.</p>
+            <div className="mt-4 space-y-3">
+              <button onClick={buildFuture} className="w-full rounded-2xl px-5 py-4 text-left text-background" style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}>
+                <span className="block font-display text-[18px]">Build my future</span>
+                <span className="mt-0.5 block text-[13px] text-background/75">
+                  Move {formatINR(amount)} toward {activeDream ? activeDream.name : "your dream"}.
+                </span>
+              </button>
+              <button onClick={buy} className="w-full rounded-2xl border border-white/14 bg-white/5 px-5 py-4 text-left">
+                <span className="block font-display text-[18px]">Enjoy it</span>
+                <span className="mt-0.5 block text-[13px] text-foreground/50">Keep your order. You chose it consciously.</span>
+              </button>
+            </div>
+
+            {/* dreams preview (opportunity, not guilt) */}
             {dreams.length > 0 && (
-              <div className="mt-8">
-                <h2 className="font-display text-[22px] leading-tight">Your future is waiting.</h2>
-                <p className="mt-1.5 text-[13.5px] text-foreground/55">
-                  You could put {formatINR(amount)} toward it instead.
-                </p>
-                <div className="mt-4 flex flex-col gap-3">
-                  {dreams.map((d) => <DreamGlance key={d.id} dream={d} active={d.id === (activeDream?.id ?? dreams[0]?.id)} />)}
+              <div className="mt-7">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-foreground/40">this could move</p>
+                <div className="mt-2 flex flex-col gap-2">
+                  {dreams.slice(0, 3).map((d) => (
+                    <div key={d.id} className="flex items-center gap-3 rounded-xl border border-white/8 bg-surface p-2.5">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-white/5 text-[18px]">
+                        {d.cover ? <img src={d.cover} alt="" className="h-full w-full object-cover" /> : d.emoji}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="truncate text-[13px]">{d.name}</span>
+                          <span className="text-[12px] text-gold">+{formatINR(amount)}</span>
+                        </div>
+                        <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/8">
+                          <div className="h-full rounded-full" style={{ width: `${pct(d)}%`, background: "linear-gradient(90deg, oklch(0.72 0.12 80), oklch(0.92 0.09 84))" }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
-            <p className="mt-9 text-center font-display italic text-[15px] text-foreground/55">One choice. Two directions.</p>
-            <p className="mt-1 text-center text-[13px] text-foreground/40">{formatINR(amount)} — what do you choose?</p>
-
-            <div className="mt-5 space-y-3">
-              <button onClick={buy} className="w-full rounded-2xl border border-white/12 bg-white/5 px-5 py-4 text-left">
-                <span className="block font-display text-[16px]">Enjoy it</span>
-                <span className="mt-0.5 block text-[12.5px] text-foreground/50">Keep the order. You chose it consciously.</span>
-              </button>
-              <button onClick={buildFuture} className="w-full rounded-2xl px-5 py-4 text-left text-background" style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}>
-                <span className="block font-display text-[16px]">Build my future</span>
-                <span className="mt-0.5 block text-[12.5px] text-background/70">
-                  Put {formatINR(amount)} toward {activeDream ? activeDream.name : "your dream"}.
-                </span>
-              </button>
+            {/* trigger — secondary, optional, conversational */}
+            <div className="mt-7">
+              <p className="text-center text-[12.5px] text-foreground/45">What's making you want it? <span className="text-foreground/30">(optional)</span></p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                {triggers.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setFeeling(feeling === t ? null : t)}
+                    className={`rounded-full border px-3.5 py-1.5 text-[12.5px] transition ${feeling === t ? "border-gold/50 bg-gold/15 text-gold" : "border-white/10 bg-white/5 text-foreground/60"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
-            <button onClick={() => setStep("feel")} className="mt-6 block w-full text-center text-[13px] text-foreground/45">← back</button>
           </div>
         )}
 
-        {/* STEP 3 — pick the goal, see before → after */}
+        {/* CHOOSE — pick the goal, before → after */}
         {step === "choose" && (
           <div className="flex-1 overflow-y-auto px-7 py-10 animate-rise">
             <p className="text-[11px] uppercase tracking-[0.3em] text-gold/80">where should it go?</p>
@@ -148,7 +155,7 @@ function PauseScreen() {
           </div>
         )}
 
-        {/* STEP 4 — enjoy it, no shame */}
+        {/* BOUGHT — enjoy it, no shame */}
         {step === "bought" && (
           <div className="flex-1 flex flex-col justify-center px-7 text-center animate-rise">
             <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gold/10 ring-1 ring-gold/30 text-[32px]">🎉</div>
@@ -169,36 +176,10 @@ function PauseScreen() {
   );
 }
 
-function pct(d: Dream) {
-  return Math.min(100, Math.round((d.saved / d.target) * 100));
-}
-
-// Read-only glance at a dream during the decision — shows the real cover/photo.
-function DreamGlance({ dream, active }: { dream: Dream; active: boolean }) {
-  return (
-    <div className={`flex items-center gap-3 rounded-2xl border p-3 ${active ? "border-gold/40 bg-gold/5" : "border-white/8 bg-surface"}`}>
-      <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/5 text-[24px]">
-        {dream.cover ? <img src={dream.cover} alt="" className="h-full w-full object-cover" /> : dream.emoji}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <h4 className="truncate font-display text-[15px]">{dream.name}</h4>
-          <span className="shrink-0 text-[12px] text-gold">{pct(dream)}%</span>
-        </div>
-        <p className="mt-0.5 text-[11px] text-foreground/45">{formatINR(dream.saved)} / {formatINR(dream.target)}</p>
-        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/8">
-          <div className="h-full rounded-full" style={{ width: `${pct(dream)}%`, background: "linear-gradient(90deg, oklch(0.72 0.12 80), oklch(0.92 0.09 84))" }} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Goal card in the choose step — makes the redirect tangible (before → after).
 function GoalChoiceCard({ dream, amount, onPick }: { dream: Dream; amount: number; onPick: () => void }) {
-  const before = dream.saved;
   const after = dream.saved + amount;
   const afterPct = Math.min(100, Math.round((after / dream.target) * 100));
+  const shortName = dream.name.replace(/^(My |my )/, "");
   return (
     <button onClick={onPick} className="overflow-hidden rounded-2xl border border-white/10 bg-surface text-left transition hover:border-gold/40">
       <div className="relative h-24 w-full">
@@ -215,13 +196,13 @@ function GoalChoiceCard({ dream, amount, onPick }: { dream: Dream; amount: numbe
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between text-[12px]">
-          <span className="text-foreground/50">Before <span className="text-foreground/80">{formatINR(before)}</span></span>
+          <span className="text-foreground/50">Before <span className="text-foreground/80">{formatINR(dream.saved)}</span></span>
           <span className="text-foreground/50">After <span className="text-gold">{formatINR(after)}</span></span>
         </div>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
           <div className="h-full rounded-full transition-all duration-700" style={{ width: `${afterPct}%`, background: "linear-gradient(90deg, oklch(0.72 0.12 80), oklch(0.92 0.09 84))" }} />
         </div>
-        <p className="mt-2 text-[12.5px] text-foreground/60">{dream.name.replace(/^(My |my )/, "")} just got {formatINR(amount)} closer.</p>
+        <p className="mt-2 text-[12.5px] text-foreground/60">Your {shortName} just got {formatINR(amount)} closer.</p>
       </div>
     </button>
   );

@@ -134,19 +134,19 @@ try {
   log("cart → checkout → place order → pause: true");
 
   // 8) DECISION MOMENT → BUILD MY FUTURE → CONTINUE
-  await page.getByText("I'm hungry", { exact: false }).click();
   await page.waitForTimeout(250);
-  const futureWaiting = await page.getByText("Your future is waiting", { exact: false }).count();
-  log(`decision moment shows dreams ("future is waiting"): ${futureWaiting > 0}`);
-  if (futureWaiting === 0) issues.push("DECISION: dreams not shown at the decision moment");
+  const spendLead = await page.getByText("about to spend", { exact: false }).count();
+  log(`decision leads with amount ("about to spend"): ${spendLead > 0}`);
+  if (spendLead === 0) issues.push("DECISION: amount not leading the screen");
   const twoDirections = await page.getByText("One choice. Two directions", { exact: false }).count();
   if (twoDirections === 0) issues.push("DECISION: 'One choice. Two directions' copy missing");
   const dreamAtDecide = await page.getByText("India Trip", { exact: false }).count();
   log(`dream visible with amount at decision: ${dreamAtDecide > 0}`);
   if (dreamAtDecide === 0) issues.push("DECISION: active dream not visible at decision");
+  // trigger is optional now — pick one to verify it still records
+  await page.getByText("I'm hungry", { exact: false }).first().click().catch(() => {});
   await page.getByRole("button", { name: /Build my future/i }).click();
   await page.waitForTimeout(300);
-  // choose step: before→after goal card
   const closer = await page.getByText("closer", { exact: false }).count();
   log(`goal choice shows before→after ("…closer"): ${closer > 0}`);
   if (closer === 0) issues.push("DECISION: before/after goal card missing");
@@ -169,7 +169,6 @@ try {
   // address is remembered now
   await page.getByText("Place order", { exact: false }).click();
   await page.waitForURL("**/pause**", { timeout: 8000 });
-  await page.getByText("I genuinely want it", { exact: false }).first().click();
   await page.waitForTimeout(250);
   await page.getByRole("button", { name: /Enjoy it/i }).click();
   await page.waitForTimeout(400);
@@ -216,7 +215,6 @@ try {
   await page.waitForURL("**/checkout", { timeout: 8000 });
   await page.getByText("Place order", { exact: false }).click();
   await page.waitForURL("**/pause**", { timeout: 8000 });
-  await page.getByText("I'm bored", { exact: false }).click();
   await page.waitForTimeout(250);
   const hasTrip = await page.getByText("India Trip", { exact: false }).count();
   const hasHome = await page.getByText("Dream Home", { exact: false }).count();
@@ -268,7 +266,6 @@ try {
   await page.waitForURL("**/checkout", { timeout: 8000 });
   await page.getByText("Place order", { exact: false }).click();
   await page.waitForURL("**/pause**", { timeout: 8000 });
-  await page.getByText("I genuinely want it", { exact: false }).first().click();
   await page.waitForTimeout(250);
   const catEl = await page.getByText("Electronics", { exact: false }).count();
   log(`decision shows Electronics category: ${catEl > 0}`);
@@ -312,14 +309,22 @@ try {
   log(`wishlist persists an item: ${wlHas > 0}`);
   if (wlHas === 0) issues.push("SHOPPING: wishlist did not persist item");
 
-  // 9f) CONSUMPTION dashboard
-  await go("/consumption");
-  const attn = await page.getByText("Your attention", { exact: false }).count();
+  // 9f) TRACKER VISIBLE — home "Your day" card + consumption dashboard
+  await go("/");
+  const yourDay = await page.getByText("your day", { exact: false }).count();
+  const seeActivity = await page.getByText("See my activity", { exact: false }).count();
+  log(`home 'Your day' tracker card visible: ${yourDay > 0 && seeActivity > 0}`);
+  if (yourDay === 0 || seeActivity === 0) issues.push("TRACKER: 'Your day' card not on home");
+  await page.getByText("See my activity", { exact: false }).click();
+  await page.waitForURL("**/consumption", { timeout: 8000 });
+  const attn = await page.getByText("where your attention went", { exact: false }).count();
   log(`consumption dashboard: ${attn > 0}`);
   if (attn === 0) issues.push("CONSUMPTION: dashboard not rendering");
+  const today = await page.getByText("Exploring time", { exact: false }).count();
   const caught = await page.getByText("What caught your attention", { exact: false }).count();
   const hasEl = await page.getByText("Electronics", { exact: false }).count();
-  log(`attention map present + has a vertical: ${caught > 0 && hasEl > 0}`);
+  log(`today tiles + attention map + vertical: ${today > 0 && caught > 0 && hasEl > 0}`);
+  if (today === 0) issues.push("CONSUMPTION: today tiles missing");
   if (caught === 0) issues.push("CONSUMPTION: attention map missing");
   await shot("consumption");
 
@@ -353,7 +358,6 @@ try {
   await page.waitForURL("**/checkout", { timeout: 8000 });
   await page.getByText("Place order", { exact: false }).click();
   await page.waitForURL("**/pause**", { timeout: 8000 });
-  await page.getByText("I genuinely want it", { exact: false }).first().click();
   await page.waitForTimeout(250);
   const gCat = await page.getByText("Grocery", { exact: false }).count();
   log(`decision shows Grocery category: ${gCat > 0}`);

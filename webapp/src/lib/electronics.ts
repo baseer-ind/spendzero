@@ -2,7 +2,7 @@
 // fictional names only. Realistic Indian pricing, MRP/discount, bank offers and
 // scarcity cues so users can observe their own response. This is a behavioural
 // simulation: nothing here is a real commercial offer. See docs/INDIA_CATALOGUE_GUIDE.md.
-import { photo } from "@/lib/images";
+import { productArt } from "@/lib/productArt";
 
 export const ELECTRONICS_APP = { id: "techbazaar", name: "TechBazaar", tagline: "India's gadgets, delivered", accent: "#2563EB" };
 
@@ -43,7 +43,7 @@ export function discountPct(p: Product) {
 }
 
 function img(kw: string, seed: string) {
-  return photo(kw, seed, 800, 600);
+  return productArt(kw, seed);
 }
 
 export const PRODUCTS: Product[] = [

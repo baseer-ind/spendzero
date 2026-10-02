@@ -198,6 +198,7 @@ type Ctx = State & {
   trackOpen: () => void;
   trackCartExplore: (value: number) => void;
   weekSummary: WeekSummary;
+  todaySummary: WeekSummary;
   reset: () => void;
 };
 
@@ -212,6 +213,8 @@ export type WeekSummary = {
   spent: number; // from decisions: choice "enjoyed"
   redirected: number; // from decisions: choice "redirected"
   decisions: number;
+  enjoyedCount: number;
+  redirectedCount: number;
 };
 
 const StoreContext = createContext<Ctx | null>(null);
@@ -416,6 +419,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const acc: WeekSummary = {
       activeMs: 0, byVertical: {}, byApp: {}, productsViewed: 0, productsOpened: 0,
       cartAdds: 0, cartValueExplored: 0, spent: 0, redirected: 0, decisions: 0,
+      enjoyedCount: 0, redirectedCount: 0,
     };
     for (const [k, d] of Object.entries(state.engagement)) {
       if (new Date(k + "T00:00:00").getTime() < weekAgo) continue;
@@ -432,6 +436,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       acc.decisions += 1;
       if (dec.choice === "enjoyed") acc.spent += dec.amount;
       else acc.redirected += dec.amount;
+    }
+    return acc;
+  }, [state.engagement, state.decisionLog]);
+
+  const todaySummary = useMemo<WeekSummary>(() => {
+    const k = todayKey();
+    const d = state.engagement[k] ?? emptyDay();
+    const start = new Date(k + "T00:00:00").getTime();
+    const acc: WeekSummary = {
+      activeMs: d.activeMs, byVertical: { ...d.byVertical }, byApp: { ...d.byApp },
+      productsViewed: d.productsViewed, productsOpened: d.productsOpened, cartAdds: d.cartAdds,
+      cartValueExplored: d.cartValueExplored, spent: 0, redirected: 0, decisions: 0,
+      enjoyedCount: 0, redirectedCount: 0,
+    };
+    for (const dec of state.decisionLog) {
+      if (dec.at < start) continue;
+      acc.decisions += 1;
+      if (dec.choice === "enjoyed") { acc.spent += dec.amount; acc.enjoyedCount += 1; }
+      else { acc.redirected += dec.amount; acc.redirectedCount += 1; }
     }
     return acc;
   }, [state.engagement, state.decisionLog]);
@@ -514,6 +537,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     trackOpen,
     trackCartExplore,
     weekSummary,
+    todaySummary,
     reset,
   };
 

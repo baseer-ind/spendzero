@@ -18,7 +18,7 @@ const CAT_ICON: Record<string, string> = {
 };
 
 function ConsumptionScreen() {
-  const { hydrated, weekSummary: w } = useStore();
+  const { hydrated, weekSummary: w, todaySummary: t } = useStore();
 
   const verticals = Object.entries(w.byVertical).sort((a, b) => b[1] - a[1]);
   const totalVertMs = Math.max(1, verticals.reduce((a, [, v]) => a + v, 0));
@@ -33,21 +33,45 @@ function ConsumptionScreen() {
       <NavBar title="My Consumption" back="/profile" />
 
       <div className="px-6 pt-2 animate-rise">
-        <p className="text-[11px] uppercase tracking-[0.3em] text-gold/80">this week</p>
-        <h1 className="font-display text-[30px] leading-[1.1] mt-2">
-          Your attention <span className="text-shimmer-gold italic">and your money.</span>
+        <p className="text-[11px] uppercase tracking-[0.3em] text-gold/80">your exploring</p>
+        <h1 className="font-display text-[28px] leading-[1.1] mt-2">
+          See where your <span className="text-shimmer-gold italic">attention went.</span>
         </h1>
-        <p className="mt-2 text-[13px] text-foreground/55">Only active browsing is counted — not time in the background or idle.</p>
+        <p className="mt-2 text-[13px] text-foreground/55">Only active browsing is counted — not background or idle time.</p>
       </div>
 
-      {/* Headline tiles */}
-      <div className="mt-6 grid grid-cols-2 gap-3 px-6">
+      {/* TODAY */}
+      <div className="px-6 mt-6">
+        <p className="text-[11px] uppercase tracking-[0.24em] text-foreground/40">today</p>
+        <div className="mt-2 grid grid-cols-2 gap-3">
+          <Tile label="Exploring time" value={hydrated ? fmtDuration(t.activeMs) : "—"} />
+          <Tile label="Products viewed" value={String(t.productsViewed)} />
+          <Tile label="Value explored" value={formatINR(t.cartValueExplored)} />
+          <Tile label="Money redirected" value={formatINR(t.redirected)} gold />
+        </div>
+      </div>
+
+      {/* Your decisions (today) */}
+      {hydrated && t.decisions > 0 && (
+        <div className="mx-6 mt-5 rounded-2xl border border-white/8 bg-surface p-5">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-foreground/40">your decisions today</p>
+          <div className="mt-3 flex items-center justify-between text-[13px]">
+            <span className="text-foreground/70">{t.decisions} moment{t.decisions === 1 ? "" : "s"} paused</span>
+            <span className="text-foreground/55">{t.enjoyedCount} enjoyed · {t.redirectedCount} redirected</span>
+          </div>
+          {t.redirected > 0 && <p className="mt-2 text-[13px] text-gold">{formatINR(t.redirected)} moved toward your future.</p>}
+        </div>
+      )}
+
+      {/* THIS WEEK */}
+      <div className="px-6 mt-8">
+        <p className="text-[11px] uppercase tracking-[0.24em] text-foreground/40">this week</p>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-3 px-6">
         <Tile label="Exploring" value={hydrated ? fmtDuration(w.activeMs) : "—"} />
         <Tile label="Products viewed" value={String(w.productsViewed)} />
-        <Tile label="Cart value explored" value={formatINR(w.cartValueExplored)} />
         <Tile label="Money spent" value={formatINR(w.spent)} />
         <Tile label="Money redirected" value={formatINR(w.redirected)} gold />
-        <Tile label="Conscious decisions" value={String(w.decisions)} />
       </div>
 
       {/* The insight — attention vs money */}

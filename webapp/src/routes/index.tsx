@@ -4,6 +4,7 @@ import dreamHome from "@/assets/dream-home.jpg";
 import dreamMacbook from "@/assets/dream-macbook.jpg";
 import foodSushi from "@/assets/food-sushi.jpg";
 import { formatINR, useStore, type Dream } from "@/lib/store";
+import { fmtDuration } from "@/lib/tracking";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/")({
 const DREAM_IMAGES = [kyotoHero, dreamHome, dreamMacbook, foodSushi];
 
 function Home() {
-  const { hydrated, name, dreams, activeDream, totalSaved, currentStreak } = useStore();
+  const { hydrated, name, dreams, activeDream, totalSaved, currentStreak, todaySummary } = useStore();
   const greetingName = name || "there";
 
   return (
@@ -36,6 +37,7 @@ function Home() {
         <main className="px-6 pb-36 pt-2">
           <Greeting name={greetingName} />
           {hydrated && activeDream ? <HeroDream dream={activeDream} /> : <HeroEmpty show={hydrated} />}
+          {hydrated && <YourDayCard s={todaySummary} />}
           <Link
             to="/today"
             className="mt-6 flex items-center justify-between rounded-[22px] border border-gold/20 bg-gradient-to-br from-gold/12 to-transparent p-5 animate-rise"
@@ -67,6 +69,38 @@ function Home() {
 
         <BottomNav />
       </div>
+    </div>
+  );
+}
+
+function YourDayCard({ s }: { s: { activeMs: number; redirected: number; decisions: number; productsViewed: number } }) {
+  const fresh = s.activeMs === 0 && s.decisions === 0 && s.productsViewed === 0;
+  return (
+    <Link to="/consumption" className="mt-6 block rounded-[22px] border border-white/10 bg-surface p-5 animate-rise" style={{ animationDelay: "180ms" }}>
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] uppercase tracking-[0.24em] text-gold/80">your day</p>
+        <span className="text-[12px] text-gold/80">See my activity →</span>
+      </div>
+      {fresh ? (
+        <p className="mt-3 text-[14px] text-foreground/60">Your exploration story starts here. Browse a little and you'll see where your attention and money go.</p>
+      ) : (
+        <div className="mt-3 flex items-stretch justify-between gap-3">
+          <Stat big={fmtDuration(s.activeMs)} small="exploring" />
+          <div className="w-px bg-white/8" />
+          <Stat big={formatINR(s.redirected)} small="redirected" gold />
+          <div className="w-px bg-white/8" />
+          <Stat big={String(s.decisions)} small={`conscious ${s.decisions === 1 ? "decision" : "decisions"}`} />
+        </div>
+      )}
+    </Link>
+  );
+}
+
+function Stat({ big, small, gold }: { big: string; small: string; gold?: boolean }) {
+  return (
+    <div className="flex-1 text-center">
+      <p className={`font-display text-[20px] ${gold ? "text-shimmer-gold" : "text-foreground/90"}`}>{big}</p>
+      <p className="mt-0.5 text-[10.5px] uppercase tracking-wider text-foreground/45">{small}</p>
     </div>
   );
 }

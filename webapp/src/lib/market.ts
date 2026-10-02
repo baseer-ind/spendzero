@@ -3,7 +3,7 @@
 // single generic storefront, so every vertical is genuinely usable (browse →
 // detail → cart → checkout → Decision Moment), not a stub. Fictional brands only,
 // ₹ pricing, local imagery. See docs/INDIA_CATALOGUE_GUIDE.md.
-import { artImage } from "@/lib/localImage";
+import { productArt } from "@/lib/productArt";
 
 export type MarketProduct = {
   id: string;
@@ -47,7 +47,7 @@ function mk(
     rating: partial.rating ?? 4.2,
     ratingCount: partial.ratingCount ?? 1000 + ((seedN * 137) % 40000),
     mrp: partial.mrp ?? Math.round(partial.price * 1.4),
-    img: artImage(kw, partial.id),
+    img: productArt(kw, partial.id),
     ...partial,
   };
 }
