@@ -36,6 +36,18 @@ function Home() {
         <main className="px-6 pb-36 pt-2">
           <Greeting name={greetingName} />
           {hydrated && activeDream ? <HeroDream dream={activeDream} /> : <HeroEmpty show={hydrated} />}
+          <Link
+            to="/today"
+            className="mt-6 flex items-center justify-between rounded-[22px] border border-gold/20 bg-gradient-to-br from-gold/12 to-transparent p-5 animate-rise"
+            style={{ animationDelay: "220ms" }}
+          >
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-gold">today's opportunity</p>
+              <p className="mt-1 font-display text-[18px]">A craving is a chance to build.</p>
+              <p className="mt-0.5 text-[12px] text-foreground/55">Browse Food, Shopping & more — then decide.</p>
+            </div>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/15 text-gold">→</span>
+          </Link>
           <CollectionRow dreams={dreams} activeId={activeDream?.id ?? null} />
           <MomentumStrip totalSaved={totalSaved} streak={currentStreak} show={hydrated} />
           <Whisper />
@@ -271,7 +283,7 @@ function BottomNav() {
       <div className="rounded-full px-3 py-2.5 flex items-center justify-between ring-1 ring-white/10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.9)]" style={{ background: "linear-gradient(180deg, rgba(26,29,36,0.85), rgba(17,19,24,0.85))", backdropFilter: "blur(20px) saturate(140%)" }}>
         <NavLink to="/" label="Today" active />
         <NavLink to="/future" label="Future" />
-        <Link to="/order" aria-label="Pause a craving" className="-mt-7 grid h-12 w-12 place-items-center rounded-full text-background" style={{ background: "radial-gradient(circle at 30% 30%, #f5e1aa 0%, #D8B36A 55%, #a8853d 100%)", boxShadow: "0 10px 30px -8px rgba(216,179,106,0.5), inset 0 0 0 1px rgba(255,255,255,0.4)" }}>
+        <Link to="/today" aria-label="Explore today" className="-mt-7 grid h-12 w-12 place-items-center rounded-full text-background" style={{ background: "radial-gradient(circle at 30% 30%, #f5e1aa 0%, #D8B36A 55%, #a8853d 100%)", boxShadow: "0 10px 30px -8px rgba(216,179,106,0.5), inset 0 0 0 1px rgba(255,255,255,0.4)" }}>
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
         </Link>
         <NavLink to="/journey" label="Journey" />

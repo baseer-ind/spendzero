@@ -87,9 +87,9 @@ export function BottomNav({ active }: { active: "home" | "future" | "journey" | 
           </svg>,
         )}
         <Link
-          to="/order"
+          to="/today"
           className="-mt-7 grid h-14 w-14 place-items-center rounded-full"
-          aria-label="Pause"
+          aria-label="Explore today"
           style={{
             background:
               "radial-gradient(circle at 30% 30%, oklch(0.92 0.09 84), oklch(0.72 0.12 80))",

@@ -56,11 +56,12 @@ type State = {
   storySeen: boolean;
   profile: Profile | null;
   decisions: number; // conscious pause decisions made (buy or not-today)
+  postGoalSeen: boolean;
 };
 
 const EMPTY: State = {
   name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [],
-  storySeen: false, profile: null, decisions: 0,
+  storySeen: false, profile: null, decisions: 0, postGoalSeen: false,
 };
 const KEY = "project_future_state_v1";
 const CREDS_KEY = "project_future_creds_v1";
@@ -122,6 +123,7 @@ type Ctx = State & {
   setStorySeen: () => void;
   setProfile: (p: Profile) => void;
   recordDecision: () => void;
+  setPostGoalSeen: () => void;
   setName: (n: string) => void;
   register: (d: { name: string; email: string; password: string }) => AuthResult;
   login: (d: { email: string; password: string }) => AuthResult;
@@ -268,6 +270,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setStorySeen = useCallback(() => setState((s) => ({ ...s, storySeen: true })), []);
   const setProfile = useCallback((p: Profile) => setState((s) => ({ ...s, profile: p })), []);
   const recordDecision = useCallback(() => setState((s) => ({ ...s, decisions: s.decisions + 1 })), []);
+  const setPostGoalSeen = useCallback(() => setState((s) => ({ ...s, postGoalSeen: true })), []);
 
   const reset = useCallback(() => setState(EMPTY), []);
 
@@ -320,6 +323,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setStorySeen,
     setProfile,
     recordDecision,
+    setPostGoalSeen,
     setName,
     register,
     login,

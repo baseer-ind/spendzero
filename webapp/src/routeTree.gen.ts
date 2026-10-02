@@ -20,6 +20,10 @@ import { Route as PauseRouteImport } from './routes/pause'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RestaurantRouteImport } from './routes/restaurant'
 import { Route as RestaurantsRouteImport } from './routes/restaurants'
+import { Route as TodayRouteImport } from './routes/today'
+import { Route as FoodIndexRouteImport } from './routes/food.index'
+import { Route as FoodAppIdIndexRouteImport } from './routes/food.$appId.index'
+import { Route as FoodAppIdRestaurantIdRouteImport } from './routes/food.$appId.$restaurantId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +80,26 @@ const RestaurantsRoute = RestaurantsRouteImport.update({
   path: '/restaurants',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TodayRoute = TodayRouteImport.update({
+  id: '/today',
+  path: '/today',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodIndexRoute = FoodIndexRouteImport.update({
+  id: '/food/',
+  path: '/food/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodAppIdIndexRoute = FoodAppIdIndexRouteImport.update({
+  id: '/food/$appId/',
+  path: '/food/$appId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FoodAppIdRestaurantIdRoute = FoodAppIdRestaurantIdRouteImport.update({
+  id: '/food/$appId/$restaurantId',
+  path: '/food/$appId/$restaurantId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +113,10 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/restaurant': typeof RestaurantRoute
   '/restaurants': typeof RestaurantsRoute
+  '/today': typeof TodayRoute
+  '/food/': typeof FoodIndexRoute
+  '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
+  '/food/$appId/': typeof FoodAppIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +130,10 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/restaurant': typeof RestaurantRoute
   '/restaurants': typeof RestaurantsRoute
+  '/today': typeof TodayRoute
+  '/food': typeof FoodIndexRoute
+  '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
+  '/food/$appId': typeof FoodAppIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +148,10 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/restaurant': typeof RestaurantRoute
   '/restaurants': typeof RestaurantsRoute
+  '/today': typeof TodayRoute
+  '/food/': typeof FoodIndexRoute
+  '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
+  '/food/$appId/': typeof FoodAppIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +167,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/restaurant'
     | '/restaurants'
+    | '/today'
+    | '/food/'
+    | '/food/$appId/$restaurantId'
+    | '/food/$appId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +184,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/restaurant'
     | '/restaurants'
+    | '/today'
+    | '/food'
+    | '/food/$appId/$restaurantId'
+    | '/food/$appId'
   id:
     | '__root__'
     | '/'
@@ -157,6 +201,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/restaurant'
     | '/restaurants'
+    | '/today'
+    | '/food/'
+    | '/food/$appId/$restaurantId'
+    | '/food/$appId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +219,10 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RestaurantRoute: typeof RestaurantRoute
   RestaurantsRoute: typeof RestaurantsRoute
+  TodayRoute: typeof TodayRoute
+  FoodIndexRoute: typeof FoodIndexRoute
+  FoodAppIdRestaurantIdRoute: typeof FoodAppIdRestaurantIdRoute
+  FoodAppIdIndexRoute: typeof FoodAppIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +304,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/today': {
+      id: '/today'
+      path: '/today'
+      fullPath: '/today'
+      preLoaderRoute: typeof TodayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/': {
+      id: '/food/'
+      path: '/food'
+      fullPath: '/food/'
+      preLoaderRoute: typeof FoodIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/$appId/': {
+      id: '/food/$appId/'
+      path: '/food/$appId'
+      fullPath: '/food/$appId/'
+      preLoaderRoute: typeof FoodAppIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/food/$appId/$restaurantId': {
+      id: '/food/$appId/$restaurantId'
+      path: '/food/$appId/$restaurantId'
+      fullPath: '/food/$appId/$restaurantId'
+      preLoaderRoute: typeof FoodAppIdRestaurantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,6 +347,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RestaurantRoute: RestaurantRoute,
   RestaurantsRoute: RestaurantsRoute,
+  TodayRoute: TodayRoute,
+  FoodIndexRoute: FoodIndexRoute,
+  FoodAppIdRestaurantIdRoute: FoodAppIdRestaurantIdRoute,
+  FoodAppIdIndexRoute: FoodAppIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,6 +5,7 @@ import { Story } from "./onboarding/Story";
 import { Assessment } from "./onboarding/Assessment";
 import { ProfileResult } from "./onboarding/ProfileResult";
 import { FirstGoal } from "./onboarding/FirstGoal";
+import { GoalTransition } from "./onboarding/GoalTransition";
 
 /**
  * Sequences the story-first first-run journey (see docs/PRODUCT_JOURNEY.md):
@@ -12,7 +13,7 @@ import { FirstGoal } from "./onboarding/FirstGoal";
  * SSR-safe: renders a stable splash before hydration.
  */
 export function ExperienceGate({ children }: { children: ReactNode }) {
-  const { hydrated, authed, storySeen, profile, dreams } = useStore();
+  const { hydrated, authed, storySeen, profile, dreams, postGoalSeen } = useStore();
   const [showResult, setShowResult] = useState(false);
 
   if (!hydrated) return <Splash />;
@@ -21,6 +22,7 @@ export function ExperienceGate({ children }: { children: ReactNode }) {
   if (!profile) return <Assessment onDone={() => setShowResult(true)} />;
   if (showResult) return <ProfileResult onContinue={() => setShowResult(false)} />;
   if (dreams.length === 0) return <FirstGoal />;
+  if (!postGoalSeen) return <GoalTransition />;
   return <>{children}</>;
 }
 

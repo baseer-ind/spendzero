@@ -68,12 +68,57 @@ try {
   await page.waitForTimeout(300);
   await page.getByText("Start building this", { exact: false }).click();
   await page.waitForTimeout(600);
-  await shot("home");
 
-  // 6) IN APP — home
-  const inApp = await page.getByText("Today", { exact: false }).count();
-  log(`landed in app (bottom nav): ${inApp > 0}`);
-  if (inApp === 0) issues.push("APP: did not land in app after goal");
+  // 5b) POST-GOAL TRANSITION
+  const trans = await page.getByText("your future has a name", { exact: false }).count();
+  log(`post-goal transition shown: ${trans > 0}`);
+  if (trans === 0) issues.push("TRANSITION: post-goal screen not shown");
+  await shot("transition");
+  await page.getByText("Explore today", { exact: false }).click();
+  await page.waitForURL("**/today", { timeout: 8000 });
+
+  // 6) TODAY HUB → FOOD deep flow
+  log("\n-- food vertical --");
+  const mood = await page.getByText("in the mood for", { exact: false }).count();
+  log(`today hub shown: ${mood > 0}`);
+  await page.getByText("Food", { exact: true }).click();
+  await page.waitForURL("**/food", { timeout: 8000 });
+  await page.getByText("Zwigato", { exact: false }).first().click();
+  await page.waitForURL("**/food/zwigato", { timeout: 8000 });
+  await shot("foodapp");
+  // search
+  await page.getByPlaceholder("Search restaurants or dishes…").fill("biryani");
+  await page.waitForTimeout(300);
+  const found = await page.getByText("Nizam", { exact: false }).count();
+  log(`search 'biryani' finds restaurant: ${found > 0}`);
+  if (found === 0) issues.push("FOOD: search did not filter");
+  await page.getByText("Nizam", { exact: false }).first().click();
+  await page.waitForURL("**/food/zwigato/**", { timeout: 8000 });
+  await shot("menu");
+  const menu = await page.getByText("Menu", { exact: false }).count();
+  log(`restaurant menu shown: ${menu > 0}`);
+  await page.getByRole("button", { name: "ADD", exact: true }).first().click();
+  await page.waitForTimeout(400);
+  // dishes with add-ons open a customization sheet — confirm from there
+  const sheet = await page.getByRole("button", { name: /Add to cart/i }).count();
+  if (sheet > 0) {
+    log("dish detail sheet opened (add-ons): true");
+    await page.getByRole("button", { name: /Add to cart/i }).click();
+    await page.waitForTimeout(400);
+  }
+  await page.getByText("View cart", { exact: false }).click();
+  await page.waitForURL("**/cart", { timeout: 8000 });
+  await page.waitForTimeout(500);
+  const cartItem = await page.getByText("Biryani", { exact: false }).count();
+  log(`cart has item from food flow: ${cartItem > 0}`);
+  if (cartItem === 0) issues.push("FOOD: item not in cart");
+  await page.getByText("Take a moment", { exact: false }).click();
+  await page.waitForURL("**/pause**", { timeout: 8000 });
+  await page.getByText("I'm hungry", { exact: false }).click();
+  await page.waitForTimeout(200);
+  await page.getByText("build my future", { exact: false }).click();
+  await page.waitForURL("**/continue", { timeout: 8000 });
+  log("food → cart → pause → redirect → continue: true");
 
   // 7) QUICK RESIST → PAUSE → NOT TODAY → CONTINUE
   await go("/order");
