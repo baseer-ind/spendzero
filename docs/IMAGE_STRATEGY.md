@@ -43,6 +43,17 @@ real product. **Stores stay fictional** (TechBazaar, StyleBazaar, FreshKart…).
 `node scripts/image-audit.mjs` reports the **launch catalogue** (X/8 per vertical)
 separately from the long tail, and never counts illustration as a photograph.
 
+## Automated pipeline (one command, once a source is enabled)
+This Claude Code session has **no built-in image generator or stock-photo tool**.
+To automate population, enable ONE source for the session, then run the pipeline:
+- **Pexels** (recommended): set `PEXELS_API_KEY` and run
+  `PEXELS_API_KEY=xxx node webapp/scripts/fetch-pexels.mjs` → downloads the 34
+  launch photos to `public/products/…`, writes `src/lib/photoRegistry.generated.ts`
+  (with photographer credit + license), then `node webapp/scripts/image-audit.mjs`
+  to verify `34/34`. `--all` does the whole catalogue.
+- Or generate the 34 in the Claude.ai chat and drop them in (see ADDING_PRODUCT_PHOTOS.md).
+The key is only ever used by this build-time script — never shipped to the frontend.
+
 ## What's required to populate the 34
 Create 34 photographs per `docs/PRODUCT_PHOTO_SPEC.md`, name them by the manifest's
 `photoFilename`, drop into the folders (or register Pexels URLs), run the audit.

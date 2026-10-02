@@ -57,7 +57,12 @@ function folderFor(vertical: string): string {
  * Local example:   "soniq-airbuds-pro": { type: "local", src: "/products/electronics/soniq-airbuds-pro.webp" }
  * Remote example:  "soniq-airbuds-pro": { type: "remote", src: "https://images.pexels.com/...", source: "pexels", credit: "Photo by … on Pexels", licenseNote: "Pexels License" }
  */
-export const PHOTO_REGISTRY: Record<string, ProductMedia> = {};
+import { GENERATED_PHOTOS } from "./photoRegistry.generated";
+
+// Manual entries can override/extend the generated ones.
+const MANUAL_PHOTOS: Record<string, ProductMedia> = {};
+
+export const PHOTO_REGISTRY: Record<string, ProductMedia> = { ...GENERATED_PHOTOS, ...MANUAL_PHOTOS };
 
 /** Resolve a product's media. Registry wins; otherwise illustration fallback. */
 export function resolveMedia(vertical: string, id: string, illustrationSrc: string): ProductMedia {
