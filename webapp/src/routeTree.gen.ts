@@ -30,6 +30,8 @@ import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnLessonIdRouteImport } from './routes/learn.$lessonId'
 import { Route as FoodAppIdIndexRouteImport } from './routes/food.$appId.index'
 import { Route as FoodAppIdRestaurantIdRouteImport } from './routes/food.$appId.$restaurantId'
+import { Route as MarketVerticalIndexRouteImport } from './routes/market.$vertical.index'
+import { Route as MarketVerticalProductIdRouteImport } from './routes/market.$vertical.$productId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -136,6 +138,16 @@ const FoodAppIdRestaurantIdRoute = FoodAppIdRestaurantIdRouteImport.update({
   path: '/food/$appId/$restaurantId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketVerticalIndexRoute = MarketVerticalIndexRouteImport.update({
+  id: '/market/$vertical/',
+  path: '/market/$vertical/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketVerticalProductIdRoute = MarketVerticalProductIdRouteImport.update({
+  id: '/market/$vertical/$productId',
+  path: '/market/$vertical/$productId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -158,7 +170,9 @@ export interface FileRoutesByFullPath {
   '/food/': typeof FoodIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
+  '/market/$vertical/$productId': typeof MarketVerticalProductIdRoute
   '/food/$appId/': typeof FoodAppIdIndexRoute
+  '/market/$vertical/': typeof MarketVerticalIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -181,7 +195,9 @@ export interface FileRoutesByTo {
   '/food': typeof FoodIndexRoute
   '/learn': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
+  '/market/$vertical/$productId': typeof MarketVerticalProductIdRoute
   '/food/$appId': typeof FoodAppIdIndexRoute
+  '/market/$vertical': typeof MarketVerticalIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -205,7 +221,9 @@ export interface FileRoutesById {
   '/food/': typeof FoodIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
+  '/market/$vertical/$productId': typeof MarketVerticalProductIdRoute
   '/food/$appId/': typeof FoodAppIdIndexRoute
+  '/market/$vertical/': typeof MarketVerticalIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -230,7 +248,9 @@ export interface FileRouteTypes {
     | '/food/'
     | '/learn/'
     | '/food/$appId/$restaurantId'
+    | '/market/$vertical/$productId'
     | '/food/$appId/'
+    | '/market/$vertical/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -253,7 +273,9 @@ export interface FileRouteTypes {
     | '/food'
     | '/learn'
     | '/food/$appId/$restaurantId'
+    | '/market/$vertical/$productId'
     | '/food/$appId'
+    | '/market/$vertical'
   id:
     | '__root__'
     | '/'
@@ -276,7 +298,9 @@ export interface FileRouteTypes {
     | '/food/'
     | '/learn/'
     | '/food/$appId/$restaurantId'
+    | '/market/$vertical/$productId'
     | '/food/$appId/'
+    | '/market/$vertical/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -300,7 +324,9 @@ export interface RootRouteChildren {
   FoodIndexRoute: typeof FoodIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
   FoodAppIdRestaurantIdRoute: typeof FoodAppIdRestaurantIdRoute
+  MarketVerticalProductIdRoute: typeof MarketVerticalProductIdRoute
   FoodAppIdIndexRoute: typeof FoodAppIdIndexRoute
+  MarketVerticalIndexRoute: typeof MarketVerticalIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -452,6 +478,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoodAppIdRestaurantIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/market/$vertical/': {
+      id: '/market/$vertical/'
+      path: '/market/$vertical'
+      fullPath: '/market/$vertical/'
+      preLoaderRoute: typeof MarketVerticalIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market/$vertical/$productId': {
+      id: '/market/$vertical/$productId'
+      path: '/market/$vertical/$productId'
+      fullPath: '/market/$vertical/$productId'
+      preLoaderRoute: typeof MarketVerticalProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -476,7 +516,9 @@ const rootRouteChildren: RootRouteChildren = {
   FoodIndexRoute: FoodIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
   FoodAppIdRestaurantIdRoute: FoodAppIdRestaurantIdRoute,
+  MarketVerticalProductIdRoute: MarketVerticalProductIdRoute,
   FoodAppIdIndexRoute: FoodAppIdIndexRoute,
+  MarketVerticalIndexRoute: MarketVerticalIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -238,6 +238,7 @@ try {
   log(`electronics live on today: ${elLive > 0}`);
   await page.getByText("Electronics", { exact: true }).click();
   await page.waitForURL("**/electronics", { timeout: 8000 });
+  await page.getByText("Deals of the day", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
   const deals = await page.getByText("Deals of the day", { exact: false }).count();
   log(`techbazaar deals rail: ${deals > 0}`);
   if (deals === 0) issues.push("ELECTRONICS: deals rail missing");
@@ -322,6 +323,44 @@ try {
   if (caught === 0) issues.push("CONSUMPTION: attention map missing");
   await shot("consumption");
 
+  // 9g) NEW VERTICALS live (no more "Soon" dead cards)
+  log("\n-- market verticals --");
+  await go("/today");
+  for (const name of ["Grocery", "Shopping", "Travel", "Entertainment", "Beauty", "Home"]) {
+    const soon = await page.locator(`text=${name}`).first().isVisible().catch(() => false);
+    if (!soon) issues.push(`MARKET: ${name} card missing`);
+  }
+  // deep-test Grocery end to end
+  await page.getByText("Grocery", { exact: true }).click();
+  await page.waitForURL("**/market/grocery", { timeout: 8000 });
+  await page.getByText("Top deals", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
+  const gHub = await page.getByText("Top deals", { exact: false }).count();
+  log(`grocery storefront loads: ${gHub > 0}`);
+  if (gHub === 0) issues.push("MARKET: grocery storefront not rendering");
+  await page.getByPlaceholder(/Search FreshKart/i).fill("milk");
+  await page.waitForTimeout(300);
+  const milk = await page.getByText("Milk", { exact: false }).count();
+  log(`grocery search works: ${milk > 0}`);
+  if (milk === 0) issues.push("MARKET: grocery search failed");
+  await page.getByText("Milk", { exact: false }).first().click();
+  await page.waitForURL("**/market/grocery/**", { timeout: 8000 });
+  await page.waitForTimeout(300);
+  await page.getByRole("button", { name: "Add to cart", exact: true }).click();
+  await page.waitForTimeout(300);
+  await page.getByText("View cart", { exact: false }).first().click();
+  await page.waitForURL("**/cart", { timeout: 8000 });
+  await page.getByText("Proceed to checkout", { exact: false }).click();
+  await page.waitForURL("**/checkout", { timeout: 8000 });
+  await page.getByText("Place order", { exact: false }).click();
+  await page.waitForURL("**/pause**", { timeout: 8000 });
+  await page.getByText("I genuinely want it", { exact: false }).first().click();
+  await page.waitForTimeout(250);
+  const gCat = await page.getByText("Grocery", { exact: false }).count();
+  log(`decision shows Grocery category: ${gCat > 0}`);
+  if (gCat === 0) issues.push("MARKET: grocery category not carried to decision");
+  await page.getByRole("button", { name: /Enjoy it/i }).click();
+  await page.waitForTimeout(300);
+
   // 10) PROFILE photo affordance + ACHIEVEMENTS
   await go("/profile");
   const photoBtn = await page.getByLabel("Change profile photo").count();
@@ -365,7 +404,7 @@ try {
   await page.waitForURL("**/food", { timeout: 8000 });
 
   // 13) all live routes 200
-  for (const r of ["/", "/future", "/today", "/food", "/electronics", "/wishlist", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/consumption", "/learn", "/learn/discount-trap", "/feedback"]) {
+  for (const r of ["/", "/future", "/today", "/food", "/electronics", "/market/grocery", "/market/shopping", "/market/travel", "/market/entertainment", "/market/beauty", "/market/home", "/wishlist", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/consumption", "/learn", "/learn/discount-trap", "/feedback"]) {
     const s = await go(r);
     if (s !== 200) log(`route ${r}: ${s}`);
   }

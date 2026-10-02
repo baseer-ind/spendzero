@@ -26,7 +26,7 @@ Goal: zero dead interactions. Verified via code + Playwright (`smoke.mjs`).
 |---|---|
 | Food card → /food | ✅ |
 | Electronics card → /electronics | ✅ |
-| Grocery / Shopping / Travel / Entertainment / Beauty / Home | 🚧 "Soon" badge, non-clickable, honest |
+| Grocery / Shopping / Travel / Entertainment / Beauty / Home → /market/$vertical | ✅ all live (shared storefront engine) |
 
 ## Food vertical
 | Element | Status |

@@ -10,12 +10,12 @@ export const Route = createFileRoute("/today")({
 const CATEGORIES = [
   { emoji: "🍔", name: "Food", to: "/food", live: true, tint: "from-[#E2443A]/30" },
   { emoji: "📱", name: "Electronics", to: "/electronics", live: true, tint: "from-blue-500/25" },
-  { emoji: "🛒", name: "Grocery", live: false, tint: "from-emerald-500/25" },
-  { emoji: "👕", name: "Shopping", live: false, tint: "from-fuchsia-500/25" },
-  { emoji: "✈️", name: "Travel", live: false, tint: "from-cyan-500/25" },
-  { emoji: "🎬", name: "Entertainment", live: false, tint: "from-violet-500/25" },
-  { emoji: "💄", name: "Beauty", live: false, tint: "from-pink-500/25" },
-  { emoji: "🏠", name: "Home", live: false, tint: "from-amber-500/25" },
+  { emoji: "🛒", name: "Grocery", to: "/market/grocery", live: true, tint: "from-emerald-500/25" },
+  { emoji: "👕", name: "Shopping", to: "/market/shopping", live: true, tint: "from-fuchsia-500/25" },
+  { emoji: "✈️", name: "Travel", to: "/market/travel", live: true, tint: "from-cyan-500/25" },
+  { emoji: "🎬", name: "Entertainment", to: "/market/entertainment", live: true, tint: "from-violet-500/25" },
+  { emoji: "💄", name: "Beauty", to: "/market/beauty", live: true, tint: "from-pink-500/25" },
+  { emoji: "🏠", name: "Home", to: "/market/home", live: true, tint: "from-amber-500/25" },
 ];
 
 function TodayScreen() {
