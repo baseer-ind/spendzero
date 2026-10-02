@@ -39,7 +39,6 @@ function OrderScreen() {
   const { hydrated, activeDream, applySaving, events, totalSaved, currentStreak } = useStore();
   const navigate = useNavigate();
   const [amount, setAmount] = useState(820);
-  const [selected, setSelected] = useState("sushi");
 
   function resist() {
     if (!activeDream) {
@@ -89,14 +88,9 @@ function OrderScreen() {
             <ul className="space-y-4">
               {APPS.map((a, i) => (
                 <li key={a.id} className="animate-rise" style={{ animationDelay: `${120 + i * 90}ms` }}>
-                  <AppRow
-                    app={a}
-                    active={selected === a.id}
-                    onPick={() => {
-                      setSelected(a.id);
-                      setAmount(a.avg);
-                    }}
-                  />
+                  <Link to="/restaurants" className="block">
+                    <AppRow app={a} />
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -155,14 +149,9 @@ function OrderScreen() {
   );
 }
 
-function AppRow({ app, active, onPick }: { app: App; active: boolean; onPick: () => void }) {
+function AppRow({ app }: { app: App }) {
   return (
-    <button
-      onClick={onPick}
-      className={`group w-full text-left relative overflow-hidden rounded-[22px] bg-surface ring-1 transition ${
-        active ? "ring-gold/50" : "ring-white/8 hover:ring-white/15"
-      }`}
-    >
+    <div className="group w-full text-left relative overflow-hidden rounded-[22px] bg-surface ring-1 ring-white/8 hover:ring-white/15 transition">
       <div className="flex items-stretch gap-0">
         <div className="relative h-[124px] w-[124px] shrink-0 overflow-hidden">
           <img src={app.img} alt={app.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -178,13 +167,13 @@ function AppRow({ app, active, onPick }: { app: App; active: boolean; onPick: ()
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[12px] text-muted-foreground">{formatINR(app.avg)} avg · {app.eta}</span>
-            <span className={`h-7 min-w-[64px] px-3 rounded-full grid place-items-center text-[11px] transition ${active ? "bg-gold/20 text-gold" : "bg-white/5 text-foreground/70"}`}>
-              {active ? "Selected" : "Select"}
+            <span className="h-7 min-w-[64px] px-3 rounded-full grid place-items-center text-[11px] bg-white/5 text-foreground/70">
+              Browse →
             </span>
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 

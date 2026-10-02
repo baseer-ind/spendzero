@@ -104,6 +104,31 @@ try {
 }
 await page.screenshot({ path: `${OUT}_continue.png` });
 
+// 6b. cart flow: browse -> add -> cart -> resist & save
+log("\n-- cart flow --");
+try {
+  await go("/restaurant");
+  await page.getByRole("button", { name: "Add", exact: true }).first().click();
+  await page.waitForTimeout(400);
+  await page.getByText("Review", { exact: false }).first().click();
+  await page.waitForURL("**/cart", { timeout: 8000 });
+  await page.waitForTimeout(300);
+  const cartHasItem = await page.getByText("Chef's Omakase", { exact: false }).count();
+  log(`cart shows added item: ${cartHasItem > 0}`);
+  if (cartHasItem === 0) issues.push("CART: added item not shown in cart");
+  await page.getByRole("button", { name: /to my future/i }).click();
+  await page.waitForURL("**/continue", { timeout: 8000 });
+  log("cart resist -> continue: true");
+  // cart should now be empty
+  await go("/cart");
+  await page.waitForTimeout(300);
+  const emptied = await page.getByText("cart is empty", { exact: false }).count();
+  log(`cart cleared after checkout: ${emptied > 0}`);
+  if (emptied === 0) issues.push("CART: not cleared after checkout");
+} catch (e) {
+  issues.push(`CART flow failed: ${e.message}`);
+}
+
 // 6. home reflects saved progress
 await go("/");
 await page.waitForTimeout(500);

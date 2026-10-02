@@ -14,10 +14,10 @@ export const Route = createFileRoute("/profile")({
 });
 
 function Row({
-  icon, label, value, danger, onClick,
-}: { icon: string; label: string; value?: string; danger?: boolean; onClick?: () => void }) {
-  return (
-    <button onClick={onClick} className="flex w-full items-center justify-between border-b border-white/5 px-5 py-4 text-left last:border-0">
+  icon, label, value, danger, onClick, to,
+}: { icon: string; label: string; value?: string; danger?: boolean; onClick?: () => void; to?: string }) {
+  const inner = (
+    <>
       <div className="flex items-center gap-4">
         <span className="grid h-9 w-9 place-items-center rounded-full bg-white/5 text-[14px]">{icon}</span>
         <span className={`text-[14px] ${danger ? "text-destructive" : "text-foreground/85"}`}>{label}</span>
@@ -25,8 +25,11 @@ function Row({
       <span className="flex items-center gap-2 text-[12px] text-foreground/45">
         {value} <span className="text-foreground/30">›</span>
       </span>
-    </button>
+    </>
   );
+  const cls = "flex w-full items-center justify-between border-b border-white/5 px-5 py-4 text-left last:border-0";
+  if (to) return <Link to={to} className={cls}>{inner}</Link>;
+  return <button onClick={onClick} className={cls}>{inner}</button>;
 }
 
 function ProfileScreen() {
@@ -75,14 +78,8 @@ function ProfileScreen() {
 
       {/* Sections */}
       <div className="mx-6 mt-7 overflow-hidden rounded-2xl border border-white/8 bg-surface">
-        <Row icon="◎" label="My dreams" value={`${dreams.length} active`} />
-        <Row icon="◐" label="Daily ritual time" value="9:00 PM" />
-      </div>
-
-      <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">
-        <Row icon="✦" label="Notifications" value="Gentle" />
-        <Row icon="◈" label="Appearance" value="Midnight" />
-        <Row icon="?" label="Help & philosophy" />
+        <Row icon="◎" label="My dreams" value={`${dreams.length} active`} to="/future" />
+        <Row icon="⟳" label="My journey" value={`${events.length} wins`} to="/journey" />
       </div>
 
       <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">

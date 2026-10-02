@@ -35,6 +35,14 @@ export type SaveEvent = {
   at: number;
 };
 
+export type CartItem = {
+  id: string;
+  name: string;
+  price: number; // rupees
+  qty: number;
+  image?: string;
+};
+
 export type Account = { name: string; email: string };
 
 type State = {
@@ -43,9 +51,10 @@ type State = {
   dreams: Dream[];
   activeDreamId: string | null;
   events: SaveEvent[];
+  cart: CartItem[];
 };
 
-const EMPTY: State = { name: null, account: null, dreams: [], activeDreamId: null, events: [] };
+const EMPTY: State = { name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [] };
 const KEY = "project_future_state_v1";
 const CREDS_KEY = "project_future_creds_v1";
 
@@ -97,6 +106,12 @@ type Ctx = State & {
   activeDream: Dream | null;
   totalSaved: number;
   currentStreak: number;
+  cartTotal: number;
+  cartCount: number;
+  addToCart: (item: { id: string; name: string; price: number; image?: string }) => void;
+  setCartQty: (id: string, qty: number) => void;
+  removeFromCart: (id: string) => void;
+  clearCart: () => void;
   setName: (n: string) => void;
   register: (d: { name: string; email: string; password: string }) => AuthResult;
   login: (d: { email: string; password: string }) => AuthResult;
@@ -215,7 +230,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return updated;
   }, []);
 
+  const addToCart = useCallback((item: { id: string; name: string; price: number; image?: string }) => {
+    setState((s) => {
+      const existing = s.cart.find((c) => c.id === item.id);
+      const cart = existing
+        ? s.cart.map((c) => (c.id === item.id ? { ...c, qty: c.qty + 1 } : c))
+        : [...s.cart, { ...item, qty: 1 }];
+      return { ...s, cart };
+    });
+  }, []);
+
+  const setCartQty = useCallback((id: string, qty: number) => {
+    setState((s) => ({
+      ...s,
+      cart: qty <= 0 ? s.cart.filter((c) => c.id !== id) : s.cart.map((c) => (c.id === id ? { ...c, qty } : c)),
+    }));
+  }, []);
+
+  const removeFromCart = useCallback((id: string) => {
+    setState((s) => ({ ...s, cart: s.cart.filter((c) => c.id !== id) }));
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setState((s) => ({ ...s, cart: [] }));
+  }, []);
+
   const reset = useCallback(() => setState(EMPTY), []);
+
+  const cartTotal = useMemo(() => state.cart.reduce((a, c) => a + c.price * c.qty, 0), [state.cart]);
+  const cartCount = useMemo(() => state.cart.reduce((a, c) => a + c.qty, 0), [state.cart]);
 
   const activeDream = useMemo(
     () => state.dreams.find((d) => d.id === state.activeDreamId) ?? state.dreams[0] ?? null,
@@ -254,6 +297,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     activeDream,
     totalSaved,
     currentStreak,
+    cartTotal,
+    cartCount,
+    addToCart,
+    setCartQty,
+    removeFromCart,
+    clearCart,
     setName,
     register,
     login,
