@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
 import futureSelf from "@/assets/future-self.jpg";
+import { ImagePicker } from "@/components/ImagePicker";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/future")({
@@ -17,12 +18,15 @@ export const Route = createFileRoute("/future")({
 const EMOJIS = ["✨", "🏖️", "🏡", "💻", "🚗", "🎓", "💍", "📷", "✈️", "⌚", "🎸", "🧘"];
 
 function FutureScreen() {
-  const { hydrated, dreams, activeDreamId, addDream, setActiveDream } = useStore();
+  const { hydrated, dreams, activeDreamId, activeDream, addDream, setActiveDream, setDreamCover } = useStore();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [target, setTarget] = useState("");
   const [emoji, setEmoji] = useState("✨");
+  const [cover, setCover] = useState<string | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
+  const [editCoverId, setEditCoverId] = useState<string | null>(null);
 
   function submit() {
     const amt = parseInt(target.replace(/[^0-9]/g, ""), 10);
@@ -30,13 +34,16 @@ function FutureScreen() {
       setError("Give your dream a name and a target amount.");
       return;
     }
-    addDream({ name, emoji, target: amt });
+    addDream({ name, emoji, target: amt, cover });
     setName("");
     setTarget("");
     setEmoji("✨");
+    setCover(undefined);
     setError(null);
     setOpen(false);
   }
+
+  const heroImg = activeDream?.cover || futureSelf;
 
   return (
     <Screen>
@@ -45,7 +52,7 @@ function FutureScreen() {
 
       <div className="relative mx-6 overflow-hidden rounded-3xl">
         <img
-          src={futureSelf}
+          src={heroImg}
           alt="Future self"
           width={1024}
           height={1024}
@@ -97,7 +104,16 @@ function FutureScreen() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-[22px]">{d.emoji}</span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); setEditCoverId(d.id); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); setEditCoverId(d.id); } }}
+                    className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/5 text-[22px]"
+                  >
+                    {d.cover ? <img src={d.cover} alt="" className="h-full w-full object-cover" /> : d.emoji}
+                    <span className="absolute bottom-0 right-0 rounded-tl-md bg-black/60 px-1 text-[9px] text-white/90">✎</span>
+                  </span>
                   <div>
                     <h4 className="font-display text-[17px]">{d.name}</h4>
                     <p className="mt-1 text-[11px] text-foreground/45">
@@ -166,6 +182,19 @@ function FutureScreen() {
               className="mt-3 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[15px] outline-none placeholder:text-foreground/35 focus:border-gold/50"
             />
 
+            <button
+              type="button"
+              onClick={() => setShowPicker(true)}
+              className="mt-3 flex w-full items-center gap-3 overflow-hidden rounded-xl border border-white/10 bg-white/5 p-2.5 text-left"
+            >
+              {cover ? (
+                <img src={cover} alt="" className="h-12 w-16 rounded-lg object-cover" />
+              ) : (
+                <span className="grid h-12 w-16 place-items-center rounded-lg bg-white/5 text-[20px]">{emoji}</span>
+              )}
+              <span className="text-[13px] text-foreground/70">{cover ? "Change cover" : "Add a cover image"}</span>
+            </button>
+
             {error && <p className="mt-3 text-[12px] text-destructive">{error}</p>}
 
             <div className="mt-4 flex gap-3">
@@ -189,6 +218,24 @@ function FutureScreen() {
           </div>
         )}
       </div>
+
+      <ImagePicker
+        open={showPicker}
+        kind="cover"
+        seedKeyword={name || "india dream"}
+        onPick={(url) => setCover(url)}
+        onRemove={cover ? () => setCover(undefined) : undefined}
+        onClose={() => setShowPicker(false)}
+      />
+
+      <ImagePicker
+        open={editCoverId !== null}
+        kind="cover"
+        seedKeyword={dreams.find((d) => d.id === editCoverId)?.name || "india dream"}
+        onPick={(url) => { if (editCoverId) setDreamCover(editCoverId, url); }}
+        onRemove={dreams.find((d) => d.id === editCoverId)?.cover ? () => { if (editCoverId) setDreamCover(editCoverId, null); } : undefined}
+        onClose={() => setEditCoverId(null)}
+      />
 
       <BottomNav active="future" />
     </Screen>

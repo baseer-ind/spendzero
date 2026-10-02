@@ -26,6 +26,19 @@ export type Dream = {
   target: number; // rupees
   saved: number; // rupees
   createdAt: number;
+  cover?: string; // image URL or data: URL (curated / searched / uploaded)
+};
+
+// Indian delivery address (checkout simulation only — no real orders are placed).
+export type Address = {
+  name: string;
+  phone: string;
+  flat: string; // Flat / House no / Building
+  area: string; // Area / Street / Sector
+  landmark: string;
+  city: string;
+  state: string;
+  pin: string; // PIN Code
 };
 
 export type SaveEvent = {
@@ -57,11 +70,14 @@ type State = {
   profile: Profile | null;
   decisions: number; // conscious pause decisions made (buy or not-today)
   postGoalSeen: boolean;
+  profilePhoto: string | null; // image URL or data: URL
+  address: Address | null;
 };
 
 const EMPTY: State = {
   name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [],
   storySeen: false, profile: null, decisions: 0, postGoalSeen: false,
+  profilePhoto: null, address: null,
 };
 const KEY = "project_future_state_v1";
 const CREDS_KEY = "project_future_creds_v1";
@@ -128,9 +144,12 @@ type Ctx = State & {
   register: (d: { name: string; email: string; password: string }) => AuthResult;
   login: (d: { email: string; password: string }) => AuthResult;
   logout: () => void;
-  addDream: (d: { name: string; emoji?: string; target: number }) => string;
+  addDream: (d: { name: string; emoji?: string; target: number; cover?: string }) => string;
   setActiveDream: (id: string) => void;
+  setDreamCover: (id: string, cover: string | null) => void;
   applySaving: (amount: number, note: string) => Dream | null;
+  setProfilePhoto: (url: string | null) => void;
+  saveAddress: (a: Address) => void;
   reset: () => void;
 };
 
@@ -194,7 +213,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addDream = useCallback(
-    (d: { name: string; emoji?: string; target: number }) => {
+    (d: { name: string; emoji?: string; target: number; cover?: string }) => {
       const id = uid();
       setState((s) => ({
         ...s,
@@ -207,6 +226,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             target: Math.max(1, Math.round(d.target)),
             saved: 0,
             createdAt: Date.now(),
+            cover: d.cover,
           },
         ],
         activeDreamId: s.activeDreamId ?? id,
@@ -218,6 +238,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setActiveDream = useCallback((id: string) => {
     setState((s) => ({ ...s, activeDreamId: id }));
+  }, []);
+
+  const setDreamCover = useCallback((id: string, cover: string | null) => {
+    setState((s) => ({
+      ...s,
+      dreams: s.dreams.map((d) => (d.id === id ? { ...d, cover: cover ?? undefined } : d)),
+    }));
+  }, []);
+
+  const setProfilePhoto = useCallback((url: string | null) => {
+    setState((s) => ({ ...s, profilePhoto: url }));
+  }, []);
+
+  const saveAddress = useCallback((a: Address) => {
+    setState((s) => ({ ...s, address: a }));
   }, []);
 
   const applySaving = useCallback((amount: number, note: string) => {
@@ -330,7 +365,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     logout,
     addDream,
     setActiveDream,
+    setDreamCover,
     applySaving,
+    setProfilePhoto,
+    saveAddress,
     reset,
   };
 

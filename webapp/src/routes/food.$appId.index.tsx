@@ -84,12 +84,16 @@ function FoodAppHome() {
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className={`h-3 w-3 rounded-sm border ${r.veg ? "border-green-500" : "border-red-500"} grid place-items-center`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${r.veg ? "bg-green-500" : "bg-red-500"}`} />
-                    </span>
+                    {r.vegOnly && (
+                      <span className="grid h-3 w-3 place-items-center rounded-sm border border-green-500">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                      </span>
+                    )}
                     <h3 className="font-display text-[19px] leading-tight">{r.name}</h3>
+                    {r.vegOnly && <span className="text-[10px] uppercase tracking-wider text-green-400">Pure veg</span>}
                   </div>
                   <p className="mt-1 text-[12px] text-foreground/50">{r.cuisines.join(" · ")}</p>
+                  <p className="mt-0.5 text-[11px] text-foreground/40">{r.area}, {r.city}</p>
                 </div>
                 <div className="text-right text-[12px] text-foreground/55">
                   <div>{r.etaMins} min</div>
@@ -97,7 +101,7 @@ function FoodAppHome() {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3 text-[12px] text-foreground/55">
-                <span>{formatINR(r.priceForTwo)} for two</span>
+                <span>{formatINR(r.costForTwo)} for two</span>
                 <span>{r.deliveryFee === 0 ? "Free delivery" : `₹${r.deliveryFee} delivery`}</span>
               </div>
             </div>

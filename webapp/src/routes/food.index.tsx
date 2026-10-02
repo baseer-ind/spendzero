@@ -28,7 +28,7 @@ function FoodApps() {
             <div className="p-6" style={{ background: `linear-gradient(135deg, ${a.accent}, ${a.accent}22)` }}>
               <div className="flex items-center gap-3">
                 <div className="grid h-14 w-14 place-items-center rounded-2xl bg-white/15 text-[26px] backdrop-blur">
-                  {a.id === "zwigato" ? "🛵" : a.id === "tomato" ? "🍴" : "⚡"}
+                  {a.glyph}
                 </div>
                 <div>
                   <h3 className="font-display text-[24px] text-white leading-none">{a.name}</h3>

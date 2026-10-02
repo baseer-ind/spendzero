@@ -1,13 +1,14 @@
-// Fictional marketplace catalogue — structured so UI is reusable and data can grow.
-// See docs/MARKETPLACE_ECOSYSTEM.md. No real trademarks; fictional brands only.
-import sakura from "@/assets/rest-sakura.jpg";
+// India-first fictional marketplace catalogue. Default city: Hyderabad.
+// No real trademarks — fictional brands only. See docs/INDIA_CATALOGUE_GUIDE.md.
 import omakase from "@/assets/dish-omakase.jpg";
 import nigiri from "@/assets/dish-nigiri.jpg";
-import sushi from "@/assets/food-sushi.jpg";
 import burger from "@/assets/food-burger.jpg";
 import grocery from "@/assets/food-grocery.jpg";
 
-// Keyword photo (React <img> loads any host; no CORS issue). Stable per seed.
+export const DEFAULT_CITY = "Hyderabad";
+export const CITIES = ["Hyderabad", "Bengaluru", "Mumbai", "Delhi", "Chennai", "Pune", "Kolkata"];
+
+// Keyword photo (React <img>, no CORS). Stable per seed. Used for the long tail.
 function lock(seed: string): number {
   let h = 7;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) & 0x7fffffff;
@@ -17,77 +18,109 @@ export function kwImg(keyword: string, seed: string, w = 600, h = 420): string {
   return `https://loremflickr.com/${w}/${h}/${encodeURIComponent(keyword)}?lock=${lock(seed)}`;
 }
 
-export type FoodApp = { id: string; name: string; tagline: string; accent: string; badge: string };
+export type Diet = "veg" | "nonveg" | "egg";
+export type FoodApp = { id: string; name: string; tagline: string; accent: string; badge: string; glyph: string };
 
 export const FOOD_APPS: FoodApp[] = [
-  { id: "zwigato", name: "Zwigato", tagline: "Food at the speed of hunger", accent: "#E2443A", badge: "#1 in your city" },
-  { id: "tomato", name: "Tomato", tagline: "Discover restaurants you'll love", accent: "#D1286B", badge: "Top rated" },
-  { id: "yumrush", name: "YumRush", tagline: "Hot food, 20-min promise", accent: "#7A3FF2", badge: "Fastest" },
+  { id: "zaikago", name: "ZaikaGo", tagline: "Ghar jaisa, tez delivery", accent: "#E23744", badge: "#1 in Hyderabad", glyph: "🛵" },
+  { id: "khananow", name: "KhanaNow", tagline: "Top-rated kitchens near you", accent: "#C2185B", badge: "Top rated", glyph: "🍴" },
+  { id: "mealkart", name: "MealKart", tagline: "30-min meals, no surge", accent: "#F2711C", badge: "Fastest", glyph: "⚡" },
 ];
 
-export const FOOD_CUISINES = ["Biryani", "Pizza", "Burgers", "Chinese", "South Indian", "Sushi", "Desserts", "Healthy", "Beverages"];
+export const FOOD_CUISINES = ["Biryani", "Hyderabadi", "South Indian", "North Indian", "Street Food", "Thali", "Desserts", "Beverages", "Chinese"];
 
 export type Dish = {
   id: string; name: string; section: string; desc: string; price: number; mrp?: number;
-  rating: number; veg: boolean; img: string; bestseller?: boolean; addons?: { name: string; price: number }[];
+  rating: number; diet: Diet; img: string; bestseller?: boolean; addons?: { name: string; price: number }[];
 };
 export type Restaurant = {
-  id: string; name: string; cuisines: string[]; rating: number; etaMins: number; deliveryFee: number;
-  distanceKm: number; priceForTwo: number; veg: boolean; offer?: string; img: string; apps: string[]; dishes: Dish[];
+  id: string; name: string; area: string; city: string; cuisines: string[]; rating: number; etaMins: number;
+  deliveryFee: number; distanceKm: number; costForTwo: number; vegOnly: boolean; offer?: string; img: string;
+  apps: string[]; dishes: Dish[];
 };
 
-const addonsVeg = [{ name: "Extra cheese", price: 60 }, { name: "Garlic bread", price: 90 }];
-const addonsDrink = [{ name: "Coke (300ml)", price: 60 }, { name: "Fresh lime", price: 70 }];
+const drinks = [{ name: "Masala Chai", price: 30 }, { name: "Sweet Lassi", price: 60 }];
+const naan = [{ name: "Butter Naan", price: 45 }, { name: "Garlic Naan", price: 55 }];
 
 export const RESTAURANTS: Restaurant[] = [
   {
-    id: "sakura", name: "Sakura Omakase", cuisines: ["Sushi", "Japanese"], rating: 4.8, etaMins: 34,
-    deliveryFee: 49, distanceKm: 2.1, priceForTwo: 1200, veg: false, offer: "20% off up to ₹120",
-    img: sakura, apps: ["zwigato", "tomato"],
+    id: "deccan-zaika", name: "Deccan Zaika", area: "Banjara Hills", city: "Hyderabad",
+    cuisines: ["Biryani", "Hyderabadi"], rating: 4.5, etaMins: 38, deliveryFee: 29, distanceKm: 3.4,
+    costForTwo: 500, vegOnly: false, offer: "₹100 OFF above ₹499 · UPI", img: kwImg("hyderabadi biryani", "deccan-zaika", 800, 500),
+    apps: ["zaikago", "khananow", "mealkart"],
     dishes: [
-      { id: "sk-omakase", name: "Chef's Omakase (12 course)", section: "Popular", desc: "A guided tasting of the counter's best.", price: 1840, rating: 4.9, veg: false, img: omakase, bestseller: true },
-      { id: "sk-anago", name: "Anago Nigiri", section: "Nigiri", desc: "Sea eel with a sweet tare glaze.", price: 420, rating: 4.7, veg: false, img: nigiri },
-      { id: "sk-aburi", name: "Salmon Aburi Set", section: "Popular", desc: "Torched salmon, yuzu kosho.", price: 680, mrp: 760, rating: 4.8, veg: false, img: sushi, bestseller: true },
-      { id: "sk-maki", name: "Avocado Cucumber Maki", section: "Rolls", desc: "Crisp, clean, vegetarian.", price: 320, rating: 4.5, veg: true, img: kwImg("sushi roll", "sk-maki") },
-      { id: "sk-miso", name: "Miso Soup", section: "Sides", desc: "Dashi, tofu, wakame.", price: 140, rating: 4.4, veg: true, img: kwImg("miso soup", "sk-miso") },
-      { id: "sk-matcha", name: "Matcha Cheesecake", section: "Desserts", desc: "Stone-ground matcha, light bake.", price: 260, rating: 4.6, veg: true, img: kwImg("matcha cake", "sk-matcha") },
+      { id: "dz-chk-bir", name: "Hyderabadi Chicken Dum Biryani", section: "Popular", desc: "Long-grain basmati, sealed on the dum.", price: 289, mrp: 329, rating: 4.6, diet: "nonveg", img: kwImg("chicken biryani", "dz-chk-bir"), bestseller: true, addons: drinks },
+      { id: "dz-mut-bir", name: "Mutton Dum Biryani", section: "Biryani", desc: "Tender mutton on the bone, slow-cooked.", price: 359, rating: 4.5, diet: "nonveg", img: kwImg("mutton biryani", "dz-mut-bir") },
+      { id: "dz-haleem", name: "Hyderabadi Haleem", section: "Popular", desc: "Wheat, lentils & mutton, hand-pounded.", price: 220, rating: 4.7, diet: "nonveg", img: kwImg("haleem", "dz-haleem"), bestseller: true },
+      { id: "dz-mirchi", name: "Mirchi Ka Salan", section: "Sides", desc: "Peanut-sesame gravy, green chillies.", price: 120, rating: 4.3, diet: "veg", img: kwImg("mirchi salan curry", "dz-mirchi") },
+      { id: "dz-veg-bir", name: "Veg Dum Biryani", section: "Biryani", desc: "Seasonal veg, saffron rice.", price: 229, rating: 4.2, diet: "veg", img: kwImg("veg biryani", "dz-veg-bir") },
+      { id: "dz-dkm", name: "Double Ka Meetha", section: "Desserts", desc: "Fried bread in saffron milk.", price: 110, rating: 4.6, diet: "veg", img: kwImg("double ka meetha dessert", "dz-dkm") },
+      { id: "dz-irani", name: "Irani Chai + Osmania", section: "Beverages", desc: "Irani chai with Osmania biscuits.", price: 70, rating: 4.5, diet: "veg", img: kwImg("irani chai", "dz-irani") },
     ],
   },
   {
-    id: "biryani-house", name: "Nizam's Dum Biryani House", cuisines: ["Biryani", "South Indian"], rating: 4.5, etaMins: 38,
-    deliveryFee: 29, distanceKm: 3.4, priceForTwo: 500, veg: false, offer: "Free delivery over ₹199",
-    img: kwImg("biryani", "biryani-house", 800, 500), apps: ["zwigato", "yumrush", "tomato"],
+    id: "charminar-kitchen", name: "Charminar Kitchen", area: "Old City", city: "Hyderabad",
+    cuisines: ["Hyderabadi", "North Indian"], rating: 4.4, etaMins: 42, deliveryFee: 35, distanceKm: 5.1,
+    costForTwo: 450, vegOnly: false, offer: "Free delivery over ₹199", img: kwImg("indian restaurant curry", "charminar-kitchen", 800, 500),
+    apps: ["zaikago", "khananow"],
     dishes: [
-      { id: "bh-chk", name: "Hyderabadi Chicken Dum Biryani", section: "Popular", desc: "Long-grain basmati, sealed on the dum.", price: 289, mrp: 329, rating: 4.6, veg: false, img: kwImg("chicken biryani", "bh-chk"), bestseller: true, addons: addonsDrink },
-      { id: "bh-mutton", name: "Mutton Biryani (Half)", section: "Biryani", desc: "Slow-cooked mutton on the bone.", price: 329, rating: 4.5, veg: false, img: kwImg("mutton biryani", "bh-mutton") },
-      { id: "bh-veg", name: "Veg Dum Biryani", section: "Biryani", desc: "Seasonal veg, saffron rice.", price: 229, rating: 4.3, veg: true, img: kwImg("veg biryani", "bh-veg") },
-      { id: "bh-65", name: "Chicken 65", section: "Starters", desc: "Fiery, curry-leaf tossed.", price: 189, rating: 4.4, veg: false, img: kwImg("chicken 65", "bh-65"), bestseller: true },
-      { id: "bh-raita", name: "Boondi Raita", section: "Sides", desc: "Cooling, spiced yoghurt.", price: 60, rating: 4.2, veg: true, img: kwImg("raita", "bh-raita") },
-      { id: "bh-phirni", name: "Phirni", section: "Desserts", desc: "Rose-cardamom rice pudding.", price: 110, rating: 4.5, veg: true, img: kwImg("phirni dessert", "bh-phirni") },
+      { id: "ck-butter-chk", name: "Butter Chicken", section: "Popular", desc: "Creamy tomato gravy, charcoal notes.", price: 299, rating: 4.6, diet: "nonveg", img: kwImg("butter chicken", "ck-butter-chk"), bestseller: true, addons: naan },
+      { id: "ck-paneer", name: "Paneer Tikka Masala", section: "Popular", desc: "Tandoori paneer in rich masala.", price: 269, rating: 4.5, diet: "veg", img: kwImg("paneer tikka masala", "ck-paneer"), bestseller: true, addons: naan },
+      { id: "ck-dal", name: "Dal Makhani", section: "Main Course", desc: "Black lentils, slow-simmered overnight.", price: 199, rating: 4.4, diet: "veg", img: kwImg("dal makhani", "ck-dal") },
+      { id: "ck-65", name: "Chicken 65", section: "Starters", desc: "Fiery, curry-leaf tossed.", price: 189, rating: 4.5, diet: "nonveg", img: kwImg("chicken 65", "ck-65") },
+      { id: "ck-roti", name: "Tandoori Roti (2)", section: "Breads", desc: "Fresh from the tandoor.", price: 40, rating: 4.3, diet: "veg", img: kwImg("tandoori roti", "ck-roti") },
+      { id: "ck-gulab", name: "Gulab Jamun (2)", section: "Desserts", desc: "Warm, syrup-soaked.", price: 80, rating: 4.6, diet: "veg", img: kwImg("gulab jamun", "ck-gulab") },
     ],
   },
   {
-    id: "slice", name: "Slice & Co. Pizzeria", cuisines: ["Pizza", "Burgers"], rating: 4.4, etaMins: 28,
-    deliveryFee: 39, distanceKm: 1.8, priceForTwo: 600, veg: false, offer: "Buy 1 Get 1 on medium pizzas",
-    img: kwImg("pizza", "slice", 800, 500), apps: ["zwigato", "yumrush"],
+    id: "udupi-grand", name: "Udupi Grand Tiffins", area: "Ameerpet", city: "Hyderabad",
+    cuisines: ["South Indian", "Thali"], rating: 4.6, etaMins: 26, deliveryFee: 19, distanceKm: 1.6,
+    costForTwo: 300, vegOnly: true, offer: "10% OFF on Thali", img: kwImg("masala dosa", "udupi-grand", 800, 500),
+    apps: ["zaikago", "mealkart", "khananow"],
     dishes: [
-      { id: "sl-margh", name: "Margherita", section: "Popular", desc: "San Marzano, fior di latte, basil.", price: 299, rating: 4.6, veg: true, img: kwImg("margherita pizza", "sl-margh"), bestseller: true, addons: addonsVeg },
-      { id: "sl-pepp", name: "Pepperoni Classic", section: "Pizza", desc: "Cured pepperoni, mozzarella.", price: 449, mrp: 499, rating: 4.7, veg: false, img: kwImg("pepperoni pizza", "sl-pepp"), addons: addonsVeg },
-      { id: "sl-burg", name: "Smash Cheeseburger", section: "Burgers", desc: "Double smash, house sauce.", price: 329, rating: 4.5, veg: false, img: burger, bestseller: true },
-      { id: "sl-fries", name: "Truffle Fries", section: "Sides", desc: "Parmesan, truffle oil.", price: 199, rating: 4.4, veg: true, img: kwImg("truffle fries", "sl-fries") },
-      { id: "sl-coke", name: "Cold Drink", section: "Beverages", desc: "Chilled, 500ml.", price: 60, rating: 4.1, veg: true, img: kwImg("soft drink", "sl-coke") },
-      { id: "sl-tira", name: "Tiramisu", section: "Desserts", desc: "Mascarpone, espresso.", price: 240, rating: 4.6, veg: true, img: kwImg("tiramisu", "sl-tira") },
+      { id: "ug-dosa", name: "Masala Dosa", section: "Popular", desc: "Crisp dosa, potato masala, 2 chutneys.", price: 99, rating: 4.7, diet: "veg", img: kwImg("masala dosa", "ug-dosa"), bestseller: true },
+      { id: "ug-idli", name: "Idli Vada Combo", section: "Tiffins", desc: "Soft idli + crisp vada, sambar.", price: 89, rating: 4.5, diet: "veg", img: kwImg("idli vada", "ug-idli") },
+      { id: "ug-thali", name: "South Indian Meals (Unlimited)", section: "Thali", desc: "Rice, sambar, rasam, curries, curd.", price: 169, rating: 4.6, diet: "veg", img: kwImg("south indian thali meals", "ug-thali"), bestseller: true },
+      { id: "ug-pongal", name: "Ven Pongal", section: "Tiffins", desc: "Rice-dal, pepper, ghee, cashews.", price: 99, rating: 4.4, diet: "veg", img: kwImg("pongal", "ug-pongal") },
+      { id: "ug-filter", name: "Filter Coffee", section: "Beverages", desc: "Degree coffee, steel tumbler.", price: 45, rating: 4.7, diet: "veg", img: kwImg("filter coffee", "ug-filter") },
     ],
   },
   {
-    id: "green-bowl", name: "Green Bowl Kitchen", cuisines: ["Healthy", "Beverages"], rating: 4.6, etaMins: 24,
-    deliveryFee: 25, distanceKm: 1.2, priceForTwo: 450, veg: true, offer: "Healthy week: 15% off",
-    img: kwImg("salad bowl", "green-bowl", 800, 500), apps: ["tomato", "yumrush"],
+    id: "mumbai-tadka", name: "Mumbai Tadka Street", area: "Kukatpally", city: "Hyderabad",
+    cuisines: ["Street Food", "Chinese"], rating: 4.3, etaMins: 30, deliveryFee: 25, distanceKm: 2.3,
+    costForTwo: 250, vegOnly: false, offer: "Combo: Vada Pav x2 + Chai", img: kwImg("vada pav street food", "mumbai-tadka", 800, 500),
+    apps: ["zaikago", "mealkart"],
     dishes: [
-      { id: "gb-buddha", name: "Buddha Bowl", section: "Popular", desc: "Quinoa, chickpea, tahini.", price: 299, rating: 4.7, veg: true, img: kwImg("buddha bowl", "gb-buddha"), bestseller: true },
-      { id: "gb-caesar", name: "Grilled Caesar", section: "Salads", desc: "Cos lettuce, parmesan.", price: 269, rating: 4.4, veg: true, img: kwImg("caesar salad", "gb-caesar") },
-      { id: "gb-smooth", name: "Berry Protein Smoothie", section: "Beverages", desc: "Whey, berries, banana.", price: 220, rating: 4.5, veg: true, img: kwImg("smoothie", "gb-smooth") },
-      { id: "gb-wrap", name: "Falafel Wrap", section: "Popular", desc: "Baked falafel, hummus.", price: 239, rating: 4.3, veg: true, img: kwImg("falafel wrap", "gb-wrap") },
+      { id: "mt-vadapav", name: "Vada Pav (2)", section: "Popular", desc: "Mumbai classic, dry garlic chutney.", price: 60, rating: 4.5, diet: "veg", img: kwImg("vada pav", "mt-vadapav"), bestseller: true },
+      { id: "mt-pavbhaji", name: "Pav Bhaji", section: "Popular", desc: "Buttery bhaji, toasted pav.", price: 129, rating: 4.4, diet: "veg", img: kwImg("pav bhaji", "mt-pavbhaji"), bestseller: true },
+      { id: "mt-misal", name: "Misal Pav", section: "Street Food", desc: "Spicy sprouts, farsan, pav.", price: 119, rating: 4.3, diet: "veg", img: kwImg("misal pav", "mt-misal") },
+      { id: "mt-noodles", name: "Hakka Noodles", section: "Chinese", desc: "Wok-tossed, desi-Chinese.", price: 149, rating: 4.2, diet: "veg", img: kwImg("hakka noodles", "mt-noodles") },
+      { id: "mt-manchurian", name: "Gobi Manchurian", section: "Chinese", desc: "Crisp cauliflower, tangy sauce.", price: 159, rating: 4.3, diet: "veg", img: kwImg("gobi manchurian", "mt-manchurian") },
+    ],
+  },
+  {
+    id: "andhra-ruchulu", name: "Andhra Ruchulu", area: "Madhapur", city: "Hyderabad",
+    cuisines: ["Andhra", "Biryani"], rating: 4.5, etaMins: 36, deliveryFee: 29, distanceKm: 3.0,
+    costForTwo: 400, vegOnly: false, offer: "Bank offer: 10% on UPI", img: kwImg("andhra meals spicy", "andhra-ruchulu", 800, 500),
+    apps: ["khananow", "mealkart"],
+    dishes: [
+      { id: "ar-gongura", name: "Gongura Chicken", section: "Popular", desc: "Tangy gongura, Andhra spice.", price: 279, rating: 4.6, diet: "nonveg", img: kwImg("gongura chicken curry", "ar-gongura"), bestseller: true },
+      { id: "ar-meals", name: "Andhra Meals (Non-Veg)", section: "Thali", desc: "Rice, fry, curry, rasam, pappu.", price: 199, rating: 4.5, diet: "nonveg", img: kwImg("andhra meals", "ar-meals") },
+      { id: "ar-pulihora", name: "Pulihora", section: "Rice", desc: "Tamarind rice, peanuts.", price: 99, rating: 4.3, diet: "veg", img: kwImg("pulihora tamarind rice", "ar-pulihora") },
+      { id: "ar-pesarattu", name: "Pesarattu + Upma", section: "Tiffins", desc: "Green-gram dosa, ginger chutney.", price: 119, rating: 4.4, diet: "veg", img: kwImg("pesarattu", "ar-pesarattu") },
+      { id: "ar-egg", name: "Egg Pulusu", section: "Main Course", desc: "Andhra-style tangy egg curry.", price: 149, rating: 4.3, diet: "egg", img: kwImg("egg curry", "ar-egg") },
+    ],
+  },
+  {
+    id: "sweet-house", name: "Hyderabad Sweet House", area: "Secunderabad", city: "Hyderabad",
+    cuisines: ["Desserts", "Beverages"], rating: 4.6, etaMins: 22, deliveryFee: 19, distanceKm: 1.1,
+    costForTwo: 200, vegOnly: true, offer: "Weekend offer: Buy 1kg get 250g free", img: kwImg("indian sweets mithai", "sweet-house", 800, 500),
+    apps: ["zaikago", "khananow", "mealkart"],
+    dishes: [
+      { id: "sh-qubani", name: "Qubani Ka Meetha", section: "Popular", desc: "Apricot dessert, cream.", price: 120, rating: 4.7, diet: "veg", img: kwImg("qubani ka meetha", "sh-qubani"), bestseller: true },
+      { id: "sh-jalebi", name: "Hot Jalebi (250g)", section: "Sweets", desc: "Crisp, syrupy, fresh.", price: 110, rating: 4.5, diet: "veg", img: kwImg("jalebi", "sh-jalebi") },
+      { id: "sh-kaju", name: "Kaju Katli (250g)", section: "Sweets", desc: "Cashew fudge, silver leaf.", price: 260, rating: 4.6, diet: "veg", img: kwImg("kaju katli sweet", "sh-kaju") },
+      { id: "sh-falooda", name: "Royal Falooda", section: "Beverages", desc: "Rose, vermicelli, ice cream.", price: 140, rating: 4.5, diet: "veg", img: kwImg("falooda", "sh-falooda") },
     ],
   },
 ];
@@ -102,4 +135,5 @@ export function restaurant(id: string) {
   return RESTAURANTS.find((r) => r.id === id);
 }
 
-export const GROCERY_HERO = grocery;
+// Retained bundled assets available for curated covers etc.
+export const BUNDLED = { omakase, nigiri, burger, grocery };

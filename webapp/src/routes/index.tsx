@@ -81,7 +81,7 @@ function HeroDream({ dream }: { dream: Dream }) {
       style={{ animationDelay: "120ms" }}
     >
       <div className="relative h-[460px] w-full">
-        <img src={kyotoHero} alt={dream.name} className="absolute inset-0 h-full w-full object-cover scale-110" />
+        <img src={dream.cover || kyotoHero} alt={dream.name} className="absolute inset-0 h-full w-full object-cover scale-110" />
         <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,11,14,0.15) 0%, rgba(10,11,14,0.25) 35%, rgba(10,11,14,0.85) 78%, rgba(10,11,14,0.98) 100%)" }} />
         <Petals />
 
@@ -166,7 +166,7 @@ function CollectionRow({ dreams, activeId }: { dreams: Dream[]; activeId: string
             const pct = Math.min(100, Math.round((d.saved / d.target) * 100));
             return (
               <Link key={d.id} to="/future" className="relative w-[200px] h-[260px] shrink-0 rounded-[22px] overflow-hidden ring-1 ring-white/10">
-                <img src={DREAM_IMAGES[(i + 1) % DREAM_IMAGES.length]} alt={d.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                <img src={d.cover || DREAM_IMAGES[(i + 1) % DREAM_IMAGES.length]} alt={d.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                 <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,11,14,0.05) 0%, rgba(10,11,14,0.55) 60%, rgba(10,11,14,0.95) 100%)" }} />
                 <div className="absolute inset-x-0 bottom-0 p-4">
                   <h4 className="font-display text-[20px] mt-1 text-white">{d.emoji} {d.name}</h4>

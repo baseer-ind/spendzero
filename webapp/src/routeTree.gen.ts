@@ -12,14 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ContinueRouteImport } from './routes/continue'
 import { Route as FutureRouteImport } from './routes/future'
 import { Route as JourneyRouteImport } from './routes/journey'
-import { Route as OrderRouteImport } from './routes/order'
 import { Route as PauseRouteImport } from './routes/pause'
 import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as RestaurantRouteImport } from './routes/restaurant'
-import { Route as RestaurantsRouteImport } from './routes/restaurants'
 import { Route as TodayRouteImport } from './routes/today'
 import { Route as FoodIndexRouteImport } from './routes/food.index'
 import { Route as FoodAppIdIndexRouteImport } from './routes/food.$appId.index'
@@ -40,6 +38,11 @@ const CartRoute = CartRouteImport.update({
   path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContinueRoute = ContinueRouteImport.update({
   id: '/continue',
   path: '/continue',
@@ -55,11 +58,6 @@ const JourneyRoute = JourneyRouteImport.update({
   path: '/journey',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OrderRoute = OrderRouteImport.update({
-  id: '/order',
-  path: '/order',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PauseRoute = PauseRouteImport.update({
   id: '/pause',
   path: '/pause',
@@ -68,16 +66,6 @@ const PauseRoute = PauseRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RestaurantRoute = RestaurantRouteImport.update({
-  id: '/restaurant',
-  path: '/restaurant',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RestaurantsRoute = RestaurantsRouteImport.update({
-  id: '/restaurants',
-  path: '/restaurants',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TodayRoute = TodayRouteImport.update({
@@ -105,14 +93,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
-  '/order': typeof OrderRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
-  '/restaurant': typeof RestaurantRoute
-  '/restaurants': typeof RestaurantsRoute
   '/today': typeof TodayRoute
   '/food/': typeof FoodIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
@@ -122,14 +108,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
-  '/order': typeof OrderRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
-  '/restaurant': typeof RestaurantRoute
-  '/restaurants': typeof RestaurantsRoute
   '/today': typeof TodayRoute
   '/food': typeof FoodIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
@@ -140,14 +124,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
+  '/checkout': typeof CheckoutRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
-  '/order': typeof OrderRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
-  '/restaurant': typeof RestaurantRoute
-  '/restaurants': typeof RestaurantsRoute
   '/today': typeof TodayRoute
   '/food/': typeof FoodIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
@@ -159,14 +141,12 @@ export interface FileRouteTypes {
     | '/'
     | '/achievements'
     | '/cart'
+    | '/checkout'
     | '/continue'
     | '/future'
     | '/journey'
-    | '/order'
     | '/pause'
     | '/profile'
-    | '/restaurant'
-    | '/restaurants'
     | '/today'
     | '/food/'
     | '/food/$appId/$restaurantId'
@@ -176,14 +156,12 @@ export interface FileRouteTypes {
     | '/'
     | '/achievements'
     | '/cart'
+    | '/checkout'
     | '/continue'
     | '/future'
     | '/journey'
-    | '/order'
     | '/pause'
     | '/profile'
-    | '/restaurant'
-    | '/restaurants'
     | '/today'
     | '/food'
     | '/food/$appId/$restaurantId'
@@ -193,14 +171,12 @@ export interface FileRouteTypes {
     | '/'
     | '/achievements'
     | '/cart'
+    | '/checkout'
     | '/continue'
     | '/future'
     | '/journey'
-    | '/order'
     | '/pause'
     | '/profile'
-    | '/restaurant'
-    | '/restaurants'
     | '/today'
     | '/food/'
     | '/food/$appId/$restaurantId'
@@ -211,14 +187,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AchievementsRoute: typeof AchievementsRoute
   CartRoute: typeof CartRoute
+  CheckoutRoute: typeof CheckoutRoute
   ContinueRoute: typeof ContinueRoute
   FutureRoute: typeof FutureRoute
   JourneyRoute: typeof JourneyRoute
-  OrderRoute: typeof OrderRoute
   PauseRoute: typeof PauseRoute
   ProfileRoute: typeof ProfileRoute
-  RestaurantRoute: typeof RestaurantRoute
-  RestaurantsRoute: typeof RestaurantsRoute
   TodayRoute: typeof TodayRoute
   FoodIndexRoute: typeof FoodIndexRoute
   FoodAppIdRestaurantIdRoute: typeof FoodAppIdRestaurantIdRoute
@@ -248,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/continue': {
       id: '/continue'
       path: '/continue'
@@ -269,13 +250,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JourneyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/order': {
-      id: '/order'
-      path: '/order'
-      fullPath: '/order'
-      preLoaderRoute: typeof OrderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/pause': {
       id: '/pause'
       path: '/pause'
@@ -288,20 +262,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/restaurant': {
-      id: '/restaurant'
-      path: '/restaurant'
-      fullPath: '/restaurant'
-      preLoaderRoute: typeof RestaurantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/restaurants': {
-      id: '/restaurants'
-      path: '/restaurants'
-      fullPath: '/restaurants'
-      preLoaderRoute: typeof RestaurantsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/today': {
@@ -339,14 +299,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AchievementsRoute: AchievementsRoute,
   CartRoute: CartRoute,
+  CheckoutRoute: CheckoutRoute,
   ContinueRoute: ContinueRoute,
   FutureRoute: FutureRoute,
   JourneyRoute: JourneyRoute,
-  OrderRoute: OrderRoute,
   PauseRoute: PauseRoute,
   ProfileRoute: ProfileRoute,
-  RestaurantRoute: RestaurantRoute,
-  RestaurantsRoute: RestaurantsRoute,
   TodayRoute: TodayRoute,
   FoodIndexRoute: FoodIndexRoute,
   FoodAppIdRestaurantIdRoute: FoodAppIdRestaurantIdRoute,

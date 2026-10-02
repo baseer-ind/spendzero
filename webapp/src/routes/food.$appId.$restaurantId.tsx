@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Screen } from "@/components/Shell";
 import { Img } from "@/components/Img";
-import { restaurant, type Dish } from "@/lib/catalog";
+import { restaurant, type Dish, type Diet } from "@/lib/catalog";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/food/$appId/$restaurantId")({
@@ -10,10 +10,13 @@ export const Route = createFileRoute("/food/$appId/$restaurantId")({
   component: RestaurantMenu,
 });
 
-function VegDot({ veg }: { veg: boolean }) {
+const DIET_RING: Record<Diet, string> = { veg: "border-green-500", egg: "border-amber-500", nonveg: "border-red-500" };
+const DIET_FILL: Record<Diet, string> = { veg: "bg-green-500", egg: "bg-amber-500", nonveg: "bg-red-500" };
+
+function DietDot({ diet }: { diet: Diet }) {
   return (
-    <span className={`inline-grid h-3.5 w-3.5 place-items-center rounded-sm border ${veg ? "border-green-500" : "border-red-500"}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${veg ? "bg-green-500" : "bg-red-500"}`} />
+    <span className={`inline-grid h-3.5 w-3.5 place-items-center rounded-sm border ${DIET_RING[diet]}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${DIET_FILL[diet]}`} />
     </span>
   );
 }
@@ -27,8 +30,8 @@ function RestaurantMenu() {
 
   const sections = useMemo(() => {
     if (!r) return [];
-    const dishes = r.dishes.filter((d) => (vegOnly ? d.veg : true));
-    const order = ["Popular", "Biryani", "Nigiri", "Rolls", "Pizza", "Burgers", "Salads", "Starters", "Sides", "Beverages", "Desserts"];
+    const dishes = r.dishes.filter((d) => (vegOnly ? d.diet === "veg" : true));
+    const order = ["Popular", "Biryani", "Thali", "Tiffins", "Main Course", "Rice", "Starters", "Breads", "Sides", "Street Food", "Chinese", "Sweets", "Beverages", "Desserts"];
     const groups: Record<string, Dish[]> = {};
     for (const d of dishes) (groups[d.section] ??= []).push(d);
     return Object.keys(groups)
@@ -71,7 +74,7 @@ function RestaurantMenu() {
       <div className="px-6 mt-5 flex items-center justify-between">
         <h2 className="font-display text-[18px]">Menu</h2>
         <button onClick={() => setVegOnly(!vegOnly)} className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[12px] ${vegOnly ? "border-green-500/50 bg-green-500/10 text-green-400" : "border-white/10 text-foreground/60"}`}>
-          <VegDot veg /> Veg only
+          <DietDot diet="veg" /> Veg only
         </button>
       </div>
 
@@ -86,7 +89,7 @@ function RestaurantMenu() {
                   <div key={d.id} className="flex gap-4 py-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <VegDot veg={d.veg} />
+                        <DietDot diet={d.diet} />
                         {d.bestseller && <span className="text-[10px] uppercase tracking-wider text-gold">★ Bestseller</span>}
                       </div>
                       <h4 className="mt-1 font-display text-[16px] leading-tight">{d.name}</h4>
@@ -151,7 +154,7 @@ function DishSheet({ dish, onClose }: { dish: Dish; onClose: () => void }) {
       <div className="w-full max-w-[440px] rounded-t-3xl border-t border-white/10 bg-background p-5 pb-8 animate-rise" onClick={(e) => e.stopPropagation()}>
         <Img src={dish.img} alt={dish.name} emoji="🍴" seed={dish.id} className="h-44 w-full rounded-2xl object-cover" />
         <div className="mt-4 flex items-center gap-2">
-          <VegDot veg={dish.veg} />
+          <DietDot diet={dish.diet} />
           {dish.bestseller && <span className="text-[10px] uppercase tracking-wider text-gold">★ Bestseller</span>}
           <span className="ml-auto text-[12px] text-foreground/60">★ {dish.rating}</span>
         </div>

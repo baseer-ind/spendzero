@@ -58,7 +58,7 @@ function JourneyScreen() {
             Resist a craving and it'll appear here — every rupee you redirect, in order.
           </p>
           <Link
-            to="/order"
+            to="/today"
             className="mt-5 inline-block rounded-full px-6 py-3 text-background font-medium"
             style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}
           >

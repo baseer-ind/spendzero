@@ -1,8 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
-import avatar from "@/assets/avatar-user.jpg";
+import { ImagePicker } from "@/components/ImagePicker";
 import { formatINR, useStore } from "@/lib/store";
 import { ARCHETYPES } from "@/lib/assessment";
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "✦";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -34,9 +42,10 @@ function Row({
 }
 
 function ProfileScreen() {
-  const { account, name, totalSaved, currentStreak, dreams, events, profile, logout } = useStore();
+  const { account, name, totalSaved, currentStreak, dreams, events, profile, profilePhoto, setProfilePhoto, logout } = useStore();
   const displayName = account?.name || name || "You";
   const archetype = profile ? ARCHETYPES[profile.archetype] : null;
+  const [showPhoto, setShowPhoto] = useState(false);
   return (
     <Screen>
       <StatusBar />
@@ -44,13 +53,20 @@ function ProfileScreen() {
 
       {/* Portrait */}
       <div className="px-6 text-center animate-rise">
-        <div className="relative mx-auto h-28 w-28">
+        <button onClick={() => setShowPhoto(true)} className="relative mx-auto block h-28 w-28" aria-label="Change profile photo">
           <div
             className="absolute -inset-2 rounded-full opacity-60 blur-xl"
             style={{ background: "radial-gradient(circle, oklch(0.79 0.105 82 / 0.5), transparent 70%)" }}
           />
-          <img src={avatar} alt="You" width={1024} height={1024} className="relative h-28 w-28 rounded-full border border-gold/30 object-cover" />
-        </div>
+          {profilePhoto ? (
+            <img src={profilePhoto} alt="You" className="relative h-28 w-28 rounded-full border border-gold/30 object-cover" />
+          ) : (
+            <span className="relative grid h-28 w-28 place-items-center rounded-full border border-gold/30 bg-white/5 font-display text-[34px] text-gold">
+              {initials(displayName)}
+            </span>
+          )}
+          <span className="absolute bottom-1 right-1 grid h-8 w-8 place-items-center rounded-full border border-background bg-gold text-[14px] text-background">✎</span>
+        </button>
         <p className="mt-5 text-[11px] uppercase tracking-[0.32em] text-gold/80">becoming</p>
         <h1 className="mt-2 font-display text-[28px] leading-tight">{displayName}</h1>
         <p className="mt-1 text-[12px] text-foreground/50">
@@ -104,6 +120,14 @@ function ProfileScreen() {
           ← back to today
         </Link>
       </div>
+
+      <ImagePicker
+        open={showPhoto}
+        kind="profile"
+        onPick={(url) => setProfilePhoto(url)}
+        onRemove={profilePhoto ? () => setProfilePhoto(null) : undefined}
+        onClose={() => setShowPhoto(false)}
+      />
 
       <BottomNav active="profile" />
     </Screen>

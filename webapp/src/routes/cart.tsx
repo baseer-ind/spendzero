@@ -16,20 +16,20 @@ function CartScreen() {
   const { hydrated, cart, cartTotal, cartCount, setCartQty, removeFromCart, activeDream } = useStore();
   const navigate = useNavigate();
 
-  function pauseAndDecide() {
+  function goCheckout() {
     if (cartCount === 0) return;
-    navigate({ to: "/pause", search: { amt: cartTotal, from: "cart" } });
+    navigate({ to: "/checkout" });
   }
 
   if (hydrated && cartCount === 0) {
     return (
       <Screen>
-        <NavBar title="Your cart" back="/restaurant" />
+        <NavBar title="Your cart" back="/today" />
         <div className="mx-6 mt-16 rounded-3xl border border-white/8 bg-surface p-8 text-center">
           <p className="font-display text-[22px]">Your cart is empty</p>
           <p className="mt-2 text-[13px] text-foreground/55">Browse a craving — then resist it and watch the money move.</p>
-          <Link to="/restaurants" className="mt-6 inline-block rounded-full px-6 py-3 text-background font-medium" style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}>
-            Browse restaurants
+          <Link to="/today" className="mt-6 inline-block rounded-full px-6 py-3 text-background font-medium" style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}>
+            Explore today
           </Link>
         </div>
       </Screen>
@@ -38,7 +38,7 @@ function CartScreen() {
 
   return (
     <Screen>
-      <NavBar title="One Last Pause" back="/restaurant" />
+      <NavBar title="One Last Pause" back="/today" />
 
       <div className="px-6 pt-2 animate-rise">
         <p className="text-[11px] uppercase tracking-[0.28em] text-gold/80">your cart</p>
@@ -87,13 +87,13 @@ function CartScreen() {
 
       <div className="px-6 mt-6 space-y-3 pb-10">
         <button
-          onClick={pauseAndDecide}
+          onClick={goCheckout}
           className="block w-full rounded-full py-4 text-center font-medium text-background"
           style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))", boxShadow: "0 10px 30px -8px oklch(0.79 0.105 82 / 0.4)" }}
         >
-          Take a moment before you decide →
+          Proceed to checkout →
         </button>
-        <p className="pt-1 text-center text-[11px] text-foreground/40">A short pause, then it's your call — buy it or build your future.</p>
+        <p className="pt-1 text-center text-[11px] text-foreground/40">You'll get one breath at the moment of payment — then it's your call.</p>
       </div>
     </Screen>
   );

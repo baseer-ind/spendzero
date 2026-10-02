@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { formatINR, useStore } from "@/lib/store";
+import { ImagePicker } from "@/components/ImagePicker";
 
 const EXAMPLES = [
-  { emoji: "🏖️", name: "Travel", hint: 50000 },
-  { emoji: "🏡", name: "Dream Home", hint: 1000000 },
-  { emoji: "🚗", name: "A Car", hint: 300000 },
-  { emoji: "👨‍👩‍👧", name: "For my parents", hint: 100000 },
-  { emoji: "🛟", name: "Emergency Fund", hint: 100000 },
-  { emoji: "🎓", name: "Education", hint: 200000 },
-  { emoji: "✨", name: "Personal dream", hint: 50000 },
+  { emoji: "🛟", name: "Emergency Fund", hint: 100000, kw: "savings safety india" },
+  { emoji: "👨‍👩‍👧", name: "Parents' Vacation", hint: 80000, kw: "india family travel" },
+  { emoji: "🏍️", name: "New Bike", hint: 150000, kw: "motorcycle india" },
+  { emoji: "💍", name: "Wedding", hint: 500000, kw: "indian wedding" },
+  { emoji: "🎓", name: "Child's Education", hint: 300000, kw: "india student graduation" },
+  { emoji: "🪙", name: "Gold", hint: 100000, kw: "gold jewellery india" },
+  { emoji: "🏡", name: "Own Home", hint: 2000000, kw: "india house home" },
+  { emoji: "💼", name: "Start a Business", hint: 500000, kw: "india small business shop" },
+  { emoji: "🏔️", name: "India Trip", hint: 60000, kw: "himalayas india travel" },
+  { emoji: "✨", name: "Personal dream", hint: 50000, kw: "goal dream" },
 ];
 
 export function FirstGoal() {
@@ -18,11 +22,15 @@ export function FirstGoal() {
   const [target, setTarget] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState(false);
+  const [kw, setKw] = useState("india dream");
+  const [cover, setCover] = useState<string | undefined>(undefined);
+  const [showPicker, setShowPicker] = useState(false);
 
   function choose(ex: (typeof EXAMPLES)[number]) {
     setEmoji(ex.emoji);
     setName(ex.name);
     setTarget(String(ex.hint));
+    setKw(ex.kw);
     setPicked(true);
     setError(null);
   }
@@ -33,7 +41,7 @@ export function FirstGoal() {
       setError("Give your goal a name and a target.");
       return;
     }
-    addDream({ name, emoji, target: amt });
+    addDream({ name, emoji, target: amt, cover });
     // gate falls through to the app once a dream exists
   }
 
@@ -75,6 +83,24 @@ export function FirstGoal() {
                   <input value={target} onChange={(e) => setTarget(e.target.value)} inputMode="numeric" className="w-full bg-transparent px-2 py-3 text-[16px] outline-none" />
                 </div>
               </label>
+              <div className="mt-5">
+                <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Cover image</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPicker(true)}
+                  className="mt-2 flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3 text-left"
+                >
+                  {cover ? (
+                    <img src={cover} alt="" className="h-16 w-20 rounded-xl object-cover" />
+                  ) : (
+                    <span className="grid h-16 w-20 place-items-center rounded-xl bg-white/5 text-[24px]">{emoji}</span>
+                  )}
+                  <span className="text-[14px] text-foreground/75">
+                    {cover ? "Change cover" : "Add a cover to make it real"}
+                    <span className="mt-0.5 block text-[12px] text-foreground/45">Suggested · Search · Your photo</span>
+                  </span>
+                </button>
+              </div>
               {target && /^\d+$/.test(target) && (
                 <p className="mt-4 rounded-2xl border border-gold/20 bg-gold/5 p-4 font-display text-[18px]">
                   {emoji} {name || "Your goal"} — <span className="text-gold">{formatINR(0)} / {formatINR(parseInt(target, 10))}</span>
@@ -94,6 +120,15 @@ export function FirstGoal() {
             <p className="mt-3 text-center text-[12px] text-foreground/45">From now on, the money you choose not to waste moves this forward.</p>
           </div>
         )}
+
+        <ImagePicker
+          open={showPicker}
+          kind="cover"
+          seedKeyword={kw}
+          onPick={(url) => setCover(url)}
+          onRemove={cover ? () => setCover(undefined) : undefined}
+          onClose={() => setShowPicker(false)}
+        />
       </div>
     </div>
   );
