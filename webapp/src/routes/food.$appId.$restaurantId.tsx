@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Screen } from "@/components/Shell";
 import { Img } from "@/components/Img";
 import { restaurant, type Dish, type Diet } from "@/lib/catalog";
+import { useBrowseTracking } from "@/lib/tracking";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/food/$appId/$restaurantId")({
@@ -23,8 +24,9 @@ function DietDot({ diet }: { diet: Diet }) {
 
 function RestaurantMenu() {
   const { appId, restaurantId } = Route.useParams();
+  useBrowseTracking("Food", appId);
   const r = restaurant(restaurantId);
-  const { cart, addToCart, cartCount, cartTotal } = useStore();
+  const { cart, addToCart, cartCount, cartTotal, trackCartExplore } = useStore();
   const [vegOnly, setVegOnly] = useState(false);
   const [open, setOpen] = useState<Dish | null>(null);
 
@@ -103,7 +105,7 @@ function RestaurantMenu() {
                         <Img src={d.img} alt={d.name} emoji="🍴" seed={d.id} className="h-24 w-28 rounded-xl object-cover" />
                       </button>
                       <button
-                        onClick={() => (d.addons && d.addons.length ? setOpen(d) : addToCart({ id: d.id, name: d.name, price: d.price, image: d.img }))}
+                        onClick={() => (d.addons && d.addons.length ? setOpen(d) : (addToCart({ id: d.id, name: d.name, price: d.price, image: d.img, vertical: "Food" }), trackCartExplore(d.price)))}
                         className={`absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-lg px-5 py-1.5 text-[13px] font-semibold shadow ${inCart ? "bg-gold/20 text-gold ring-1 ring-gold/40" : "bg-surface-elevated text-gold ring-1 ring-gold/30"}`}
                       >
                         {inCart ? `${inCart.qty} ·` : "ADD"}
@@ -132,7 +134,7 @@ function RestaurantMenu() {
 }
 
 function DishSheet({ dish, onClose }: { dish: Dish; onClose: () => void }) {
-  const { addToCart } = useStore();
+  const { addToCart, trackCartExplore } = useStore();
   const [chosen, setChosen] = useState<Record<string, boolean>>({});
   const addonTotal = (dish.addons ?? []).reduce((a, x) => a + (chosen[x.name] ? x.price : 0), 0);
   const total = dish.price + addonTotal;
@@ -145,7 +147,9 @@ function DishSheet({ dish, onClose }: { dish: Dish; onClose: () => void }) {
       name: dish.name + (picked.length ? ` (${picked.map((p) => p.name).join(", ")})` : ""),
       price: total,
       image: dish.img,
+      vertical: "Food",
     });
+    trackCartExplore(total);
     onClose();
   }
 

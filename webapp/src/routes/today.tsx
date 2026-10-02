@@ -9,9 +9,9 @@ export const Route = createFileRoute("/today")({
 
 const CATEGORIES = [
   { emoji: "🍔", name: "Food", to: "/food", live: true, tint: "from-[#E2443A]/30" },
+  { emoji: "📱", name: "Electronics", to: "/electronics", live: true, tint: "from-blue-500/25" },
   { emoji: "🛒", name: "Grocery", live: false, tint: "from-emerald-500/25" },
   { emoji: "👕", name: "Shopping", live: false, tint: "from-fuchsia-500/25" },
-  { emoji: "📱", name: "Electronics", live: false, tint: "from-blue-500/25" },
   { emoji: "✈️", name: "Travel", live: false, tint: "from-cyan-500/25" },
   { emoji: "🎬", name: "Entertainment", live: false, tint: "from-violet-500/25" },
   { emoji: "💄", name: "Beauty", live: false, tint: "from-pink-500/25" },

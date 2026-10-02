@@ -231,6 +231,61 @@ try {
   log(`redirect routed to chosen goal (Dream Home): ${movedHome > 0}`);
   if (movedHome === 0) issues.push("DECISION: redirect did not route to the chosen goal");
 
+  // 9e) ELECTRONICS vertical (browse-heavy) + tracking
+  log("\n-- electronics vertical --");
+  await go("/today");
+  const elLive = await page.getByText("Electronics", { exact: true }).count();
+  log(`electronics live on today: ${elLive > 0}`);
+  await page.getByText("Electronics", { exact: true }).click();
+  await page.waitForURL("**/electronics", { timeout: 8000 });
+  const deals = await page.getByText("Deals of the day", { exact: false }).count();
+  log(`techbazaar deals rail: ${deals > 0}`);
+  if (deals === 0) issues.push("ELECTRONICS: deals rail missing");
+  await page.waitForTimeout(1500);
+  // search
+  await page.getByPlaceholder("Search gadgets, brands…").fill("earbuds");
+  await page.waitForTimeout(400);
+  const foundEl = await page.getByText("AirBuds", { exact: false }).count();
+  log(`electronics search works: ${foundEl > 0}`);
+  if (foundEl === 0) issues.push("ELECTRONICS: search did not filter");
+  await page.getByText("AirBuds", { exact: false }).first().click();
+  await page.waitForURL("**/electronics/**", { timeout: 8000 });
+  await shot("product");
+  const specs = await page.getByText("Specifications", { exact: false }).count();
+  const reviews = await page.getByText("Reviews", { exact: false }).count();
+  log(`product detail (specs + reviews): ${specs > 0 && reviews > 0}`);
+  if (specs === 0 || reviews === 0) issues.push("ELECTRONICS: product detail missing specs/reviews");
+  // wishlist toggle
+  await page.getByLabel("Wishlist").click();
+  await page.waitForTimeout(200);
+  await page.waitForTimeout(1200);
+  await page.getByRole("button", { name: "Add to cart", exact: true }).click();
+  await page.waitForTimeout(300);
+  await page.getByText("View cart", { exact: false }).first().click();
+  await page.waitForURL("**/cart", { timeout: 8000 });
+  await page.getByText("Proceed to checkout", { exact: false }).click();
+  await page.waitForURL("**/checkout", { timeout: 8000 });
+  await page.getByText("Place order", { exact: false }).click();
+  await page.waitForURL("**/pause**", { timeout: 8000 });
+  await page.getByText("I genuinely want it", { exact: false }).first().click();
+  await page.waitForTimeout(250);
+  const catEl = await page.getByText("Electronics", { exact: false }).count();
+  log(`decision shows Electronics category: ${catEl > 0}`);
+  if (catEl === 0) issues.push("ELECTRONICS: category not carried to decision");
+  await page.getByRole("button", { name: /Enjoy it/i }).click();
+  await page.waitForTimeout(300);
+
+  // 9f) CONSUMPTION dashboard
+  await go("/consumption");
+  const attn = await page.getByText("Your attention", { exact: false }).count();
+  log(`consumption dashboard: ${attn > 0}`);
+  if (attn === 0) issues.push("CONSUMPTION: dashboard not rendering");
+  const caught = await page.getByText("What caught your attention", { exact: false }).count();
+  const hasEl = await page.getByText("Electronics", { exact: false }).count();
+  log(`attention map present + has a vertical: ${caught > 0 && hasEl > 0}`);
+  if (caught === 0) issues.push("CONSUMPTION: attention map missing");
+  await shot("consumption");
+
   // 10) PROFILE photo affordance + ACHIEVEMENTS
   await go("/profile");
   const photoBtn = await page.getByLabel("Change profile photo").count();
@@ -256,7 +311,7 @@ try {
   await page.waitForURL("**/food", { timeout: 8000 });
 
   // 13) all live routes 200
-  for (const r of ["/", "/future", "/today", "/food", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/learn", "/learn/discount-trap"]) {
+  for (const r of ["/", "/future", "/today", "/food", "/electronics", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/consumption", "/learn", "/learn/discount-trap"]) {
     const s = await go(r);
     if (s !== 200) log(`route ${r}: ${s}`);
   }

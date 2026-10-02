@@ -67,9 +67,32 @@ export type CartItem = {
   price: number; // rupees
   qty: number;
   image?: string;
+  vertical?: string; // Food, Electronics, …
 };
 
 export type Account = { name: string; email: string };
+
+export type WishItem = { id: string; name: string; price: number; image?: string; vertical: string };
+
+// Per-day engagement aggregates (attention, not money). Active time only —
+// background/idle time is excluded by the tracker. See lib/tracking.tsx and
+// docs/CONSUMPTION_INTELLIGENCE.md.
+export type DayEngagement = {
+  activeMs: number;
+  byVertical: Record<string, number>; // active ms per vertical (Food, Electronics…)
+  byApp: Record<string, number>; // active ms per fictional app
+  productsViewed: number; // products seen in a list
+  productsOpened: number; // product detail opens
+  cartAdds: number;
+  cartValueExplored: number; // ₹ value added to cart (whether or not bought)
+};
+
+function emptyDay(): DayEngagement {
+  return { activeMs: 0, byVertical: {}, byApp: {}, productsViewed: 0, productsOpened: 0, cartAdds: 0, cartValueExplored: 0 };
+}
+function todayKey(d = new Date()): string {
+  return d.toISOString().slice(0, 10);
+}
 
 type State = {
   name: string | null;
@@ -85,12 +108,14 @@ type State = {
   postGoalSeen: boolean;
   profilePhoto: string | null; // image URL or data: URL
   address: Address | null;
+  wishlist: WishItem[];
+  engagement: Record<string, DayEngagement>; // keyed by YYYY-MM-DD
 };
 
 const EMPTY: State = {
   name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [],
   storySeen: false, profile: null, decisions: 0, decisionLog: [], postGoalSeen: false,
-  profilePhoto: null, address: null,
+  profilePhoto: null, address: null, wishlist: [], engagement: {},
 };
 const KEY = "project_future_state_v1";
 const CREDS_KEY = "project_future_creds_v1";
@@ -146,7 +171,7 @@ type Ctx = State & {
   currentStreak: number;
   cartTotal: number;
   cartCount: number;
-  addToCart: (item: { id: string; name: string; price: number; image?: string }) => void;
+  addToCart: (item: { id: string; name: string; price: number; image?: string; vertical?: string }) => void;
   setCartQty: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -164,7 +189,29 @@ type Ctx = State & {
   applySaving: (amount: number, note: string, category?: string) => Dream | null;
   setProfilePhoto: (url: string | null) => void;
   saveAddress: (a: Address) => void;
+  // wishlist
+  toggleWish: (item: WishItem) => void;
+  inWishlist: (id: string) => boolean;
+  // engagement / consumption intelligence
+  trackActive: (ms: number, vertical: string, app?: string) => void;
+  trackView: (count?: number) => void;
+  trackOpen: () => void;
+  trackCartExplore: (value: number) => void;
+  weekSummary: WeekSummary;
   reset: () => void;
+};
+
+export type WeekSummary = {
+  activeMs: number;
+  byVertical: Record<string, number>;
+  byApp: Record<string, number>;
+  productsViewed: number;
+  productsOpened: number;
+  cartAdds: number;
+  cartValueExplored: number;
+  spent: number; // from decisions: choice "enjoyed"
+  redirected: number; // from decisions: choice "redirected"
+  decisions: number;
 };
 
 const StoreContext = createContext<Ctx | null>(null);
@@ -269,6 +316,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, address: a }));
   }, []);
 
+  const toggleWish = useCallback((item: WishItem) => {
+    setState((s) => {
+      const exists = s.wishlist.some((w) => w.id === item.id);
+      return { ...s, wishlist: exists ? s.wishlist.filter((w) => w.id !== item.id) : [item, ...s.wishlist] };
+    });
+  }, []);
+  const inWishlist = useCallback((id: string) => state.wishlist.some((w) => w.id === id), [state.wishlist]);
+
+  // --- engagement (attention) ---
+  const mutDay = useCallback((fn: (d: DayEngagement) => DayEngagement) => {
+    setState((s) => {
+      const k = todayKey();
+      const day = s.engagement[k] ? { ...s.engagement[k] } : emptyDay();
+      return { ...s, engagement: { ...s.engagement, [k]: fn(day) } };
+    });
+  }, []);
+
+  const trackActive = useCallback((ms: number, vertical: string, app?: string) => {
+    if (ms <= 0) return;
+    mutDay((d) => ({
+      ...d,
+      activeMs: d.activeMs + ms,
+      byVertical: { ...d.byVertical, [vertical]: (d.byVertical[vertical] || 0) + ms },
+      byApp: app ? { ...d.byApp, [app]: (d.byApp[app] || 0) + ms } : d.byApp,
+    }));
+  }, [mutDay]);
+
+  const trackView = useCallback((count = 1) => mutDay((d) => ({ ...d, productsViewed: d.productsViewed + count })), [mutDay]);
+  const trackOpen = useCallback(() => mutDay((d) => ({ ...d, productsOpened: d.productsOpened + 1 })), [mutDay]);
+  const trackCartExplore = useCallback((value: number) => mutDay((d) => ({ ...d, cartAdds: d.cartAdds + 1, cartValueExplored: d.cartValueExplored + Math.max(0, Math.round(value)) })), [mutDay]);
+
   const applySaving = useCallback((amount: number, note: string, category?: string) => {
     let updated: Dream | null = null;
     setState((s) => {
@@ -292,7 +370,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return updated;
   }, []);
 
-  const addToCart = useCallback((item: { id: string; name: string; price: number; image?: string }) => {
+  const addToCart = useCallback((item: { id: string; name: string; price: number; image?: string; vertical?: string }) => {
     setState((s) => {
       const existing = s.cart.find((c) => c.id === item.id);
       const cart = existing
@@ -331,6 +409,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setPostGoalSeen = useCallback(() => setState((s) => ({ ...s, postGoalSeen: true })), []);
 
   const reset = useCallback(() => setState(EMPTY), []);
+
+  const weekSummary = useMemo<WeekSummary>(() => {
+    const now = Date.now();
+    const weekAgo = now - 7 * 24 * 3600 * 1000;
+    const acc: WeekSummary = {
+      activeMs: 0, byVertical: {}, byApp: {}, productsViewed: 0, productsOpened: 0,
+      cartAdds: 0, cartValueExplored: 0, spent: 0, redirected: 0, decisions: 0,
+    };
+    for (const [k, d] of Object.entries(state.engagement)) {
+      if (new Date(k + "T00:00:00").getTime() < weekAgo) continue;
+      acc.activeMs += d.activeMs;
+      acc.productsViewed += d.productsViewed;
+      acc.productsOpened += d.productsOpened;
+      acc.cartAdds += d.cartAdds;
+      acc.cartValueExplored += d.cartValueExplored;
+      for (const [v, ms] of Object.entries(d.byVertical)) acc.byVertical[v] = (acc.byVertical[v] || 0) + ms;
+      for (const [a, ms] of Object.entries(d.byApp)) acc.byApp[a] = (acc.byApp[a] || 0) + ms;
+    }
+    for (const dec of state.decisionLog) {
+      if (dec.at < weekAgo) continue;
+      acc.decisions += 1;
+      if (dec.choice === "enjoyed") acc.spent += dec.amount;
+      else acc.redirected += dec.amount;
+    }
+    return acc;
+  }, [state.engagement, state.decisionLog]);
 
   const cartTotal = useMemo(() => state.cart.reduce((a, c) => a + c.price * c.qty, 0), [state.cart]);
   const cartCount = useMemo(() => state.cart.reduce((a, c) => a + c.qty, 0), [state.cart]);
@@ -403,6 +507,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     applySaving,
     setProfilePhoto,
     saveAddress,
+    toggleWish,
+    inWishlist,
+    trackActive,
+    trackView,
+    trackOpen,
+    trackCartExplore,
+    weekSummary,
     reset,
   };
 

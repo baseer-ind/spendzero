@@ -104,6 +104,7 @@ function ProfileScreen() {
       {/* Sections */}
       <div className="mx-6 mt-7 overflow-hidden rounded-2xl border border-white/8 bg-surface">
         <Row icon="◎" label="My dreams" value={`${dreams.length} active`} to="/future" />
+        <Row icon="◴" label="My consumption" value="attention & money" to="/consumption" />
         <Row icon="₹" label="Money you kept" value={formatINR(totalSaved)} to="/savings" />
         <Row icon="◈" label="Future Intelligence" to="/learn" />
         <Row icon="⟳" label="My journey" value={`${events.length} wins`} to="/journey" />

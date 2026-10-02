@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ConsumptionRouteImport } from './routes/consumption'
 import { Route as ContinueRouteImport } from './routes/continue'
 import { Route as FutureRouteImport } from './routes/future'
 import { Route as JourneyRouteImport } from './routes/journey'
@@ -20,6 +21,8 @@ import { Route as PauseRouteImport } from './routes/pause'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SavingsRouteImport } from './routes/savings'
 import { Route as TodayRouteImport } from './routes/today'
+import { Route as ElectronicsIndexRouteImport } from './routes/electronics.index'
+import { Route as ElectronicsProductIdRouteImport } from './routes/electronics.$productId'
 import { Route as FoodIndexRouteImport } from './routes/food.index'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnLessonIdRouteImport } from './routes/learn.$lessonId'
@@ -44,6 +47,11 @@ const CartRoute = CartRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsumptionRoute = ConsumptionRouteImport.update({
+  id: '/consumption',
+  path: '/consumption',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContinueRoute = ContinueRouteImport.update({
@@ -81,6 +89,16 @@ const TodayRoute = TodayRouteImport.update({
   path: '/today',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ElectronicsIndexRoute = ElectronicsIndexRouteImport.update({
+  id: '/electronics/',
+  path: '/electronics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ElectronicsProductIdRoute = ElectronicsProductIdRouteImport.update({
+  id: '/electronics/$productId',
+  path: '/electronics/$productId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FoodIndexRoute = FoodIndexRouteImport.update({
   id: '/food/',
   path: '/food/',
@@ -112,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/consumption': typeof ConsumptionRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
@@ -119,7 +138,9 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/electronics/$productId': typeof ElectronicsProductIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
+  '/electronics/': typeof ElectronicsIndexRoute
   '/food/': typeof FoodIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
@@ -130,6 +151,7 @@ export interface FileRoutesByTo {
   '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/consumption': typeof ConsumptionRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
@@ -137,7 +159,9 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/electronics/$productId': typeof ElectronicsProductIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
+  '/electronics': typeof ElectronicsIndexRoute
   '/food': typeof FoodIndexRoute
   '/learn': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
@@ -149,6 +173,7 @@ export interface FileRoutesById {
   '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/consumption': typeof ConsumptionRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
@@ -156,7 +181,9 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/electronics/$productId': typeof ElectronicsProductIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
+  '/electronics/': typeof ElectronicsIndexRoute
   '/food/': typeof FoodIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
@@ -169,6 +196,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/cart'
     | '/checkout'
+    | '/consumption'
     | '/continue'
     | '/future'
     | '/journey'
@@ -176,7 +204,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/savings'
     | '/today'
+    | '/electronics/$productId'
     | '/learn/$lessonId'
+    | '/electronics/'
     | '/food/'
     | '/learn/'
     | '/food/$appId/$restaurantId'
@@ -187,6 +217,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/cart'
     | '/checkout'
+    | '/consumption'
     | '/continue'
     | '/future'
     | '/journey'
@@ -194,7 +225,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/savings'
     | '/today'
+    | '/electronics/$productId'
     | '/learn/$lessonId'
+    | '/electronics'
     | '/food'
     | '/learn'
     | '/food/$appId/$restaurantId'
@@ -205,6 +238,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/cart'
     | '/checkout'
+    | '/consumption'
     | '/continue'
     | '/future'
     | '/journey'
@@ -212,7 +246,9 @@ export interface FileRouteTypes {
     | '/profile'
     | '/savings'
     | '/today'
+    | '/electronics/$productId'
     | '/learn/$lessonId'
+    | '/electronics/'
     | '/food/'
     | '/learn/'
     | '/food/$appId/$restaurantId'
@@ -224,6 +260,7 @@ export interface RootRouteChildren {
   AchievementsRoute: typeof AchievementsRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
+  ConsumptionRoute: typeof ConsumptionRoute
   ContinueRoute: typeof ContinueRoute
   FutureRoute: typeof FutureRoute
   JourneyRoute: typeof JourneyRoute
@@ -231,7 +268,9 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SavingsRoute: typeof SavingsRoute
   TodayRoute: typeof TodayRoute
+  ElectronicsProductIdRoute: typeof ElectronicsProductIdRoute
   LearnLessonIdRoute: typeof LearnLessonIdRoute
+  ElectronicsIndexRoute: typeof ElectronicsIndexRoute
   FoodIndexRoute: typeof FoodIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
   FoodAppIdRestaurantIdRoute: typeof FoodAppIdRestaurantIdRoute
@@ -266,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumption': {
+      id: '/consumption'
+      path: '/consumption'
+      fullPath: '/consumption'
+      preLoaderRoute: typeof ConsumptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/continue': {
@@ -317,6 +363,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TodayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/electronics/': {
+      id: '/electronics/'
+      path: '/electronics'
+      fullPath: '/electronics/'
+      preLoaderRoute: typeof ElectronicsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/electronics/$productId': {
+      id: '/electronics/$productId'
+      path: '/electronics/$productId'
+      fullPath: '/electronics/$productId'
+      preLoaderRoute: typeof ElectronicsProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/food/': {
       id: '/food/'
       path: '/food'
@@ -360,6 +420,7 @@ const rootRouteChildren: RootRouteChildren = {
   AchievementsRoute: AchievementsRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
+  ConsumptionRoute: ConsumptionRoute,
   ContinueRoute: ContinueRoute,
   FutureRoute: FutureRoute,
   JourneyRoute: JourneyRoute,
@@ -367,7 +428,9 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SavingsRoute: SavingsRoute,
   TodayRoute: TodayRoute,
+  ElectronicsProductIdRoute: ElectronicsProductIdRoute,
   LearnLessonIdRoute: LearnLessonIdRoute,
+  ElectronicsIndexRoute: ElectronicsIndexRoute,
   FoodIndexRoute: FoodIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
   FoodAppIdRestaurantIdRoute: FoodAppIdRestaurantIdRoute,

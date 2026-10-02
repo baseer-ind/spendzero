@@ -85,7 +85,8 @@ function CheckoutScreen() {
       return;
     }
     // The moment of commitment IS the intervention point.
-    navigate({ to: "/pause", search: { amt: payable, from: "checkout", cat: "Food" } });
+    const cat = [...cart].sort((a, b) => b.price * b.qty - a.price * a.qty)[0]?.vertical || "Food";
+    navigate({ to: "/pause", search: { amt: payable, from: "checkout", cat } });
   }
 
   const field = "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-[15px] outline-none placeholder:text-foreground/35 focus:border-gold/50";

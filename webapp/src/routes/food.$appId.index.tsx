@@ -3,6 +3,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { NavBar, Screen } from "@/components/Shell";
 import { Img } from "@/components/Img";
 import { FOOD_CUISINES, foodApp, restaurantsForApp } from "@/lib/catalog";
+import { useBrowseTracking } from "@/lib/tracking";
+import { ExploreNudge } from "@/components/ExploreNudge";
 import { formatINR } from "@/lib/store";
 
 export const Route = createFileRoute("/food/$appId/")({
@@ -12,6 +14,7 @@ export const Route = createFileRoute("/food/$appId/")({
 
 function FoodAppHome() {
   const { appId } = Route.useParams();
+  useBrowseTracking("Food", appId);
   const app = foodApp(appId);
   const all = restaurantsForApp(appId);
   const [q, setQ] = useState("");
@@ -113,6 +116,8 @@ function FoodAppHome() {
           </div>
         )}
       </div>
+
+      <ExploreNudge />
     </Screen>
   );
 }
