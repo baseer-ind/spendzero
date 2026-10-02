@@ -133,12 +133,27 @@ try {
   await page.waitForURL("**/pause**", { timeout: 8000 });
   log("cart → checkout → place order → pause: true");
 
-  // 8) PAUSE → REDIRECT → CONTINUE
+  // 8) DECISION MOMENT → BUILD MY FUTURE → CONTINUE
   await page.getByText("I'm hungry", { exact: false }).click();
-  await page.waitForTimeout(200);
-  await page.getByText("build my future", { exact: false }).click();
+  await page.waitForTimeout(250);
+  const futureWaiting = await page.getByText("Your future is waiting", { exact: false }).count();
+  log(`decision moment shows dreams ("future is waiting"): ${futureWaiting > 0}`);
+  if (futureWaiting === 0) issues.push("DECISION: dreams not shown at the decision moment");
+  const twoDirections = await page.getByText("One choice. Two directions", { exact: false }).count();
+  if (twoDirections === 0) issues.push("DECISION: 'One choice. Two directions' copy missing");
+  const dreamAtDecide = await page.getByText("India Trip", { exact: false }).count();
+  log(`dream visible with amount at decision: ${dreamAtDecide > 0}`);
+  if (dreamAtDecide === 0) issues.push("DECISION: active dream not visible at decision");
+  await page.getByRole("button", { name: /Build my future/i }).click();
+  await page.waitForTimeout(300);
+  // choose step: before→after goal card
+  const closer = await page.getByText("closer", { exact: false }).count();
+  log(`goal choice shows before→after ("…closer"): ${closer > 0}`);
+  if (closer === 0) issues.push("DECISION: before/after goal card missing");
+  await page.getByText("India Trip", { exact: false }).first().click();
   await page.waitForURL("**/continue", { timeout: 8000 });
-  log("pause (not today) → continue: true");
+  const cravingEnds = await page.getByText("craving ends here", { exact: false }).count();
+  log(`continue screen ("craving ends here"): ${cravingEnds > 0}`);
   await shot("continue");
 
   // 9) BUY PATH (enjoy it) — go through food again quickly
@@ -154,13 +169,67 @@ try {
   // address is remembered now
   await page.getByText("Place order", { exact: false }).click();
   await page.waitForURL("**/pause**", { timeout: 8000 });
-  await page.getByText("genuinely want it", { exact: false }).first().click();
-  await page.waitForTimeout(200);
-  await page.getByText("Yes — I genuinely want it", { exact: false }).click();
+  await page.getByText("I genuinely want it", { exact: false }).first().click();
+  await page.waitForTimeout(250);
+  await page.getByRole("button", { name: /Enjoy it/i }).click();
   await page.waitForTimeout(400);
-  const enjoy = await page.getByText("Enjoy it", { exact: false }).count();
+  const enjoy = await page.getByText("You made the choice consciously", { exact: false }).count();
   log(`buy path → "Enjoy it": ${enjoy > 0}`);
   if (enjoy === 0) issues.push("PAUSE: buy path did not reach Enjoy it");
+
+  // 9b) MONEY YOU KEPT
+  await go("/savings");
+  const kept = await page.getByText("redirected so far", { exact: false }).count();
+  const catFood = await page.getByText("Food", { exact: false }).count();
+  log(`money-you-kept screen + category breakdown: ${kept > 0 && catFood > 0}`);
+  if (kept === 0) issues.push("SAVINGS: Money You Kept screen not rendering");
+
+  // 9c) FUTURE INTELLIGENCE
+  await go("/learn");
+  const fi = await page.getByText("How spending decisions", { exact: false }).count();
+  log(`future intelligence hub: ${fi > 0}`);
+  if (fi === 0) issues.push("LEARN: hub not rendering");
+  await page.getByText("The Discount Trap", { exact: false }).first().click();
+  await page.waitForURL("**/learn/discount-trap", { timeout: 8000 });
+  const question = await page.getByText("Would you have bought it at", { exact: false }).count();
+  const source = await page.getByText("Krishna", { exact: false }).count();
+  log(`discount-trap lesson (question + research): ${question > 0 && source > 0}`);
+  if (question === 0 || source === 0) issues.push("LEARN: Discount Trap lesson missing question/research");
+  await shot("lesson");
+
+  // 9d) MULTIPLE DREAMS at the decision
+  await go("/future");
+  await page.getByText("Add a new dream", { exact: false }).click();
+  await page.waitForTimeout(200);
+  await page.getByPlaceholder("What are you saving for?").fill("Dream Home");
+  await page.getByPlaceholder("Target amount (₹)").fill("500000");
+  await page.getByText("Create dream", { exact: false }).click();
+  await page.waitForTimeout(400);
+  await go("/food/zaikago/deccan-zaika");
+  await page.getByRole("button", { name: "ADD", exact: true }).first().click();
+  await page.waitForTimeout(300);
+  const sheet3 = await page.getByRole("button", { name: /Add to cart/i }).count();
+  if (sheet3 > 0) { await page.getByRole("button", { name: /Add to cart/i }).click(); await page.waitForTimeout(300); }
+  await page.getByText("View cart", { exact: false }).click();
+  await page.waitForURL("**/cart", { timeout: 8000 });
+  await page.getByText("Proceed to checkout", { exact: false }).click();
+  await page.waitForURL("**/checkout", { timeout: 8000 });
+  await page.getByText("Place order", { exact: false }).click();
+  await page.waitForURL("**/pause**", { timeout: 8000 });
+  await page.getByText("I'm bored", { exact: false }).click();
+  await page.waitForTimeout(250);
+  const hasTrip = await page.getByText("India Trip", { exact: false }).count();
+  const hasHome = await page.getByText("Dream Home", { exact: false }).count();
+  log(`both dreams shown at decision: trip=${hasTrip > 0} home=${hasHome > 0}`);
+  if (hasTrip === 0 || hasHome === 0) issues.push("DECISION: not all dreams shown with multiple goals");
+  await page.getByRole("button", { name: /Build my future/i }).click();
+  await page.waitForTimeout(300);
+  // choose the second goal specifically
+  await page.getByText("Dream Home", { exact: false }).first().click();
+  await page.waitForURL("**/continue", { timeout: 8000 });
+  const movedHome = await page.getByText("Dream Home", { exact: false }).count();
+  log(`redirect routed to chosen goal (Dream Home): ${movedHome > 0}`);
+  if (movedHome === 0) issues.push("DECISION: redirect did not route to the chosen goal");
 
   // 10) PROFILE photo affordance + ACHIEVEMENTS
   await go("/profile");
@@ -187,7 +256,7 @@ try {
   await page.waitForURL("**/food", { timeout: 8000 });
 
   // 13) all live routes 200
-  for (const r of ["/", "/future", "/today", "/food", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements"]) {
+  for (const r of ["/", "/future", "/today", "/food", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/learn", "/learn/discount-trap"]) {
     const s = await go(r);
     if (s !== 200) log(`route ${r}: ${s}`);
   }

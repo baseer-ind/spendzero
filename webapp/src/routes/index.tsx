@@ -48,6 +48,18 @@ function Home() {
             </div>
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/15 text-gold">→</span>
           </Link>
+          <Link
+            to="/learn"
+            className="mt-4 flex items-center justify-between rounded-[22px] border border-white/10 bg-surface p-5 animate-rise"
+            style={{ animationDelay: "260ms" }}
+          >
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-foreground/45">future intelligence</p>
+              <p className="mt-1 font-display text-[17px]">Understand why you want it.</p>
+              <p className="mt-0.5 text-[12px] text-foreground/55">Short, evidence-based reads on how spending works.</p>
+            </div>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/5 text-foreground/70">◈</span>
+          </Link>
           <CollectionRow dreams={dreams} activeId={activeDream?.id ?? null} />
           <MomentumStrip totalSaved={totalSaved} streak={currentStreak} show={hydrated} />
           <Whisper />

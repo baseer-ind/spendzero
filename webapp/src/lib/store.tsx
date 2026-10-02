@@ -46,6 +46,18 @@ export type SaveEvent = {
   dreamId: string;
   amount: number; // rupees
   note: string;
+  category?: string; // e.g. "Food", "Shopping"
+  at: number;
+};
+
+// A conscious decision at the moment of purchase (both choices are legitimate).
+export type Decision = {
+  id: string;
+  category: string; // craving category
+  amount: number; // rupees considered
+  trigger: string; // the feeling the user named
+  choice: "enjoyed" | "redirected";
+  dreamId?: string; // set when redirected
   at: number;
 };
 
@@ -69,6 +81,7 @@ type State = {
   storySeen: boolean;
   profile: Profile | null;
   decisions: number; // conscious pause decisions made (buy or not-today)
+  decisionLog: Decision[];
   postGoalSeen: boolean;
   profilePhoto: string | null; // image URL or data: URL
   address: Address | null;
@@ -76,7 +89,7 @@ type State = {
 
 const EMPTY: State = {
   name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [],
-  storySeen: false, profile: null, decisions: 0, postGoalSeen: false,
+  storySeen: false, profile: null, decisions: 0, decisionLog: [], postGoalSeen: false,
   profilePhoto: null, address: null,
 };
 const KEY = "project_future_state_v1";
@@ -129,6 +142,7 @@ type Ctx = State & {
   authed: boolean;
   activeDream: Dream | null;
   totalSaved: number;
+  keptByCategory: Record<string, number>;
   currentStreak: number;
   cartTotal: number;
   cartCount: number;
@@ -138,7 +152,7 @@ type Ctx = State & {
   clearCart: () => void;
   setStorySeen: () => void;
   setProfile: (p: Profile) => void;
-  recordDecision: () => void;
+  recordDecision: (d: { category: string; amount: number; trigger: string; choice: "enjoyed" | "redirected"; dreamId?: string }) => void;
   setPostGoalSeen: () => void;
   setName: (n: string) => void;
   register: (d: { name: string; email: string; password: string }) => AuthResult;
@@ -147,7 +161,7 @@ type Ctx = State & {
   addDream: (d: { name: string; emoji?: string; target: number; cover?: string }) => string;
   setActiveDream: (id: string) => void;
   setDreamCover: (id: string, cover: string | null) => void;
-  applySaving: (amount: number, note: string) => Dream | null;
+  applySaving: (amount: number, note: string, category?: string) => Dream | null;
   setProfilePhoto: (url: string | null) => void;
   saveAddress: (a: Address) => void;
   reset: () => void;
@@ -255,7 +269,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, address: a }));
   }, []);
 
-  const applySaving = useCallback((amount: number, note: string) => {
+  const applySaving = useCallback((amount: number, note: string, category?: string) => {
     let updated: Dream | null = null;
     setState((s) => {
       const targetId = s.activeDreamId ?? s.dreams[0]?.id ?? null;
@@ -270,6 +284,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         dreamId: targetId,
         amount: Math.round(amount),
         note,
+        category,
         at: Date.now(),
       };
       return { ...s, dreams, events: [event, ...s.events].slice(0, 200) };
@@ -304,7 +319,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setStorySeen = useCallback(() => setState((s) => ({ ...s, storySeen: true })), []);
   const setProfile = useCallback((p: Profile) => setState((s) => ({ ...s, profile: p })), []);
-  const recordDecision = useCallback(() => setState((s) => ({ ...s, decisions: s.decisions + 1 })), []);
+  const recordDecision = useCallback(
+    (d: { category: string; amount: number; trigger: string; choice: "enjoyed" | "redirected"; dreamId?: string }) =>
+      setState((s) => ({
+        ...s,
+        decisions: s.decisions + 1,
+        decisionLog: [{ id: uid(), at: Date.now(), ...d }, ...s.decisionLog].slice(0, 300),
+      })),
+    [],
+  );
   const setPostGoalSeen = useCallback(() => setState((s) => ({ ...s, postGoalSeen: true })), []);
 
   const reset = useCallback(() => setState(EMPTY), []);
@@ -321,6 +344,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     () => state.dreams.reduce((a, d) => a + d.saved, 0),
     [state.dreams],
   );
+
+  // Money redirected, grouped by craving category (for the "Money You Kept" view).
+  const keptByCategory = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const e of state.events) {
+      const c = e.category || "Other";
+      m[c] = (m[c] || 0) + e.amount;
+    }
+    return m;
+  }, [state.events]);
 
   const currentStreak = useMemo(() => {
     // Count consecutive days ending today that have at least one save event.
@@ -348,6 +381,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     authed: state.account != null,
     activeDream,
     totalSaved,
+    keptByCategory,
     currentStreak,
     cartTotal,
     cartCount,

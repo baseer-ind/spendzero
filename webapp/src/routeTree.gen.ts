@@ -18,8 +18,11 @@ import { Route as FutureRouteImport } from './routes/future'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as PauseRouteImport } from './routes/pause'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SavingsRouteImport } from './routes/savings'
 import { Route as TodayRouteImport } from './routes/today'
 import { Route as FoodIndexRouteImport } from './routes/food.index'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as LearnLessonIdRouteImport } from './routes/learn.$lessonId'
 import { Route as FoodAppIdIndexRouteImport } from './routes/food.$appId.index'
 import { Route as FoodAppIdRestaurantIdRouteImport } from './routes/food.$appId.$restaurantId'
 
@@ -68,6 +71,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SavingsRoute = SavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TodayRoute = TodayRouteImport.update({
   id: '/today',
   path: '/today',
@@ -76,6 +84,16 @@ const TodayRoute = TodayRouteImport.update({
 const FoodIndexRoute = FoodIndexRouteImport.update({
   id: '/food/',
   path: '/food/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/learn/',
+  path: '/learn/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnLessonIdRoute = LearnLessonIdRouteImport.update({
+  id: '/learn/$lessonId',
+  path: '/learn/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FoodAppIdIndexRoute = FoodAppIdIndexRouteImport.update({
@@ -99,8 +117,11 @@ export interface FileRoutesByFullPath {
   '/journey': typeof JourneyRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
+  '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/learn/$lessonId': typeof LearnLessonIdRoute
   '/food/': typeof FoodIndexRoute
+  '/learn/': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
   '/food/$appId/': typeof FoodAppIdIndexRoute
 }
@@ -114,8 +135,11 @@ export interface FileRoutesByTo {
   '/journey': typeof JourneyRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
+  '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/learn/$lessonId': typeof LearnLessonIdRoute
   '/food': typeof FoodIndexRoute
+  '/learn': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
   '/food/$appId': typeof FoodAppIdIndexRoute
 }
@@ -130,8 +154,11 @@ export interface FileRoutesById {
   '/journey': typeof JourneyRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
+  '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/learn/$lessonId': typeof LearnLessonIdRoute
   '/food/': typeof FoodIndexRoute
+  '/learn/': typeof LearnIndexRoute
   '/food/$appId/$restaurantId': typeof FoodAppIdRestaurantIdRoute
   '/food/$appId/': typeof FoodAppIdIndexRoute
 }
@@ -147,8 +174,11 @@ export interface FileRouteTypes {
     | '/journey'
     | '/pause'
     | '/profile'
+    | '/savings'
     | '/today'
+    | '/learn/$lessonId'
     | '/food/'
+    | '/learn/'
     | '/food/$appId/$restaurantId'
     | '/food/$appId/'
   fileRoutesByTo: FileRoutesByTo
@@ -162,8 +192,11 @@ export interface FileRouteTypes {
     | '/journey'
     | '/pause'
     | '/profile'
+    | '/savings'
     | '/today'
+    | '/learn/$lessonId'
     | '/food'
+    | '/learn'
     | '/food/$appId/$restaurantId'
     | '/food/$appId'
   id:
@@ -177,8 +210,11 @@ export interface FileRouteTypes {
     | '/journey'
     | '/pause'
     | '/profile'
+    | '/savings'
     | '/today'
+    | '/learn/$lessonId'
     | '/food/'
+    | '/learn/'
     | '/food/$appId/$restaurantId'
     | '/food/$appId/'
   fileRoutesById: FileRoutesById
@@ -193,8 +229,11 @@ export interface RootRouteChildren {
   JourneyRoute: typeof JourneyRoute
   PauseRoute: typeof PauseRoute
   ProfileRoute: typeof ProfileRoute
+  SavingsRoute: typeof SavingsRoute
   TodayRoute: typeof TodayRoute
+  LearnLessonIdRoute: typeof LearnLessonIdRoute
   FoodIndexRoute: typeof FoodIndexRoute
+  LearnIndexRoute: typeof LearnIndexRoute
   FoodAppIdRestaurantIdRoute: typeof FoodAppIdRestaurantIdRoute
   FoodAppIdIndexRoute: typeof FoodAppIdIndexRoute
 }
@@ -264,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/savings': {
+      id: '/savings'
+      path: '/savings'
+      fullPath: '/savings'
+      preLoaderRoute: typeof SavingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/today': {
       id: '/today'
       path: '/today'
@@ -276,6 +322,20 @@ declare module '@tanstack/react-router' {
       path: '/food'
       fullPath: '/food/'
       preLoaderRoute: typeof FoodIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/': {
+      id: '/learn/'
+      path: '/learn'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/$lessonId': {
+      id: '/learn/$lessonId'
+      path: '/learn/$lessonId'
+      fullPath: '/learn/$lessonId'
+      preLoaderRoute: typeof LearnLessonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/food/$appId/': {
@@ -305,8 +365,11 @@ const rootRouteChildren: RootRouteChildren = {
   JourneyRoute: JourneyRoute,
   PauseRoute: PauseRoute,
   ProfileRoute: ProfileRoute,
+  SavingsRoute: SavingsRoute,
   TodayRoute: TodayRoute,
+  LearnLessonIdRoute: LearnLessonIdRoute,
   FoodIndexRoute: FoodIndexRoute,
+  LearnIndexRoute: LearnIndexRoute,
   FoodAppIdRestaurantIdRoute: FoodAppIdRestaurantIdRoute,
   FoodAppIdIndexRoute: FoodAppIdIndexRoute,
 }

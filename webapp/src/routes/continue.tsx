@@ -49,12 +49,12 @@ function ContinueScreen() {
 
             <p className="mt-8 text-[11px] uppercase tracking-[0.32em] text-gold/80">craving passed</p>
             <h1 className="mt-3 font-display text-[40px] leading-[1.05] text-balance">
-              Quiet win.
+              Your craving ends here.
               <br />
-              <span className="text-shimmer-gold">You stayed.</span>
+              <span className="text-shimmer-gold">Your future continues.</span>
             </h1>
             <p className="mt-5 mx-auto max-w-[280px] text-sm leading-relaxed text-foreground/60">
-              That craving you almost fed — it cost nothing. And it bought you something real.
+              That craving you almost fed — it cost nothing. And it moved something real.
             </p>
           </div>
 
@@ -95,6 +95,9 @@ function ContinueScreen() {
           <div className="px-6 mt-10 space-y-3 pb-16">
             <Link to="/future" className="block w-full rounded-full py-4 text-center font-medium text-background" style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}>
               See my dreams
+            </Link>
+            <Link to="/savings" className="block w-full rounded-full border border-gold/25 bg-gold/5 py-4 text-center text-sm text-gold">
+              Money you've kept
             </Link>
             <Link to="/" className="block w-full rounded-full border border-white/10 bg-white/5 py-4 text-center text-sm text-foreground/70">
               Back home
