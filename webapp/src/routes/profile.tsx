@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
 import avatar from "@/assets/avatar-user.jpg";
+import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -13,10 +14,10 @@ export const Route = createFileRoute("/profile")({
 });
 
 function Row({
-  icon, label, value, danger,
-}: { icon: string; label: string; value?: string; danger?: boolean }) {
+  icon, label, value, danger, onClick,
+}: { icon: string; label: string; value?: string; danger?: boolean; onClick?: () => void }) {
   return (
-    <button className="flex w-full items-center justify-between border-b border-white/5 px-5 py-4 text-left last:border-0">
+    <button onClick={onClick} className="flex w-full items-center justify-between border-b border-white/5 px-5 py-4 text-left last:border-0">
       <div className="flex items-center gap-4">
         <span className="grid h-9 w-9 place-items-center rounded-full bg-white/5 text-[14px]">{icon}</span>
         <span className={`text-[14px] ${danger ? "text-destructive" : "text-foreground/85"}`}>{label}</span>
@@ -29,6 +30,8 @@ function Row({
 }
 
 function ProfileScreen() {
+  const { account, name, totalSaved, currentStreak, dreams, events, logout } = useStore();
+  const displayName = account?.name || name || "You";
   return (
     <Screen>
       <StatusBar />
@@ -44,8 +47,10 @@ function ProfileScreen() {
           <img src={avatar} alt="You" width={1024} height={1024} className="relative h-28 w-28 rounded-full border border-gold/30 object-cover" />
         </div>
         <p className="mt-5 text-[11px] uppercase tracking-[0.32em] text-gold/80">becoming</p>
-        <h1 className="mt-2 font-display text-[28px] leading-tight">Arjun Mehra</h1>
-        <p className="mt-1 text-[12px] text-foreground/50">Member since March · 23-day streak</p>
+        <h1 className="mt-2 font-display text-[28px] leading-tight">{displayName}</h1>
+        <p className="mt-1 text-[12px] text-foreground/50">
+          {account?.email ?? ""}{account?.email ? " · " : ""}{currentStreak}-day streak
+        </p>
       </div>
 
       {/* Identity card */}
@@ -60,20 +65,18 @@ function ProfileScreen() {
       <div className="mt-6 grid grid-cols-2 gap-3 px-6">
         <div className="rounded-2xl border border-white/8 bg-surface p-5">
           <p className="text-[10px] uppercase tracking-[0.22em] text-foreground/45">lifetime saved</p>
-          <p className="mt-2 font-display text-[24px] text-shimmer-gold">₹1,42,380</p>
+          <p className="mt-2 font-display text-[24px] text-shimmer-gold">{formatINR(totalSaved)}</p>
         </div>
         <div className="rounded-2xl border border-white/8 bg-surface p-5">
           <p className="text-[10px] uppercase tracking-[0.22em] text-foreground/45">cravings passed</p>
-          <p className="mt-2 font-display text-[24px] text-foreground/90">147</p>
+          <p className="mt-2 font-display text-[24px] text-foreground/90">{events.length}</p>
         </div>
       </div>
 
       {/* Sections */}
       <div className="mx-6 mt-7 overflow-hidden rounded-2xl border border-white/8 bg-surface">
-        <Row icon="◎" label="My dreams" value="3 active" />
-        <Row icon="✉" label="Letters from Future Me" value="12" />
+        <Row icon="◎" label="My dreams" value={`${dreams.length} active`} />
         <Row icon="◐" label="Daily ritual time" value="9:00 PM" />
-        <Row icon="◇" label="Linked accounts" value="2" />
       </div>
 
       <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">
@@ -83,7 +86,7 @@ function ProfileScreen() {
       </div>
 
       <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">
-        <Row icon="→" label="Sign out" danger />
+        <Row icon="→" label="Sign out" danger onClick={logout} />
       </div>
 
       <div className="mt-8 px-6 text-center">

@@ -35,18 +35,49 @@ export type SaveEvent = {
   at: number;
 };
 
+export type Account = { name: string; email: string };
+
 type State = {
   name: string | null;
+  account: Account | null;
   dreams: Dream[];
   activeDreamId: string | null;
   events: SaveEvent[];
 };
 
-const EMPTY: State = { name: null, dreams: [], activeDreamId: null, events: [] };
+const EMPTY: State = { name: null, account: null, dreams: [], activeDreamId: null, events: [] };
 const KEY = "project_future_state_v1";
+const CREDS_KEY = "project_future_creds_v1";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
+}
+
+// Lightweight, local-only credential store. NOTE: this is a device-local
+// account for the beta (no server yet), so the "hash" is only obfuscation,
+// not real security. Real cloud auth (Supabase) is the next layer.
+function hash(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16);
+}
+
+type Creds = Record<string, { name: string; pass: string }>;
+
+function readCreds(): Creds {
+  try {
+    return JSON.parse(localStorage.getItem(CREDS_KEY) || "{}") as Creds;
+  } catch {
+    return {};
+  }
+}
+
+function writeCreds(c: Creds) {
+  try {
+    localStorage.setItem(CREDS_KEY, JSON.stringify(c));
+  } catch {
+    /* ignore */
+  }
 }
 
 export function formatINR(n: number): string {
@@ -58,12 +89,18 @@ export function formatINR(n: number): string {
   return `₹${rest},${last3}`;
 }
 
+type AuthResult = { ok: true } | { ok: false; error: string };
+
 type Ctx = State & {
   hydrated: boolean;
+  authed: boolean;
   activeDream: Dream | null;
   totalSaved: number;
   currentStreak: number;
   setName: (n: string) => void;
+  register: (d: { name: string; email: string; password: string }) => AuthResult;
+  login: (d: { email: string; password: string }) => AuthResult;
+  logout: () => void;
   addDream: (d: { name: string; emoji?: string; target: number }) => string;
   setActiveDream: (id: string) => void;
   applySaving: (amount: number, note: string) => Dream | null;
@@ -100,6 +137,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setName = useCallback((n: string) => {
     setState((s) => ({ ...s, name: n.trim() || null }));
+  }, []);
+
+  const register = useCallback((d: { name: string; email: string; password: string }): AuthResult => {
+    const email = d.email.trim().toLowerCase();
+    const name = d.name.trim();
+    if (!name) return { ok: false, error: "Enter your name." };
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: "Enter a valid email." };
+    if (d.password.length < 6) return { ok: false, error: "Password must be at least 6 characters." };
+    const creds = readCreds();
+    if (creds[email]) return { ok: false, error: "An account with this email already exists. Sign in instead." };
+    creds[email] = { name, pass: hash(d.password) };
+    writeCreds(creds);
+    setState((s) => ({ ...s, account: { name, email }, name }));
+    return { ok: true };
+  }, []);
+
+  const login = useCallback((d: { email: string; password: string }): AuthResult => {
+    const email = d.email.trim().toLowerCase();
+    const creds = readCreds();
+    const rec = creds[email];
+    if (!rec || rec.pass !== hash(d.password)) return { ok: false, error: "Wrong email or password." };
+    setState((s) => ({ ...s, account: { name: rec.name, email }, name: rec.name }));
+    return { ok: true };
+  }, []);
+
+  const logout = useCallback(() => {
+    setState((s) => ({ ...s, account: null }));
   }, []);
 
   const addDream = useCallback(
@@ -186,10 +250,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value: Ctx = {
     ...state,
     hydrated,
+    authed: state.account != null,
     activeDream,
     totalSaved,
     currentStreak,
     setName,
+    register,
+    login,
+    logout,
     addDream,
     setActiveDream,
     applySaving,
