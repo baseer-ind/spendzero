@@ -148,7 +148,11 @@ jobs:
         # product images load without canvaskit's CORS fetch restriction, and
         # the app is lighter/faster to first paint (closer to the prototype's
         # smoothness). Available on Flutter 3.24.x (this job is pinned to it).
-        run: flutter build web --web-renderer html --release --base-href / --dart-define-from-file=env/production.json
+        # --pwa-strategy=none disables the service worker so every visit gets
+        # the freshly deployed build (no stale cached UI after a redeploy).
+        # --web-renderer html renders network photos as <img> (no canvaskit
+        # CORS fetch), lighter first paint. Pinned to Flutter 3.24.x here.
+        run: flutter build web --web-renderer html --pwa-strategy=none --release --base-href / --dart-define-from-file=env/production.json
       - name: Add Vercel static config (no build, serve this dir, SPA rewrites)
         working-directory: spendzero/mobile/build/web
         # Config-as-code so it overrides any stale dashboard settings (e.g. an
