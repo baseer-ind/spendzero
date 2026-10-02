@@ -5,6 +5,7 @@ import { Img } from "@/components/Img";
 import { ExploreNudge } from "@/components/ExploreNudge";
 import { useBrowseTracking } from "@/lib/tracking";
 import { discountPct, marketProduct, vertical } from "@/lib/market";
+import { photoSrc } from "@/lib/productImages";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/market/$vertical/$productId")({
@@ -34,22 +35,23 @@ function MarketProductDetail() {
   const similar = v.products.filter((x) => x.category === p.category && x.id !== p.id).slice(0, 6);
   const pool = similar.length > 0 ? similar : v.products.filter((x) => x.id !== p.id).slice(0, 6);
   const physical = !["travel", "entertainment"].includes(v.id);
+  const primary = photoSrc(v.id, p.id) || p.img;
 
   function add() {
     if (!p || !v) return;
-    addToCart({ id: p.id, name: p.name, price: p.price, image: p.img, vertical: v.label });
+    addToCart({ id: p.id, name: p.name, price: p.price, image: primary, vertical: v.label });
     trackCartExplore(p.price);
   }
 
   return (
     <Screen>
       <div className="relative">
-        <Img src={p.img} alt={p.name} emoji={v.emoji} seed={p.id} className="h-[300px] w-full object-cover" />
+        <Img src={primary} alt={p.name} emoji={v.emoji} seed={p.id} className="h-[300px] w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-background" />
         <Link to="/market/$vertical" params={{ vertical: vid }} aria-label="Back" className="absolute left-5 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
         </Link>
-        <button onClick={() => toggleWish({ id: p.id, name: p.name, price: p.price, image: p.img, vertical: v.label })} aria-label="Wishlist" className="absolute right-5 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/45 backdrop-blur">
+        <button onClick={() => toggleWish({ id: p.id, name: p.name, price: p.price, image: primary, vertical: v.label })} aria-label="Wishlist" className="absolute right-5 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/45 backdrop-blur">
           <span className={wished ? "text-red-400" : "text-white"}>{wished ? "♥" : "♡"}</span>
         </button>
       </div>

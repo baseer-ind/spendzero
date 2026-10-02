@@ -15,21 +15,36 @@ const FLUSH_EVERY = 5; // flush to the store every 5 active seconds
 
 // A single cross-route "explore session" so the pause nudge can say
 // "you've been exploring for X minutes" even as the user moves between screens
-// within the same vertical. Client-memory only.
-const sess = { vertical: "", activeMs: 0 };
+// within the same vertical. Client-memory only. `startedAt`/`app` let us log a
+// finished session to the activity timeline.
+const sess = { vertical: "", app: "", activeMs: 0, startedAt: 0 };
+type SessionSink = (e: { vertical: string; app?: string; at: number; ms: number }) => void;
+let sink: SessionSink | null = null;
+
+function finalizeSession() {
+  if (sink && sess.vertical && sess.activeMs >= 2000) {
+    sink({ vertical: sess.vertical, app: sess.app || undefined, at: sess.startedAt || Date.now(), ms: sess.activeMs });
+  }
+  sess.activeMs = 0;
+  sess.startedAt = 0;
+}
 
 export function useBrowseTracking(vertical: string, app?: string) {
-  const { trackActive } = useStore();
+  const { trackActive, logSession } = useStore();
   const lastActivity = useRef(Date.now());
   const buffer = useRef(0);
   const sinceFlush = useRef(0);
+  sink = logSession;
 
   useEffect(() => {
     if (sess.vertical !== vertical) {
+      finalizeSession(); // close the previous vertical's session
       sess.vertical = vertical;
+      sess.app = app || "";
       sess.activeMs = 0;
+      sess.startedAt = Date.now();
     }
-  }, [vertical]);
+  }, [vertical, app]);
 
   useEffect(() => {
     const bump = () => { lastActivity.current = Date.now(); };
@@ -47,6 +62,7 @@ export function useBrowseTracking(vertical: string, app?: string) {
       const visible = document.visibilityState === "visible";
       const active = visible && Date.now() - lastActivity.current < IDLE_MS;
       if (active) {
+        if (!sess.startedAt) sess.startedAt = Date.now();
         buffer.current += TICK_MS;
         sess.activeMs += TICK_MS;
         sinceFlush.current += 1;
@@ -54,14 +70,16 @@ export function useBrowseTracking(vertical: string, app?: string) {
       }
     }, TICK_MS);
 
-    const onHide = () => { if (document.visibilityState === "hidden") flush(); };
+    const onHide = () => { if (document.visibilityState === "hidden") { flush(); finalizeSession(); } };
     document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", finalizeSession);
 
     return () => {
       flush();
       window.clearInterval(id);
       evs.forEach((e) => document.removeEventListener(e, bump));
       document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", finalizeSession);
     };
   }, [vertical, app, trackActive]);
 }

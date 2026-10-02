@@ -10,7 +10,7 @@ incrementally without touching the catalogue code.
 2. Add the `productId` to `HAS_PHOTO` in `webapp/src/lib/productImages.ts`.
 
 ## Folders (one per vertical)
-`electronics` · `fashion` (Shopping) · `grocery` · `beauty` · `home` · `food` ·
+`electronics` · `shopping` · `grocery` · `beauty` · `home` · `food` ·
 `travel` · `entertainment`
 
 ## Product ids

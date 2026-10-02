@@ -312,10 +312,10 @@ try {
   // 9f) TRACKER VISIBLE — home "Your day" card + consumption dashboard
   await go("/");
   const yourDay = await page.getByText("your day", { exact: false }).count();
-  const seeActivity = await page.getByText("See my activity", { exact: false }).count();
+  const seeActivity = await page.getByText("See your activity", { exact: false }).count();
   log(`home 'Your day' tracker card visible: ${yourDay > 0 && seeActivity > 0}`);
   if (yourDay === 0 || seeActivity === 0) issues.push("TRACKER: 'Your day' card not on home");
-  await page.getByText("See my activity", { exact: false }).click();
+  await page.getByText("See your activity", { exact: false }).click();
   await page.waitForURL("**/consumption", { timeout: 8000 });
   const attn = await page.getByText("where your attention went", { exact: false }).count();
   log(`consumption dashboard: ${attn > 0}`);

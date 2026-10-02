@@ -5,6 +5,7 @@ import { Img } from "@/components/Img";
 import { ExploreNudge } from "@/components/ExploreNudge";
 import { useBrowseTracking } from "@/lib/tracking";
 import { ELECTRONICS_APP, discountPct, product, productsByCategory } from "@/lib/electronics";
+import { gallerySrc, photoSrc } from "@/lib/productImages";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/electronics/$productId")({
@@ -33,11 +34,13 @@ function ProductDetail() {
 
   const wished = inWishlist(p.id);
   const vLabel = p.variants ? ` · ${p.variants.options[variant]}` : "";
-  const images = [p.img, ...p.gallery];
+  const photos = gallerySrc("electronics", p.id);
+  const images = photos.length ? photos : [p.img, ...p.gallery];
+  const primary = photoSrc("electronics", p.id) || p.img;
 
   function add() {
     if (!p) return;
-    const item = { id: p.id + (p.variants ? `-${variant}` : ""), name: p.name + vLabel, price: p.price, image: p.img, vertical: "Electronics" };
+    const item = { id: p.id + (p.variants ? `-${variant}` : ""), name: p.name + vLabel, price: p.price, image: primary, vertical: "Electronics" };
     addToCart(item);
     trackCartExplore(p.price);
   }
@@ -51,7 +54,7 @@ function ProductDetail() {
         <Link to="/electronics" aria-label="Back" className="absolute left-5 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
         </Link>
-        <button onClick={() => toggleWish({ id: p.id, name: p.name, price: p.price, image: p.img, vertical: "Electronics" })} aria-label="Wishlist" className="absolute right-5 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/45 backdrop-blur">
+        <button onClick={() => toggleWish({ id: p.id, name: p.name, price: p.price, image: primary, vertical: "Electronics" })} aria-label="Wishlist" className="absolute right-5 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/45 backdrop-blur">
           <span className={wished ? "text-red-400" : "text-white"}>{wished ? "♥" : "♡"}</span>
         </button>
         {images.length > 1 && (

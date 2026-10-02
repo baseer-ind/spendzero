@@ -15,8 +15,8 @@
 const FOLDER: Record<string, string> = {
   electronics: "electronics",
   Electronics: "electronics",
-  shopping: "fashion",
-  Shopping: "fashion",
+  shopping: "shopping",
+  Shopping: "shopping",
   grocery: "grocery",
   Grocery: "grocery",
   beauty: "beauty",

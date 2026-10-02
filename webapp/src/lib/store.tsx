@@ -90,6 +90,9 @@ export type DayEngagement = {
 function emptyDay(): DayEngagement {
   return { activeMs: 0, byVertical: {}, byApp: {}, productsViewed: 0, productsOpened: 0, cartAdds: 0, cartValueExplored: 0 };
 }
+
+// A finished browsing session (for the activity timeline). Active time only.
+export type SessionLog = { id: string; vertical: string; app?: string; at: number; ms: number };
 function todayKey(d = new Date()): string {
   return d.toISOString().slice(0, 10);
 }
@@ -110,12 +113,13 @@ type State = {
   address: Address | null;
   wishlist: WishItem[];
   engagement: Record<string, DayEngagement>; // keyed by YYYY-MM-DD
+  sessionLog: SessionLog[];
 };
 
 const EMPTY: State = {
   name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [],
   storySeen: false, profile: null, decisions: 0, decisionLog: [], postGoalSeen: false,
-  profilePhoto: null, address: null, wishlist: [], engagement: {},
+  profilePhoto: null, address: null, wishlist: [], engagement: {}, sessionLog: [],
 };
 const KEY = "project_future_state_v1";
 const CREDS_KEY = "project_future_creds_v1";
@@ -194,6 +198,7 @@ type Ctx = State & {
   inWishlist: (id: string) => boolean;
   // engagement / consumption intelligence
   trackActive: (ms: number, vertical: string, app?: string) => void;
+  logSession: (e: { vertical: string; app?: string; at: number; ms: number }) => void;
   trackView: (count?: number) => void;
   trackOpen: () => void;
   trackCartExplore: (value: number) => void;
@@ -215,6 +220,7 @@ export type WeekSummary = {
   decisions: number;
   enjoyedCount: number;
   redirectedCount: number;
+  sessions: number;
 };
 
 const StoreContext = createContext<Ctx | null>(null);
@@ -346,6 +352,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }));
   }, [mutDay]);
 
+  const logSession = useCallback((e: { vertical: string; app?: string; at: number; ms: number }) => {
+    if (e.ms < 2000) return; // ignore trivial sessions
+    setState((s) => ({ ...s, sessionLog: [{ id: uid(), ...e }, ...s.sessionLog].slice(0, 300) }));
+  }, []);
+
   const trackView = useCallback((count = 1) => mutDay((d) => ({ ...d, productsViewed: d.productsViewed + count })), [mutDay]);
   const trackOpen = useCallback(() => mutDay((d) => ({ ...d, productsOpened: d.productsOpened + 1 })), [mutDay]);
   const trackCartExplore = useCallback((value: number) => mutDay((d) => ({ ...d, cartAdds: d.cartAdds + 1, cartValueExplored: d.cartValueExplored + Math.max(0, Math.round(value)) })), [mutDay]);
@@ -419,8 +430,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const acc: WeekSummary = {
       activeMs: 0, byVertical: {}, byApp: {}, productsViewed: 0, productsOpened: 0,
       cartAdds: 0, cartValueExplored: 0, spent: 0, redirected: 0, decisions: 0,
-      enjoyedCount: 0, redirectedCount: 0,
+      enjoyedCount: 0, redirectedCount: 0, sessions: 0,
     };
+    acc.sessions = state.sessionLog.filter((e) => e.at >= weekAgo).length;
     for (const [k, d] of Object.entries(state.engagement)) {
       if (new Date(k + "T00:00:00").getTime() < weekAgo) continue;
       acc.activeMs += d.activeMs;
@@ -438,7 +450,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       else acc.redirected += dec.amount;
     }
     return acc;
-  }, [state.engagement, state.decisionLog]);
+  }, [state.engagement, state.decisionLog, state.sessionLog]);
 
   const todaySummary = useMemo<WeekSummary>(() => {
     const k = todayKey();
@@ -448,8 +460,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       activeMs: d.activeMs, byVertical: { ...d.byVertical }, byApp: { ...d.byApp },
       productsViewed: d.productsViewed, productsOpened: d.productsOpened, cartAdds: d.cartAdds,
       cartValueExplored: d.cartValueExplored, spent: 0, redirected: 0, decisions: 0,
-      enjoyedCount: 0, redirectedCount: 0,
+      enjoyedCount: 0, redirectedCount: 0, sessions: 0,
     };
+    acc.sessions = state.sessionLog.filter((e) => e.at >= start).length;
     for (const dec of state.decisionLog) {
       if (dec.at < start) continue;
       acc.decisions += 1;
@@ -457,7 +470,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       else { acc.redirected += dec.amount; acc.redirectedCount += 1; }
     }
     return acc;
-  }, [state.engagement, state.decisionLog]);
+  }, [state.engagement, state.decisionLog, state.sessionLog]);
 
   const cartTotal = useMemo(() => state.cart.reduce((a, c) => a + c.price * c.qty, 0), [state.cart]);
   const cartCount = useMemo(() => state.cart.reduce((a, c) => a + c.qty, 0), [state.cart]);
@@ -533,6 +546,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     toggleWish,
     inWishlist,
     trackActive,
+    logSession,
     trackView,
     trackOpen,
     trackCartExplore,
