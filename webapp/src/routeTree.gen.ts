@@ -15,12 +15,14 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ConsumptionRouteImport } from './routes/consumption'
 import { Route as ContinueRouteImport } from './routes/continue'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FutureRouteImport } from './routes/future'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as PauseRouteImport } from './routes/pause'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SavingsRouteImport } from './routes/savings'
 import { Route as TodayRouteImport } from './routes/today'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as ElectronicsIndexRouteImport } from './routes/electronics.index'
 import { Route as ElectronicsProductIdRouteImport } from './routes/electronics.$productId'
 import { Route as FoodIndexRouteImport } from './routes/food.index'
@@ -59,6 +61,11 @@ const ContinueRoute = ContinueRouteImport.update({
   path: '/continue',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FutureRoute = FutureRouteImport.update({
   id: '/future',
   path: '/future',
@@ -87,6 +94,11 @@ const SavingsRoute = SavingsRouteImport.update({
 const TodayRoute = TodayRouteImport.update({
   id: '/today',
   path: '/today',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ElectronicsIndexRoute = ElectronicsIndexRouteImport.update({
@@ -132,12 +144,14 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/consumption': typeof ConsumptionRoute
   '/continue': typeof ContinueRoute
+  '/feedback': typeof FeedbackRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/wishlist': typeof WishlistRoute
   '/electronics/$productId': typeof ElectronicsProductIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
   '/electronics/': typeof ElectronicsIndexRoute
@@ -153,12 +167,14 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/consumption': typeof ConsumptionRoute
   '/continue': typeof ContinueRoute
+  '/feedback': typeof FeedbackRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/wishlist': typeof WishlistRoute
   '/electronics/$productId': typeof ElectronicsProductIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
   '/electronics': typeof ElectronicsIndexRoute
@@ -175,12 +191,14 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/consumption': typeof ConsumptionRoute
   '/continue': typeof ContinueRoute
+  '/feedback': typeof FeedbackRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
   '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/savings': typeof SavingsRoute
   '/today': typeof TodayRoute
+  '/wishlist': typeof WishlistRoute
   '/electronics/$productId': typeof ElectronicsProductIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
   '/electronics/': typeof ElectronicsIndexRoute
@@ -198,12 +216,14 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/consumption'
     | '/continue'
+    | '/feedback'
     | '/future'
     | '/journey'
     | '/pause'
     | '/profile'
     | '/savings'
     | '/today'
+    | '/wishlist'
     | '/electronics/$productId'
     | '/learn/$lessonId'
     | '/electronics/'
@@ -219,12 +239,14 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/consumption'
     | '/continue'
+    | '/feedback'
     | '/future'
     | '/journey'
     | '/pause'
     | '/profile'
     | '/savings'
     | '/today'
+    | '/wishlist'
     | '/electronics/$productId'
     | '/learn/$lessonId'
     | '/electronics'
@@ -240,12 +262,14 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/consumption'
     | '/continue'
+    | '/feedback'
     | '/future'
     | '/journey'
     | '/pause'
     | '/profile'
     | '/savings'
     | '/today'
+    | '/wishlist'
     | '/electronics/$productId'
     | '/learn/$lessonId'
     | '/electronics/'
@@ -262,12 +286,14 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ConsumptionRoute: typeof ConsumptionRoute
   ContinueRoute: typeof ContinueRoute
+  FeedbackRoute: typeof FeedbackRoute
   FutureRoute: typeof FutureRoute
   JourneyRoute: typeof JourneyRoute
   PauseRoute: typeof PauseRoute
   ProfileRoute: typeof ProfileRoute
   SavingsRoute: typeof SavingsRoute
   TodayRoute: typeof TodayRoute
+  WishlistRoute: typeof WishlistRoute
   ElectronicsProductIdRoute: typeof ElectronicsProductIdRoute
   LearnLessonIdRoute: typeof LearnLessonIdRoute
   ElectronicsIndexRoute: typeof ElectronicsIndexRoute
@@ -321,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContinueRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/future': {
       id: '/future'
       path: '/future'
@@ -361,6 +394,13 @@ declare module '@tanstack/react-router' {
       path: '/today'
       fullPath: '/today'
       preLoaderRoute: typeof TodayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/electronics/': {
@@ -422,12 +462,14 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ConsumptionRoute: ConsumptionRoute,
   ContinueRoute: ContinueRoute,
+  FeedbackRoute: FeedbackRoute,
   FutureRoute: FutureRoute,
   JourneyRoute: JourneyRoute,
   PauseRoute: PauseRoute,
   ProfileRoute: ProfileRoute,
   SavingsRoute: SavingsRoute,
   TodayRoute: TodayRoute,
+  WishlistRoute: WishlistRoute,
   ElectronicsProductIdRoute: ElectronicsProductIdRoute,
   LearnLessonIdRoute: LearnLessonIdRoute,
   ElectronicsIndexRoute: ElectronicsIndexRoute,

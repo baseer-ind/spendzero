@@ -4,7 +4,7 @@ import { Screen } from "@/components/Shell";
 import { Img } from "@/components/Img";
 import { ExploreNudge } from "@/components/ExploreNudge";
 import { useBrowseTracking } from "@/lib/tracking";
-import { ELECTRONICS_APP, discountPct, product } from "@/lib/electronics";
+import { ELECTRONICS_APP, discountPct, product, productsByCategory } from "@/lib/electronics";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/electronics/$productId")({
@@ -82,6 +82,14 @@ function ProductDetail() {
           <div className="mt-3 rounded-xl border border-gold/25 bg-gold/5 px-3 py-2 text-[12.5px] text-gold">🏦 {p.bankOffer}</div>
         )}
 
+        {/* availability + delivery */}
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[12.5px] text-foreground/60">
+          <span>{p.stockLeft && p.stockLeft > 0 ? <span className="text-green-400">In stock</span> : <span className="text-red-400">Out of stock</span>}</span>
+          <span>🚚 Delivery by tomorrow</span>
+          <span>{p.price >= 499 ? "Free delivery" : "₹40 delivery"}</span>
+          <span>↩️ 7-day replacement</span>
+        </div>
+
         <p className="mt-4 text-[13.5px] leading-relaxed text-foreground/70">{p.desc}</p>
 
         {/* variants */}
@@ -108,6 +116,30 @@ function ProductDetail() {
             ))}
           </div>
         </div>
+
+        {/* recommendations */}
+        {(() => {
+          const similar = productsByCategory(p.category).filter((x) => x.id !== p.id).slice(0, 6);
+          const pool = similar.length > 0 ? similar : productsByCategory(null).filter((x) => x.id !== p.id).slice(0, 6);
+          return (
+            <div className="mt-7">
+              <h2 className="font-display text-[17px]">More like this</h2>
+              <div className="mt-3 -mx-6 overflow-x-auto px-6 no-scrollbar">
+                <div className="flex gap-3 pr-2">
+                  {pool.map((x) => (
+                    <Link key={x.id} to="/electronics/$productId" params={{ productId: x.id }} className="w-[130px] shrink-0 overflow-hidden rounded-2xl border border-white/8 bg-surface">
+                      <Img src={x.img} alt={x.name} emoji="📦" seed={x.id} className="h-24 w-full object-cover" />
+                      <div className="p-2.5">
+                        <p className="line-clamp-2 text-[12px] leading-tight text-foreground/85">{x.name}</p>
+                        <p className="mt-1 text-[12.5px] font-semibold">{formatINR(x.price)}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* reviews */}
         <div className="mt-6 pb-40">

@@ -10,15 +10,12 @@
 //  - Never use a random stock person's face as a profile photo — the picker
 //    offers the user's own photo or initials only.
 
-function lock(seed: string): number {
-  let h = 7;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) & 0x7fffffff;
-  return (h % 900) + 1;
-}
+import { artImage } from "@/lib/localImage";
 
-// Keyworded photo URL. React <img> loads cross-origin with no CORS issue.
-export function photo(keyword: string, seed: string, w = 800, h = 600): string {
-  return `https://loremflickr.com/${w}/${h}/${encodeURIComponent(keyword)}?lock=${lock(seed)}`;
+// Keyworded image. Now generated locally (offline, never broken). Kept async-free
+// and same-signature so call sites are unchanged.
+export function photo(keyword: string, seed: string, _w = 800, _h = 600): string {
+  return artImage(keyword, seed);
 }
 
 // A curated set of India-relevant covers for a goal keyword.

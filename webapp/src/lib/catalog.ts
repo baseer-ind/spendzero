@@ -8,14 +8,11 @@ import grocery from "@/assets/food-grocery.jpg";
 export const DEFAULT_CITY = "Hyderabad";
 export const CITIES = ["Hyderabad", "Bengaluru", "Mumbai", "Delhi", "Chennai", "Pune", "Kolkata"];
 
-// Keyword photo (React <img>, no CORS). Stable per seed. Used for the long tail.
-function lock(seed: string): number {
-  let h = 7;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) & 0x7fffffff;
-  return (h % 900) + 1;
-}
-export function kwImg(keyword: string, seed: string, w = 600, h = 420): string {
-  return `https://loremflickr.com/${w}/${h}/${encodeURIComponent(keyword)}?lock=${lock(seed)}`;
+// Catalogue imagery is now generated locally (offline, never broken). The old
+// LoremFlickr dependency is gone. Signature kept so call sites are unchanged.
+import { artImage } from "@/lib/localImage";
+export function kwImg(keyword: string, seed: string, _w = 600, _h = 420): string {
+  return artImage(keyword, seed);
 }
 
 export type Diet = "veg" | "nonveg" | "egg";

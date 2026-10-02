@@ -112,12 +112,16 @@ function ProfileScreen() {
       </div>
 
       <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">
+        <Row icon="✎" label="Feedback & suggestions" to="/feedback" />
+      </div>
+
+      <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">
         <Row icon="→" label="Sign out" danger onClick={logout} />
       </div>
 
       <div className="mt-8 px-6 text-center">
         <p className="font-display italic text-[13px] text-foreground/40">
-          Project Future · v1.0
+          Project Future · v1.0.0-rc1
         </p>
         <Link to="/" className="mt-3 inline-block text-[11px] uppercase tracking-[0.22em] text-gold/70">
           ← back to today

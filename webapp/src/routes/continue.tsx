@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen, StatusBar } from "@/components/Shell";
 import journeyBg from "@/assets/journey-bg.jpg";
+import { MicroFeedback } from "@/components/MicroFeedback";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/continue")({
@@ -92,7 +93,11 @@ function ContinueScreen() {
             </p>
           </div>
 
-          <div className="px-6 mt-10 space-y-3 pb-16">
+          <div className="px-6 mt-8">
+            <MicroFeedback question="Was this decision moment useful?" screen="continue" options={["Yes", "Somewhat", "No"]} />
+          </div>
+
+          <div className="px-6 mt-8 space-y-3 pb-16">
             <Link to="/future" className="block w-full rounded-full py-4 text-center font-medium text-background" style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}>
               See my dreams
             </Link>

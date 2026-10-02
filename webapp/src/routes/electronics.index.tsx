@@ -14,18 +14,35 @@ export const Route = createFileRoute("/electronics/")({
 
 function ElectronicsHome() {
   useBrowseTracking("Electronics", ELECTRONICS_APP.id);
-  const { trackView, cartCount, cartTotal } = useStore();
+  const { trackView, cartCount, cartTotal, wishlist } = useStore();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
+  const [sort, setSort] = useState<"popular" | "price-asc" | "price-desc" | "rating" | "discount">("popular");
+  const [under2k, setUnder2k] = useState(false);
+  const [topRated, setTopRated] = useState(false);
+  const [dealsOnly, setDealsOnly] = useState(false);
 
   const results = useMemo(() => {
     const query = q.trim().toLowerCase();
-    return PRODUCTS.filter((p) => {
+    let list = PRODUCTS.filter((p) => {
       const mc = !cat || p.category === cat;
       const mq = !query || p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query) || p.category.toLowerCase().includes(query);
-      return mc && mq;
+      const mp = !under2k || p.price < 2000;
+      const mr = !topRated || p.rating >= 4.3;
+      const md = !dealsOnly || discountPct(p) >= 30;
+      return mc && mq && mp && mr && md;
     });
-  }, [q, cat]);
+    list = [...list].sort((a, b) => {
+      switch (sort) {
+        case "price-asc": return a.price - b.price;
+        case "price-desc": return b.price - a.price;
+        case "rating": return b.rating - a.rating;
+        case "discount": return discountPct(b) - discountPct(a);
+        default: return (b.ratingCount) - (a.ratingCount); // popular
+      }
+    });
+    return list;
+  }, [q, cat, sort, under2k, topRated, dealsOnly]);
 
   useEffect(() => { trackView(results.length); }, [cat, q]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -70,10 +87,34 @@ function ElectronicsHome() {
         </>
       )}
 
+      {/* Wishlist access (real destination) */}
+      <div className="px-6 mt-5 flex items-center justify-between">
+        <Link to="/wishlist" className="flex items-center gap-2 text-[13px] text-foreground/70">
+          <span className="text-red-400">♥</span> Wishlist {wishlist.length > 0 && <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px]">{wishlist.length}</span>}
+        </Link>
+        <label className="flex items-center gap-2 text-[12px] text-foreground/55">
+          Sort
+          <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="rounded-lg border border-white/10 bg-surface px-2 py-1.5 text-[12px] text-foreground/85 outline-none">
+            <option value="popular" className="bg-surface">Popular</option>
+            <option value="price-asc" className="bg-surface">Price: Low → High</option>
+            <option value="price-desc" className="bg-surface">Price: High → Low</option>
+            <option value="rating" className="bg-surface">Rating</option>
+            <option value="discount" className="bg-surface">Discount</option>
+          </select>
+        </label>
+      </div>
+
       {/* Category chips */}
-      <div className="mt-6 flex gap-2 overflow-x-auto px-6 pb-1 no-scrollbar">
+      <div className="mt-4 flex gap-2 overflow-x-auto px-6 pb-1 no-scrollbar">
         <Chip active={cat === null} onClick={() => setCat(null)}>All</Chip>
         {EL_CATEGORIES.map((c) => <Chip key={c} active={cat === c} onClick={() => setCat(cat === c ? null : c)}>{c}</Chip>)}
+      </div>
+
+      {/* Working filters */}
+      <div className="mt-2 flex gap-2 overflow-x-auto px-6 pb-1 no-scrollbar">
+        <Chip active={under2k} onClick={() => setUnder2k((v) => !v)}>Under ₹2,000</Chip>
+        <Chip active={topRated} onClick={() => setTopRated((v) => !v)}>4.3★ & up</Chip>
+        <Chip active={dealsOnly} onClick={() => setDealsOnly((v) => !v)}>Big discounts</Chip>
       </div>
 
       {!q && !cat && trend.length > 0 && (

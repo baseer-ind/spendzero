@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { NavBar, Screen } from "@/components/Shell";
+import { MicroFeedback } from "@/components/MicroFeedback";
 import { lesson, research } from "@/lib/learn";
 
 export const Route = createFileRoute("/learn/$lessonId")({
@@ -91,6 +92,7 @@ function LessonScreen() {
         <p className="mt-4 text-center text-[11px] text-foreground/35">
           Research suggests these patterns are common — not that everyone responds the same way.
         </p>
+        <MicroFeedback question="Was this lesson useful?" screen={`learn/${l.id}`} options={["Yes", "No"]} />
       </div>
     </Screen>
   );

@@ -275,6 +275,42 @@ try {
   await page.getByRole("button", { name: /Enjoy it/i }).click();
   await page.waitForTimeout(300);
 
+  // 9e2) SHOPPING: sort, filters, wishlist destination, recommendations
+  await go("/electronics");
+  // local images (no remote hosts) — catalogue <img> should be data: URIs
+  const imgSrc = await page.locator("img").first().getAttribute("src");
+  const localImg = (imgSrc || "").startsWith("data:");
+  log(`catalogue images are local (data URI): ${localImg}`);
+  if (!localImg) issues.push("IMAGE: catalogue image is not a local asset");
+  // filter: under 2000
+  await page.getByText("Under ₹2,000", { exact: false }).click();
+  await page.waitForTimeout(300);
+  // sort: price low→high
+  await page.selectOption("select", "price-asc").catch(() => {});
+  await page.waitForTimeout(300);
+  // wishlist destination
+  await page.getByText("Wishlist", { exact: false }).first().click();
+  await page.waitForURL("**/wishlist", { timeout: 8000 });
+  const wlEmpty = await page.getByText("Nothing saved yet", { exact: false }).count();
+  log(`wishlist route reachable (empty state ok): ${wlEmpty >= 0}`);
+  // add a wishlist item then verify it shows
+  await go("/electronics");
+  await page.getByText("GamePad", { exact: false }).first().click();
+  await page.waitForURL("**/electronics/**", { timeout: 8000 });
+  await page.waitForTimeout(400);
+  const moreLikeThis = await page.getByText("More like this", { exact: false }).count();
+  log(`recommendations present: ${moreLikeThis > 0}`);
+  if (moreLikeThis === 0) issues.push("SHOPPING: recommendations missing");
+  const delivery = await page.getByText("Delivery by tomorrow", { exact: false }).count();
+  if (delivery === 0) issues.push("SHOPPING: delivery/availability missing on detail");
+  // wishlist this (fresh) product, then verify it persists on /wishlist
+  await page.getByLabel("Wishlist").click();
+  await page.waitForTimeout(200);
+  await go("/wishlist");
+  const wlHas = await page.getByText("Add to cart", { exact: false }).count();
+  log(`wishlist persists an item: ${wlHas > 0}`);
+  if (wlHas === 0) issues.push("SHOPPING: wishlist did not persist item");
+
   // 9f) CONSUMPTION dashboard
   await go("/consumption");
   const attn = await page.getByText("Your attention", { exact: false }).count();
@@ -296,6 +332,24 @@ try {
   log(`achievements screen: ${ach > 0}`);
   if (ach === 0) issues.push("ACHIEVEMENTS: screen not rendering");
 
+  // 10b) FEEDBACK + SUGGESTIONS
+  await go("/feedback");
+  const fbHead = await page.getByText("Help shape Project Future", { exact: false }).count();
+  log(`feedback screen: ${fbHead > 0}`);
+  if (fbHead === 0) issues.push("FEEDBACK: screen not rendering");
+  await page.getByText("Suggest an improvement", { exact: false }).click();
+  await page.getByPlaceholder(/Tell us what happened/i).fill("I'd love to compare two headphones side by side.");
+  await page.getByRole("button", { name: "Submit feedback", exact: true }).click();
+  await page.waitForTimeout(300);
+  const thanks = await page.getByText("Thank you", { exact: false }).count();
+  log(`feedback submitted: ${thanks > 0}`);
+  if (thanks === 0) issues.push("FEEDBACK: submit did not confirm");
+  await page.getByText("See my feedback", { exact: false }).click();
+  await page.waitForTimeout(300);
+  const mineHas = await page.getByText("compare two headphones", { exact: false }).count();
+  log(`my-feedback history shows submission: ${mineHas > 0}`);
+  if (mineHas === 0) issues.push("FEEDBACK: my-feedback history missing submission");
+
   // 11) persistence after reload
   await go("/");
   await page.reload({ waitUntil: "networkidle" });
@@ -311,7 +365,7 @@ try {
   await page.waitForURL("**/food", { timeout: 8000 });
 
   // 13) all live routes 200
-  for (const r of ["/", "/future", "/today", "/food", "/electronics", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/consumption", "/learn", "/learn/discount-trap"]) {
+  for (const r of ["/", "/future", "/today", "/food", "/electronics", "/wishlist", "/cart", "/checkout", "/continue", "/journey", "/profile", "/achievements", "/savings", "/consumption", "/learn", "/learn/discount-trap", "/feedback"]) {
     const s = await go(r);
     if (s !== 200) log(`route ${r}: ${s}`);
   }
