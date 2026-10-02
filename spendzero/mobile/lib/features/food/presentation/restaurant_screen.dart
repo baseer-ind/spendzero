@@ -243,7 +243,7 @@ class _Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tag = restaurant.categories.isNotEmpty ? restaurant.categories.first : 'restaurant';
+    final tag = restaurant.cuisines.isNotEmpty ? restaurant.cuisines.first : 'restaurant';
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: SizedBox(

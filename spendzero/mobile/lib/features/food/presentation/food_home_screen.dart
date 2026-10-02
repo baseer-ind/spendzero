@@ -444,7 +444,7 @@ class _RestaurantRailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tag = restaurant.categories.isNotEmpty ? restaurant.categories.first : 'restaurant';
+    final tag = restaurant.cuisines.isNotEmpty ? restaurant.cuisines.first : 'restaurant';
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -748,7 +748,7 @@ class _RestaurantCard extends ConsumerWidget {
                 height: 64,
                 child: RemoteImage(
                   url: imageUrlForBanner(
-                    restaurant.categories.isNotEmpty ? restaurant.categories.first : 'restaurant',
+                    restaurant.cuisines.isNotEmpty ? restaurant.cuisines.first : 'restaurant',
                     restaurant.id,
                     width: 200,
                     height: 200,
