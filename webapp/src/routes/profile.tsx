@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
 import avatar from "@/assets/avatar-user.jpg";
 import { formatINR, useStore } from "@/lib/store";
+import { ARCHETYPES } from "@/lib/assessment";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -33,8 +34,9 @@ function Row({
 }
 
 function ProfileScreen() {
-  const { account, name, totalSaved, currentStreak, dreams, events, logout } = useStore();
+  const { account, name, totalSaved, currentStreak, dreams, events, profile, logout } = useStore();
   const displayName = account?.name || name || "You";
+  const archetype = profile ? ARCHETYPES[profile.archetype] : null;
   return (
     <Screen>
       <StatusBar />
@@ -56,12 +58,19 @@ function ProfileScreen() {
         </p>
       </div>
 
-      {/* Identity card */}
-      <div className="mx-6 mt-7 rounded-3xl border border-gold/20 bg-[radial-gradient(circle_at_top,oklch(0.79_0.105_82/0.15),transparent_70%)] p-6 text-center animate-rise">
-        <p className="text-[11px] uppercase tracking-[0.28em] text-gold/80">your north star</p>
-        <p className="mt-3 font-display text-[20px] leading-snug italic text-balance">
-          "I am the kind of person who chooses tomorrow, gently."
-        </p>
+      {/* Behaviour profile card */}
+      <div className="mx-6 mt-7 rounded-3xl border border-gold/20 bg-[radial-gradient(circle_at_top,oklch(0.79_0.105_82/0.15),transparent_70%)] p-6 animate-rise">
+        <p className="text-[11px] uppercase tracking-[0.28em] text-gold/80">your pattern</p>
+        {archetype ? (
+          <>
+            <p className="mt-2 font-display text-[24px] text-shimmer-gold italic">{archetype.title}</p>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-foreground/75">{archetype.pattern}</p>
+          </>
+        ) : (
+          <p className="mt-3 font-display text-[18px] leading-snug italic text-balance">
+            "I choose tomorrow, gently."
+          </p>
+        )}
       </div>
 
       {/* Stats */}
@@ -80,6 +89,7 @@ function ProfileScreen() {
       <div className="mx-6 mt-7 overflow-hidden rounded-2xl border border-white/8 bg-surface">
         <Row icon="◎" label="My dreams" value={`${dreams.length} active`} to="/future" />
         <Row icon="⟳" label="My journey" value={`${events.length} wins`} to="/journey" />
+        <Row icon="✦" label="Achievements" to="/achievements" />
       </div>
 
       <div className="mx-6 mt-4 overflow-hidden rounded-2xl border border-white/8 bg-surface">

@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { Profile } from "./assessment";
 
 /**
  * Local-first app state for Project Future.
@@ -52,9 +53,15 @@ type State = {
   activeDreamId: string | null;
   events: SaveEvent[];
   cart: CartItem[];
+  storySeen: boolean;
+  profile: Profile | null;
+  decisions: number; // conscious pause decisions made (buy or not-today)
 };
 
-const EMPTY: State = { name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [] };
+const EMPTY: State = {
+  name: null, account: null, dreams: [], activeDreamId: null, events: [], cart: [],
+  storySeen: false, profile: null, decisions: 0,
+};
 const KEY = "project_future_state_v1";
 const CREDS_KEY = "project_future_creds_v1";
 
@@ -112,6 +119,9 @@ type Ctx = State & {
   setCartQty: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
+  setStorySeen: () => void;
+  setProfile: (p: Profile) => void;
+  recordDecision: () => void;
   setName: (n: string) => void;
   register: (d: { name: string; email: string; password: string }) => AuthResult;
   login: (d: { email: string; password: string }) => AuthResult;
@@ -255,6 +265,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, cart: [] }));
   }, []);
 
+  const setStorySeen = useCallback(() => setState((s) => ({ ...s, storySeen: true })), []);
+  const setProfile = useCallback((p: Profile) => setState((s) => ({ ...s, profile: p })), []);
+  const recordDecision = useCallback(() => setState((s) => ({ ...s, decisions: s.decisions + 1 })), []);
+
   const reset = useCallback(() => setState(EMPTY), []);
 
   const cartTotal = useMemo(() => state.cart.reduce((a, c) => a + c.price * c.qty, 0), [state.cart]);
@@ -303,6 +317,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCartQty,
     removeFromCart,
     clearCart,
+    setStorySeen,
+    setProfile,
+    recordDecision,
     setName,
     register,
     login,

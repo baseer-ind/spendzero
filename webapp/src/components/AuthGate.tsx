@@ -28,7 +28,7 @@ function Splash() {
   );
 }
 
-function AuthScreen() {
+export function AuthScreen() {
   const { register, login } = useStore();
   const [mode, setMode] = useState<"signup" | "signin">("signup");
   const [name, setName] = useState("");

@@ -36,17 +36,12 @@ const APPS: App[] = [
 ];
 
 function OrderScreen() {
-  const { hydrated, activeDream, applySaving, events, totalSaved, currentStreak } = useStore();
+  const { hydrated, activeDream, events, totalSaved, currentStreak } = useStore();
   const navigate = useNavigate();
   const [amount, setAmount] = useState(820);
 
   function resist() {
-    if (!activeDream) {
-      navigate({ to: "/future" });
-      return;
-    }
-    applySaving(amount, "Skipped a craving");
-    navigate({ to: "/continue" });
+    navigate({ to: "/pause", search: { amt: amount, from: "quick" } });
   }
 
   return (

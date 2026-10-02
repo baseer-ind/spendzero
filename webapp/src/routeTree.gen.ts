@@ -10,11 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as ContinueRouteImport } from './routes/continue'
 import { Route as FutureRouteImport } from './routes/future'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as OrderRouteImport } from './routes/order'
+import { Route as PauseRouteImport } from './routes/pause'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RestaurantRouteImport } from './routes/restaurant'
 import { Route as RestaurantsRouteImport } from './routes/restaurants'
@@ -22,6 +24,11 @@ import { Route as RestaurantsRouteImport } from './routes/restaurants'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AchievementsRoute = AchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -49,6 +56,11 @@ const OrderRoute = OrderRouteImport.update({
   path: '/order',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PauseRoute = PauseRouteImport.update({
+  id: '/pause',
+  path: '/pause',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -67,22 +79,26 @@ const RestaurantsRoute = RestaurantsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
   '/order': typeof OrderRoute
+  '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/restaurant': typeof RestaurantRoute
   '/restaurants': typeof RestaurantsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
   '/order': typeof OrderRoute
+  '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/restaurant': typeof RestaurantRoute
   '/restaurants': typeof RestaurantsRoute
@@ -90,11 +106,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/cart': typeof CartRoute
   '/continue': typeof ContinueRoute
   '/future': typeof FutureRoute
   '/journey': typeof JourneyRoute
   '/order': typeof OrderRoute
+  '/pause': typeof PauseRoute
   '/profile': typeof ProfileRoute
   '/restaurant': typeof RestaurantRoute
   '/restaurants': typeof RestaurantsRoute
@@ -103,33 +121,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/achievements'
     | '/cart'
     | '/continue'
     | '/future'
     | '/journey'
     | '/order'
+    | '/pause'
     | '/profile'
     | '/restaurant'
     | '/restaurants'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/achievements'
     | '/cart'
     | '/continue'
     | '/future'
     | '/journey'
     | '/order'
+    | '/pause'
     | '/profile'
     | '/restaurant'
     | '/restaurants'
   id:
     | '__root__'
     | '/'
+    | '/achievements'
     | '/cart'
     | '/continue'
     | '/future'
     | '/journey'
     | '/order'
+    | '/pause'
     | '/profile'
     | '/restaurant'
     | '/restaurants'
@@ -137,11 +161,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AchievementsRoute: typeof AchievementsRoute
   CartRoute: typeof CartRoute
   ContinueRoute: typeof ContinueRoute
   FutureRoute: typeof FutureRoute
   JourneyRoute: typeof JourneyRoute
   OrderRoute: typeof OrderRoute
+  PauseRoute: typeof PauseRoute
   ProfileRoute: typeof ProfileRoute
   RestaurantRoute: typeof RestaurantRoute
   RestaurantsRoute: typeof RestaurantsRoute
@@ -154,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/achievements': {
+      id: '/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AchievementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -191,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pause': {
+      id: '/pause'
+      path: '/pause'
+      fullPath: '/pause'
+      preLoaderRoute: typeof PauseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -217,11 +257,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AchievementsRoute: AchievementsRoute,
   CartRoute: CartRoute,
   ContinueRoute: ContinueRoute,
   FutureRoute: FutureRoute,
   JourneyRoute: JourneyRoute,
   OrderRoute: OrderRoute,
+  PauseRoute: PauseRoute,
   ProfileRoute: ProfileRoute,
   RestaurantRoute: RestaurantRoute,
   RestaurantsRoute: RestaurantsRoute,

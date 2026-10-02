@@ -13,24 +13,12 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartScreen() {
-  const { hydrated, cart, cartTotal, cartCount, setCartQty, removeFromCart, clearCart, activeDream, applySaving } = useStore();
+  const { hydrated, cart, cartTotal, cartCount, setCartQty, removeFromCart, activeDream } = useStore();
   const navigate = useNavigate();
 
-  function resistAndSave() {
+  function pauseAndDecide() {
     if (cartCount === 0) return;
-    if (!activeDream) {
-      navigate({ to: "/future" });
-      return;
-    }
-    applySaving(cartTotal, `Resisted ${cartCount} ${cartCount === 1 ? "item" : "items"}`);
-    clearCart();
-    navigate({ to: "/continue" });
-  }
-
-  function orderAnyway() {
-    // You chose to spend — nothing is saved. Clear the cart and return home.
-    clearCart();
-    navigate({ to: "/" });
+    navigate({ to: "/pause", search: { amt: cartTotal, from: "cart" } });
   }
 
   if (hydrated && cartCount === 0) {
@@ -99,16 +87,13 @@ function CartScreen() {
 
       <div className="px-6 mt-6 space-y-3 pb-10">
         <button
-          onClick={resistAndSave}
+          onClick={pauseAndDecide}
           className="block w-full rounded-full py-4 text-center font-medium text-background"
           style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))", boxShadow: "0 10px 30px -8px oklch(0.79 0.105 82 / 0.4)" }}
         >
-          Move {formatINR(cartTotal)} to my future →
+          Take a moment before you decide →
         </button>
-        <button onClick={orderAnyway} className="block w-full rounded-full border border-white/10 bg-white/5 py-4 text-center text-sm text-foreground/70">
-          I still want to order
-        </button>
-        <p className="pt-1 text-center text-[11px] text-foreground/40">Either way, your Future Self is paying attention.</p>
+        <p className="pt-1 text-center text-[11px] text-foreground/40">A short pause, then it's your call — buy it or build your future.</p>
       </div>
     </Screen>
   );
