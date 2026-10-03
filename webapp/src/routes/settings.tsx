@@ -104,7 +104,7 @@ function LegalSheet({ kind, onClose }: { kind: "privacy" | "terms" | "disclaimer
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55" onClick={onClose}>
       <div className="max-h-[80vh] w-full max-w-[440px] overflow-y-auto rounded-t-3xl border-t border-white/10 bg-background p-6 pb-10" onClick={(e) => e.stopPropagation()}>
         <h3 className="font-display text-[20px]">{content.title}</h3>
-        <p className="mt-1 text-[11px] uppercase tracking-wider text-gold/70">Draft — pending legal review</p>
+        <p className="mt-1 text-[11px] uppercase tracking-wider text-gold/70">Plain-language summary · how the app works today</p>
         <div className="mt-4 space-y-3 text-[13px] leading-relaxed text-foreground/70">
           {content.body.map((p, i) => <p key={i}>{p}</p>)}
         </div>
@@ -118,7 +118,7 @@ const LEGAL = {
   privacy: {
     title: "Privacy Policy",
     body: [
-      "This is a draft summary, not final legal text. A lawyer-reviewed policy will replace it before public launch.",
+      "This is a plain-language summary of how Project Future handles your information today.",
       "Project Future stores your data on your device only (your browser's local storage): your name/email for the local account, your dreams, your virtual savings tally, your in-app browsing activity, and any feedback you send. We do not currently run a server that collects this data.",
       "Photos you add (dream covers, profile photo) stay on your device and are never uploaded.",
       "We never ask for real card or bank details. Checkout is a simulation; no real payment is taken.",

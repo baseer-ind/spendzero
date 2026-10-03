@@ -114,10 +114,17 @@ function Stat({ big, small, gold }: { big: string; small: string; gold?: boolean
   );
 }
 
+function greetingWord(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 function Greeting({ name }: { name: string }) {
   return (
     <header className="pt-10 pb-7 animate-rise">
-      <p className="text-[12px] uppercase tracking-[0.28em] text-muted-foreground">Good evening, {name}</p>
+      <p className="text-[12px] uppercase tracking-[0.28em] text-muted-foreground">{greetingWord()}, {name}</p>
       <h1 className="font-display text-[40px] leading-[1.05] mt-3 text-balance">
         The future you're <br />
         <span className="italic text-shimmer-gold">building</span> is closer today.
