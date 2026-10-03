@@ -123,6 +123,7 @@ const EMPTY: State = {
 };
 const KEY = "project_future_state_v1";
 const CREDS_KEY = "project_future_creds_v1";
+const IMAGES_KEY = "project_future_images_v1";
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -188,8 +189,11 @@ type Ctx = State & {
   login: (d: { email: string; password: string }) => AuthResult;
   logout: () => void;
   addDream: (d: { name: string; emoji?: string; target: number; cover?: string }) => string;
+  updateDream: (id: string, patch: { name?: string; emoji?: string; target?: number; cover?: string | null }) => void;
+  deleteDream: (id: string) => void;
   setActiveDream: (id: string) => void;
   setDreamCover: (id: string, cover: string | null) => void;
+  imageFor: (ref?: string | null) => string | undefined;
   applySaving: (amount: number, note: string, category?: string) => Dream | null;
   setProfilePhoto: (url: string | null) => void;
   saveAddress: (a: Address) => void;
@@ -228,6 +232,9 @@ const StoreContext = createContext<Ctx | null>(null);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
+  // User images (dream covers, profile photo) live in their OWN store, keyed by a
+  // short id, so a large photo can never block the main state from persisting.
+  const [images, setImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     try {
@@ -238,6 +245,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     } catch {
       /* ignore corrupt storage */
+    }
+    try {
+      const rawImg = localStorage.getItem(IMAGES_KEY);
+      if (rawImg) setImages(JSON.parse(rawImg) as Record<string, string>);
+    } catch {
+      /* ignore */
     }
     setHydrated(true);
   }, []);
@@ -250,6 +263,45 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       /* ignore quota / private mode */
     }
   }, [state, hydrated]);
+
+  // Persist images separately; on quota failure, drop images no dream/profile uses.
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(IMAGES_KEY, JSON.stringify(images));
+    } catch {
+      try {
+        const used = new Set<string>();
+        state.dreams.forEach((d) => d.cover && used.add(d.cover));
+        if (state.profilePhoto) used.add(state.profilePhoto);
+        const pruned: Record<string, string> = {};
+        for (const k of Object.keys(images)) if (used.has(k)) pruned[k] = images[k];
+        localStorage.setItem(IMAGES_KEY, JSON.stringify(pruned));
+      } catch {
+        /* give up silently — main state is safe regardless */
+      }
+    }
+  }, [images, hydrated, state.dreams, state.profilePhoto]);
+
+  // Store a chosen image and return a ref id; pass through URLs/SVG/existing ids.
+  const putImg = useCallback((val?: string | null): string | undefined => {
+    if (!val) return undefined;
+    if (/^data:image\/(jpeg|png|webp)/i.test(val)) {
+      const id = "u_" + uid();
+      setImages((m) => ({ ...m, [id]: val }));
+      return id;
+    }
+    return val; // remote URL, SVG data-URI illustration, or an existing "u_" id
+  }, []);
+
+  const imageFor = useCallback(
+    (ref?: string | null): string | undefined => {
+      if (!ref) return undefined;
+      if (ref.startsWith("u_")) return images[ref];
+      return ref;
+    },
+    [images],
+  );
 
   const setName = useCallback((n: string) => {
     setState((s) => ({ ...s, name: n.trim() || null }));
@@ -285,6 +337,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addDream = useCallback(
     (d: { name: string; emoji?: string; target: number; cover?: string }) => {
       const id = uid();
+      const coverRef = putImg(d.cover);
       setState((s) => ({
         ...s,
         dreams: [
@@ -296,30 +349,60 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             target: Math.max(1, Math.round(d.target)),
             saved: 0,
             createdAt: Date.now(),
-            cover: d.cover,
+            cover: coverRef,
           },
         ],
         activeDreamId: s.activeDreamId ?? id,
       }));
       return id;
     },
-    [],
+    [putImg],
   );
+
+  const updateDream = useCallback(
+    (id: string, patch: { name?: string; emoji?: string; target?: number; cover?: string | null }) => {
+      // Convert a new cover to a stored ref; null clears it; undefined leaves it.
+      const coverRef = patch.cover === undefined ? undefined : patch.cover === null ? null : putImg(patch.cover);
+      setState((s) => ({
+        ...s,
+        dreams: s.dreams.map((d) => {
+          if (d.id !== id) return d;
+          const next = { ...d };
+          if (patch.name !== undefined && patch.name.trim()) next.name = patch.name.trim();
+          if (patch.emoji) next.emoji = patch.emoji;
+          if (patch.target !== undefined && patch.target > 0) next.target = Math.max(1, Math.round(patch.target));
+          if (patch.cover !== undefined) next.cover = coverRef === null ? undefined : coverRef;
+          return next;
+        }),
+      }));
+    },
+    [putImg],
+  );
+
+  const deleteDream = useCallback((id: string) => {
+    setState((s) => {
+      const dreams = s.dreams.filter((d) => d.id !== id);
+      const activeDreamId = s.activeDreamId === id ? (dreams[0]?.id ?? null) : s.activeDreamId;
+      return { ...s, dreams, activeDreamId };
+    });
+  }, []);
 
   const setActiveDream = useCallback((id: string) => {
     setState((s) => ({ ...s, activeDreamId: id }));
   }, []);
 
   const setDreamCover = useCallback((id: string, cover: string | null) => {
+    const ref = cover === null ? null : putImg(cover);
     setState((s) => ({
       ...s,
-      dreams: s.dreams.map((d) => (d.id === id ? { ...d, cover: cover ?? undefined } : d)),
+      dreams: s.dreams.map((d) => (d.id === id ? { ...d, cover: ref ?? undefined } : d)),
     }));
-  }, []);
+  }, [putImg]);
 
   const setProfilePhoto = useCallback((url: string | null) => {
-    setState((s) => ({ ...s, profilePhoto: url }));
-  }, []);
+    const ref = url === null ? null : putImg(url) ?? null;
+    setState((s) => ({ ...s, profilePhoto: ref }));
+  }, [putImg]);
 
   const saveAddress = useCallback((a: Address) => {
     setState((s) => ({ ...s, address: a }));
@@ -538,8 +621,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     addDream,
+    updateDream,
+    deleteDream,
     setActiveDream,
     setDreamCover,
+    imageFor,
     applySaving,
     setProfilePhoto,
     saveAddress,

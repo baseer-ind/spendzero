@@ -1,22 +1,28 @@
 import { useState } from "react";
-import { QUESTIONS, SCALE, computeProfile } from "@/lib/assessment";
+import { QUESTIONS, SCALE, computeProfile, insightFor } from "@/lib/assessment";
 import { useStore } from "@/lib/store";
 
-/** One question at a time, visible progress, conversational. Builds the profile. */
+/** One question at a time. Answer → short insight → Continue → next. Builds the profile. */
 export function Assessment({ onDone }: { onDone: () => void }) {
   const { setProfile } = useStore();
   const [i, setI] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [picked, setPicked] = useState<number | null>(null); // selected value, showing insight
   const q = QUESTIONS[i];
   const pct = Math.round((i / QUESTIONS.length) * 100);
 
-  function answer(value: number) {
-    const next = { ...answers, [q.id]: value };
-    setAnswers(next);
+  function select(value: number) {
+    setAnswers((a) => ({ ...a, [q.id]: value }));
+    setPicked(value); // reveal the insight; user presses Continue to advance
+  }
+
+  function cont() {
+    if (picked === null) return;
     if (i < QUESTIONS.length - 1) {
       setI(i + 1);
+      setPicked(null);
     } else {
-      setProfile(computeProfile(next));
+      setProfile(computeProfile({ ...answers, [q.id]: picked }));
       onDone();
     }
   }
@@ -32,8 +38,8 @@ export function Assessment({ onDone }: { onDone: () => void }) {
         <div className="px-6 pt-6">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setI(Math.max(0, i - 1))}
-              disabled={i === 0}
+              onClick={() => { if (picked !== null) { setPicked(null); } else { setI(Math.max(0, i - 1)); } }}
+              disabled={i === 0 && picked === null}
               className="grid h-9 w-9 place-items-center rounded-full bg-white/5 text-foreground/70 disabled:opacity-30"
               aria-label="Back"
             >
@@ -54,15 +60,31 @@ export function Assessment({ onDone }: { onDone: () => void }) {
             {SCALE.map((s) => (
               <button
                 key={s.value}
-                onClick={() => answer(s.value)}
+                onClick={() => select(s.value)}
                 className={`w-full rounded-2xl border px-5 py-4 text-left text-[15px] transition ${
-                  answers[q.id] === s.value ? "border-gold/50 bg-gold/10 text-foreground" : "border-white/10 bg-white/5 text-foreground/80 hover:border-white/20"
+                  picked === s.value ? "border-gold/50 bg-gold/10 text-foreground" : "border-white/10 bg-white/5 text-foreground/80 hover:border-white/20"
                 }`}
               >
                 {s.label}
               </button>
             ))}
           </div>
+
+          {picked !== null && (
+            <div className="mt-6 animate-rise">
+              <div className="rounded-2xl border border-gold/20 bg-gold/5 p-4">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-gold/80">worth noticing</p>
+                <p className="mt-2 text-[14px] leading-relaxed text-foreground/80">{insightFor(q, picked)}</p>
+              </div>
+              <button
+                onClick={cont}
+                className="mt-4 w-full rounded-full py-3.5 text-center font-medium text-background"
+                style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}
+              >
+                {i < QUESTIONS.length - 1 ? "Continue" : "See my profile"}
+              </button>
+            </div>
+          )}
         </div>
 
         <p className="px-7 pb-10 text-center text-[12px] text-foreground/40">

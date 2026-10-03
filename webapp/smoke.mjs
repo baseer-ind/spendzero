@@ -45,10 +45,17 @@ try {
   const assess = await page.getByText("A quick read", { exact: false }).count();
   log(`assessment shown after register: ${assess > 0}`);
   if (assess === 0) issues.push("ASSESSMENT: not shown after register");
+  let sawInsight = false;
   for (let i = 0; i < 10; i++) {
     await page.getByRole("button", { name: "Sometimes", exact: true }).click();
-    await page.waitForTimeout(160);
+    await page.waitForTimeout(140);
+    if (i === 0) sawInsight = (await page.getByText("worth noticing", { exact: false }).count()) > 0;
+    const label = i < 9 ? "Continue" : "See my profile";
+    await page.getByRole("button", { name: label, exact: true }).click();
+    await page.waitForTimeout(140);
   }
+  log(`assessment shows insight + Continue: ${sawInsight}`);
+  if (!sawInsight) issues.push("ASSESSMENT: insight step not shown after selecting an answer");
   await page.waitForTimeout(300);
 
   // 4) PROFILE RESULT
@@ -152,6 +159,7 @@ try {
   if (closer === 0) issues.push("DECISION: before/after goal card missing");
   await page.getByText("India Trip", { exact: false }).first().click();
   await page.waitForURL("**/continue", { timeout: 8000 });
+  await page.getByText("craving ends here", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
   const cravingEnds = await page.getByText("craving ends here", { exact: false }).count();
   log(`continue screen ("craving ends here"): ${cravingEnds > 0}`);
   await shot("continue");
@@ -190,6 +198,7 @@ try {
   if (fi === 0) issues.push("LEARN: hub not rendering");
   await page.getByText("The Discount Trap", { exact: false }).first().click();
   await page.waitForURL("**/learn/discount-trap", { timeout: 8000 });
+  await page.getByText("Would you have bought it at", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
   const question = await page.getByText("Would you have bought it at", { exact: false }).count();
   const source = await page.getByText("Krishna", { exact: false }).count();
   log(`discount-trap lesson (question + research): ${question > 0 && source > 0}`);
@@ -199,10 +208,10 @@ try {
   // 9d) MULTIPLE DREAMS at the decision
   await go("/future");
   await page.getByText("Add a new dream", { exact: false }).click();
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(250);
   await page.getByPlaceholder("What are you saving for?").fill("Dream Home");
-  await page.getByPlaceholder("Target amount (₹)").fill("500000");
-  await page.getByText("Create dream", { exact: false }).click();
+  await page.getByPlaceholder("Target amount").fill("500000");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
   await page.waitForTimeout(400);
   await go("/food/zaikago/deccan-zaika");
   await page.getByRole("button", { name: "ADD", exact: true }).first().click();
@@ -317,6 +326,7 @@ try {
   if (yourDay === 0 || seeActivity === 0) issues.push("TRACKER: 'Your day' card not on home");
   await page.getByText("See your activity", { exact: false }).click();
   await page.waitForURL("**/consumption", { timeout: 8000 });
+  await page.getByText("where your attention went", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
   const attn = await page.getByText("where your attention went", { exact: false }).count();
   log(`consumption dashboard: ${attn > 0}`);
   if (attn === 0) issues.push("CONSUMPTION: dashboard not rendering");
@@ -400,6 +410,35 @@ try {
   const mineHas = await page.getByText("compare two headphones", { exact: false }).count();
   log(`my-feedback history shows submission: ${mineHas > 0}`);
   if (mineHas === 0) issues.push("FEEDBACK: my-feedback history missing submission");
+
+  // 10c) EDIT + DELETE DREAM, amount-in-words
+  await go("/future");
+  await page.getByText("Edit", { exact: false }).first().click();
+  await page.waitForTimeout(250);
+  const nameInput = page.getByPlaceholder("What are you saving for?");
+  await nameInput.fill("Goa Escape");
+  const amtInput = page.getByPlaceholder("Target amount");
+  await amtInput.fill("200000");
+  await page.waitForTimeout(200);
+  const words = await page.getByText("Lakh Rupees", { exact: false }).count();
+  log(`edit shows amount in words (Lakh): ${words > 0}`);
+  if (words === 0) issues.push("DREAM: amount-in-words not shown in edit");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.waitForTimeout(300);
+  const renamed = await page.getByText("Goa Escape", { exact: false }).count();
+  log(`dream renamed + target edited: ${renamed > 0}`);
+  if (renamed === 0) issues.push("DREAM: edit did not apply");
+  // delete a dream with confirmation
+  const beforeDel = await page.getByText("Dream Home", { exact: false }).count();
+  if (beforeDel > 0) {
+    await page.getByText("Delete", { exact: false }).nth(1).click();
+    await page.waitForTimeout(200);
+    await page.getByRole("button", { name: "Delete dream", exact: true }).click();
+    await page.waitForTimeout(300);
+    const afterDel = await page.getByText("Dream Home", { exact: false }).count();
+    log(`dream deleted after confirm: ${afterDel === 0}`);
+    if (afterDel !== 0) issues.push("DREAM: delete did not remove the dream");
+  }
 
   // 11) persistence after reload
   await go("/");

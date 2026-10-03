@@ -23,7 +23,7 @@ function fmtTime(ts: number) {
 }
 
 function ConsumptionScreen() {
-  const { hydrated, weekSummary: w, todaySummary: t, sessionLog, engagement, activeDream } = useStore();
+  const { hydrated, weekSummary: w, todaySummary: t, sessionLog, engagement, activeDream, imageFor } = useStore();
 
   const verticals = Object.entries(w.byVertical).sort((a, b) => b[1] - a[1]);
   const totalVertMs = Math.max(1, verticals.reduce((a, [, v]) => a + v, 0));
@@ -139,7 +139,7 @@ function ConsumptionScreen() {
             </p>
             <div className="mt-3 flex items-center gap-3">
               <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-white/5 text-[20px]">
-                {activeDream.cover ? <img src={activeDream.cover} alt="" className="h-full w-full object-cover" /> : activeDream.emoji}
+                {imageFor(activeDream.cover) ? <img src={imageFor(activeDream.cover)} alt="" className="h-full w-full object-cover" /> : activeDream.emoji}
               </div>
               <div className="flex-1">
                 <p className="text-[14px]">{activeDream.name}</p>

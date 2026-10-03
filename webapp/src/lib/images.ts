@@ -80,7 +80,9 @@ export function cropToDataURL(
   const { scale = 1, offsetX = 0, offsetY = 0, outW = 800, outH = 600 } = opts;
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    // crossOrigin only matters for remote images; setting it for data: URLs is
+    // unnecessary and can cause spurious load failures in some browsers.
+    if (/^https?:/i.test(src)) img.crossOrigin = "anonymous";
     img.onload = () => {
       try {
         const canvas = document.createElement("canvas");

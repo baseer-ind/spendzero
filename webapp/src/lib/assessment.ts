@@ -142,3 +142,55 @@ export function computeProfile(answers: Record<string, number>): Profile {
 
   return { archetype, dims: d, impulseIndex, goalClarity, completedAt: Date.now() };
 }
+
+// Short, non-judgmental insight shown after each answer (no shaming, no medical or
+// dopamine claims). Keyed by the question's dimension; bucketed by how strongly the
+// user related to the statement.
+const INSIGHTS: Record<string, { high: string; mid: string; low: string }> = {
+  affective: {
+    high: "Buying on the spot is normal — the goal isn't to stop, just to notice which of these you genuinely value.",
+    mid: "A short pause before buying can make the choice feel more like yours.",
+    low: "You tend to weigh things first. We'll build on that strength.",
+  },
+  deliberation: {
+    high: "Thinking purchases over already works for you — we'll reinforce it.",
+    mid: "A little more space before deciding can help.",
+    low: "We'll add a gentle pause so decisions feel less rushed.",
+  },
+  emotion: {
+    high: "Shopping to shift a mood is really common. Noticing the trigger is the first step — no judgement.",
+    mid: "Sometimes the feeling passes faster than we expect.",
+    low: "Your spending isn't very mood-driven — useful to know.",
+  },
+  scroll: {
+    high: "Scrolling and sales can turn into spending we didn't plan. Seeing the pattern is what helps.",
+    mid: "A quick check-in can separate 'saw it' from 'need it'.",
+    low: "Notifications don't pull you much — that's a real advantage.",
+  },
+  present: {
+    high: "Something now almost always feels more real than a far-off goal. We'll make your future feel closer.",
+    mid: "Picturing the goal vividly helps it compete with 'now'.",
+    low: "You can keep future goals in view — that's a strength.",
+  },
+  regret: {
+    high: "Noticing regret afterwards is valuable — the pause tries to catch it beforehand.",
+    mid: "A beat before buying can head off the next-day second-guess.",
+    low: "You rarely regret small buys — a good sign of intention.",
+  },
+  selfEfficacy: {
+    high: "Walking away once the moment passes is a real strength.",
+    mid: "The urge often fades if you give it a moment.",
+    low: "The pause is here to make walking away easier.",
+  },
+  goalClarity: {
+    high: "Clear goals make conscious spending much easier — a great foundation.",
+    mid: "A concrete goal gives your money somewhere to go.",
+    low: "We'll help you name a goal worth redirecting toward.",
+  },
+};
+
+export function insightFor(q: Question, value: number): string {
+  const set = INSIGHTS[q.dimension] ?? INSIGHTS.affective;
+  const bucket = value >= 3 ? "high" : value <= 1 ? "low" : "mid";
+  return set[bucket];
+}

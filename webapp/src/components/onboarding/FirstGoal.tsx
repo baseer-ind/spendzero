@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { formatINR, useStore } from "@/lib/store";
+import { amountInWords, parseAmount } from "@/lib/money";
 import { ImagePicker } from "@/components/ImagePicker";
 
 const EXAMPLES = [
@@ -78,10 +79,16 @@ export function FirstGoal() {
               </div>
               <label className="mt-5 block">
                 <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Target amount</span>
-                <div className="mt-2 flex items-center rounded-xl border border-white/10 bg-white/5 px-4">
+                <div className="mt-2 flex items-center rounded-xl border border-white/10 bg-white/5 px-4 focus-within:border-gold/50">
                   <span className="text-foreground/50">₹</span>
-                  <input value={target} onChange={(e) => setTarget(e.target.value)} inputMode="numeric" className="w-full bg-transparent px-2 py-3 text-[16px] outline-none" />
+                  <input
+                    value={parseAmount(target) > 0 ? parseAmount(target).toLocaleString("en-IN") : target.replace(/[^0-9]/g, "")}
+                    onChange={(e) => setTarget(e.target.value.replace(/[^0-9]/g, ""))}
+                    inputMode="numeric"
+                    className="w-full bg-transparent px-2 py-3 text-[16px] outline-none"
+                  />
                 </div>
+                {parseAmount(target) > 0 && <p className="mt-1.5 text-[12px] text-gold/75">{amountInWords(parseAmount(target))}</p>}
               </label>
               <div className="mt-5">
                 <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Cover image</span>

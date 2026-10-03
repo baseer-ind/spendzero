@@ -29,7 +29,7 @@ function pct(d: Dream) {
 function PauseScreen() {
   const { amt, cat } = Route.useSearch();
   const navigate = useNavigate();
-  const { cart, cartTotal, clearCart, applySaving, activeDream, recordDecision, dreams, setActiveDream } = useStore();
+  const { cart, cartTotal, clearCart, applySaving, activeDream, recordDecision, dreams, setActiveDream, imageFor } = useStore();
 
   const amount = amt || cartTotal || 0;
   const [step, setStep] = useState<"decide" | "choose" | "bought">("decide");
@@ -106,7 +106,7 @@ function PauseScreen() {
                   {dreams.slice(0, 3).map((d) => (
                     <div key={d.id} className="flex items-center gap-3 rounded-xl border border-white/8 bg-surface p-2.5">
                       <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-white/5 text-[18px]">
-                        {d.cover ? <img src={d.cover} alt="" className="h-full w-full object-cover" /> : d.emoji}
+                        {imageFor(d.cover) ? <img src={imageFor(d.cover)} alt="" className="h-full w-full object-cover" /> : d.emoji}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between">
@@ -177,14 +177,16 @@ function PauseScreen() {
 }
 
 function GoalChoiceCard({ dream, amount, onPick }: { dream: Dream; amount: number; onPick: () => void }) {
+  const { imageFor } = useStore();
+  const cover = imageFor(dream.cover);
   const after = dream.saved + amount;
   const afterPct = Math.min(100, Math.round((after / dream.target) * 100));
   const shortName = dream.name.replace(/^(My |my )/, "");
   return (
     <button onClick={onPick} className="overflow-hidden rounded-2xl border border-white/10 bg-surface text-left transition hover:border-gold/40">
       <div className="relative h-24 w-full">
-        {dream.cover ? (
-          <img src={dream.cover} alt="" className="h-full w-full object-cover" />
+        {cover ? (
+          <img src={cover} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="grid h-full w-full place-items-center bg-white/5 text-[30px]">{dream.emoji}</div>
         )}

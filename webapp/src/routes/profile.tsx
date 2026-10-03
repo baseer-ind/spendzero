@@ -42,7 +42,8 @@ function Row({
 }
 
 function ProfileScreen() {
-  const { account, name, totalSaved, currentStreak, dreams, events, profile, profilePhoto, setProfilePhoto, logout } = useStore();
+  const { account, name, totalSaved, currentStreak, dreams, events, profile, profilePhoto, setProfilePhoto, imageFor, logout } = useStore();
+  const photo = imageFor(profilePhoto);
   const displayName = account?.name || name || "You";
   const archetype = profile ? ARCHETYPES[profile.archetype] : null;
   const [showPhoto, setShowPhoto] = useState(false);
@@ -58,8 +59,8 @@ function ProfileScreen() {
             className="absolute -inset-2 rounded-full opacity-60 blur-xl"
             style={{ background: "radial-gradient(circle, oklch(0.79 0.105 82 / 0.5), transparent 70%)" }}
           />
-          {profilePhoto ? (
-            <img src={profilePhoto} alt="You" className="relative h-28 w-28 rounded-full border border-gold/30 object-cover" />
+          {photo ? (
+            <img src={photo} alt="You" className="relative h-28 w-28 rounded-full border border-gold/30 object-cover" />
           ) : (
             <span className="relative grid h-28 w-28 place-items-center rounded-full border border-gold/30 bg-white/5 font-display text-[34px] text-gold">
               {initials(displayName)}
