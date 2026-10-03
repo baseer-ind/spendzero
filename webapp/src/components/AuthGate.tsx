@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useStore } from "@/lib/store";
+import { SelflyMark, SelflyGlyph } from "@/components/brand/SelflyMark";
 
 /**
  * Gates the whole app behind account creation / sign-in. Until the viewer has
@@ -18,9 +19,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
 function Splash() {
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center">
-      <div className="flex flex-col items-center gap-3 animate-rise">
-        <img src="/brand/selfly-symbol-white.png" alt="SELFly" className="h-14 w-14 object-contain" />
-        <p className="font-display text-[20px]">SELFly</p>
+      <div className="flex flex-col items-center gap-4 animate-rise">
+        <SelflyGlyph size={52} />
+        <SelflyMark size={26} showSpark={false} />
       </div>
     </div>
   );
@@ -60,12 +61,10 @@ export function AuthScreen() {
         />
 
         <div className="px-7 pt-20 pb-8">
-          <div className="h-12 w-12 rounded-full grid place-items-center ring-1 ring-gold/40 bg-gold/10 text-gold font-display text-[20px]">
-            ✦
+          <SelflyGlyph size={46} />
+          <div className="mt-6">
+            <SelflyMark size={18} showSpark={false} />
           </div>
-          <p className="mt-7 text-[12px] uppercase tracking-[0.28em] text-muted-foreground">
-            SELFly
-          </p>
           <h1 className="font-display text-[38px] leading-[1.05] mt-3 text-balance">
             {mode === "signup" ? (
               <>

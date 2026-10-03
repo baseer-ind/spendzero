@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { formatINR, useStore, type Dream } from "@/lib/store";
 import { fmtDuration } from "@/lib/tracking";
 import { scenicArt } from "@/lib/localImage";
+import { SelflyMark, SelflyGlyph } from "@/components/brand/SelflyMark";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -289,11 +290,9 @@ function TopBar() {
   return (
     <div className="flex items-center justify-between px-6 pt-5">
       <div className="flex items-center gap-2.5">
-        <div className="h-9 w-9 rounded-full bg-surface-elevated grid place-items-center ring-1 ring-white/10 overflow-hidden">
-          <img src="/brand/selfly-symbol-white.png" alt="SELFly" className="h-6 w-6 object-contain" />
-        </div>
+        <SelflyGlyph size={34} />
         <div className="leading-tight">
-          <p className="text-[13px] font-display text-foreground/90">SELFly</p>
+          <SelflyMark size={17} showSpark={false} />
           <p className="text-[11px] text-muted-foreground">Choose for your future self.</p>
         </div>
       </div>

@@ -6,6 +6,8 @@ import { Assessment } from "./onboarding/Assessment";
 import { ProfileResult } from "./onboarding/ProfileResult";
 import { FirstGoal } from "./onboarding/FirstGoal";
 import { GoalTransition } from "./onboarding/GoalTransition";
+import { SelflyMark, SelflyGlyph } from "./brand/SelflyMark";
+import { FeedbackFab } from "./FeedbackFab";
 
 /**
  * Sequences the story-first first-run journey (see docs/PRODUCT_JOURNEY.md):
@@ -23,16 +25,21 @@ export function ExperienceGate({ children }: { children: ReactNode }) {
   if (showResult) return <ProfileResult onContinue={() => setShowResult(false)} />;
   if (dreams.length === 0) return <FirstGoal />;
   if (!postGoalSeen) return <GoalTransition />;
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <FeedbackFab />
+    </>
+  );
 }
 
 function Splash() {
   return (
-    <div className="min-h-screen bg-background text-foreground grid place-items-center">
-      <div className="flex flex-col items-center gap-4 animate-rise px-8 text-center">
-        <img src="/brand/selfly-symbol-white.png" alt="SELFly" className="h-16 w-16 object-contain" />
-        <p className="font-display text-[24px] tracking-tight">SELFly</p>
-        <p className="mt-1 text-[13px] text-foreground/55">Choose for your future self.</p>
+    <div className="min-h-screen bg-[#0F1419] text-white grid place-items-center">
+      <div className="flex flex-col items-center gap-5 animate-rise px-8 text-center">
+        <SelflyGlyph size={56} />
+        <SelflyMark size={32} showSpark={false} />
+        <p className="mt-1 text-[13px] text-white/55">Choose for your future self.</p>
       </div>
     </div>
   );

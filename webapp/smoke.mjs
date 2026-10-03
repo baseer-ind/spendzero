@@ -94,6 +94,11 @@ try {
   await page.getByText("Explore today", { exact: false }).click();
   await page.waitForURL("**/today", { timeout: 8000 });
 
+  // 5c) FLOATING FEEDBACK — visible once onboarded
+  const fab = await page.getByRole("link", { name: "Send feedback", exact: true }).count();
+  log(`floating feedback button visible on app: ${fab > 0}`);
+  if (fab === 0) issues.push("FEEDBACK FAB: not visible after onboarding");
+
   // 6) TODAY HUB → FOOD deep flow (India-first)
   log("\n-- food vertical (India-first) --");
   const mood = await page.getByText("in the mood for", { exact: false }).count();
