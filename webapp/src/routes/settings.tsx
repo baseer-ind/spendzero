@@ -4,7 +4,7 @@ import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
 import { APP_VERSION } from "@/lib/feedback";
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({ meta: [{ title: "Settings — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Settings — SELFly" }] }),
   component: SettingsScreen,
 });
 
@@ -76,7 +76,7 @@ function SettingsScreen() {
         <a href="mailto:hello@projectfuture.app" className="flex w-full items-center justify-between px-5 py-4 text-left"><span className="text-[14px] text-foreground/85">Contact support</span><span className="text-[12px] text-foreground/45">email ›</span></a>
       </div>
 
-      <p className="mt-6 px-6 text-center text-[11px] text-foreground/35">Project Future · v{APP_VERSION}</p>
+      <p className="mt-6 px-6 text-center text-[11px] text-foreground/35">SELFly · v{APP_VERSION}</p>
 
       {confirming && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55" onClick={() => setConfirming(false)}>
@@ -118,8 +118,8 @@ const LEGAL = {
   privacy: {
     title: "Privacy Policy",
     body: [
-      "This is a plain-language summary of how Project Future handles your information today.",
-      "Project Future stores your data on your device only (your browser's local storage): your name/email for the local account, your dreams, your virtual savings tally, your in-app browsing activity, and any feedback you send. We do not currently run a server that collects this data.",
+      "This is a plain-language summary of how SELFly handles your information today.",
+      "SELFly stores your data on your device only (your browser's local storage): your name/email for the local account, your dreams, your virtual savings tally, your in-app browsing activity, and any feedback you send. We do not currently run a server that collects this data.",
       "Photos you add (dream covers, profile photo) stay on your device and are never uploaded.",
       "We never ask for real card or bank details. Checkout is a simulation; no real payment is taken.",
       "You can export or permanently delete all of your data at any time from Settings.",
@@ -129,17 +129,17 @@ const LEGAL = {
     title: "Terms of Use",
     body: [
       "This is a draft summary, not final legal text.",
-      "Project Future is a behavioural tool to help you notice spending urges, pause, and consciously decide. The shopping environment is a simulation for practice and awareness.",
-      "The “money you kept / redirected” figure is a virtual tally to track your own choices. It is not money held, transferred, or invested by Project Future, and it is not financial advice.",
+      "SELFly is a behavioural tool to help you notice spending urges, pause, and consciously decide. The shopping environment is a simulation for practice and awareness.",
+      "The “money you kept / redirected” figure is a virtual tally to track your own choices. It is not money held, transferred, or invested by SELFly, and it is not financial advice.",
       "Use the app responsibly. Educational content reflects published research and is not medical or financial advice.",
     ],
   },
   disclaimer: {
     title: "About brands & money",
     body: [
-      "All stores, brands, products, restaurants, prices and offers in Project Future are fictional and created for a realistic simulation. They do not represent, and are not affiliated with, any real company.",
+      "All stores, brands, products, restaurants, prices and offers in SELFly are fictional and created for a realistic simulation. They do not represent, and are not affiliated with, any real company.",
       "No real purchase is ever made and no real payment is collected.",
-      "“Money you kept” is a personal awareness tally — Project Future does not hold or move your money. A real “move to savings” option, via a regulated partner, may come later and will be clearly labelled.",
+      "“Money you kept” is a personal awareness tally — SELFly does not hold or move your money. A real “move to savings” option, via a regulated partner, may come later and will be clearly labelled.",
     ],
   },
 } as const;

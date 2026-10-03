@@ -10,7 +10,7 @@ import {
 import type { Profile } from "./assessment";
 
 /**
- * Local-first app state for Project Future.
+ * Local-first app state for SELFly.
  *
  * Everything persists in the browser (localStorage) so the core loop works
  * with no backend: create a dream, resist a craving, watch the money move.

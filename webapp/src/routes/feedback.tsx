@@ -10,7 +10,7 @@ export const Route = createFileRoute("/feedback")({
   }),
   head: () => ({
     meta: [
-      { title: "Feedback — Project Future" },
+      { title: "Feedback — SELFly" },
       { name: "description", content: "Tell us what works, what doesn't, and what you'd love next." },
     ],
   }),
@@ -43,7 +43,7 @@ function FeedbackScreen() {
       <NavBar title="Feedback" back="/profile" />
 
       <div className="px-6 pt-2">
-        <h1 className="font-display text-[26px]">Help shape Project Future</h1>
+        <h1 className="font-display text-[26px]">Help shape SELFly</h1>
         <p className="mt-1 text-[13px] text-foreground/55">Every note is read. No email needed — guest feedback is welcome.</p>
       </div>
 

@@ -10,7 +10,7 @@ import { dealsFor, discountPct, vertical } from "@/lib/market";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/market/$vertical/")({
-  head: () => ({ meta: [{ title: "Explore — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Explore — SELFly" }] }),
   component: MarketHome,
 });
 

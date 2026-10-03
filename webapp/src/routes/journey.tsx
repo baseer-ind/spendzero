@@ -5,7 +5,7 @@ import { formatINR, useStore } from "@/lib/store";
 export const Route = createFileRoute("/journey")({
   head: () => ({
     meta: [
-      { title: "Journey — Project Future" },
+      { title: "Journey — SELFly" },
       { name: "description", content: "Every quiet win, in chronological order." },
     ],
   }),

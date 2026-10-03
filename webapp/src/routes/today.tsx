@@ -3,7 +3,7 @@ import { BottomNav, NavBar, Screen } from "@/components/Shell";
 import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/today")({
-  head: () => ({ meta: [{ title: "Today — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Today — SELFly" }] }),
   component: TodayScreen,
 });
 

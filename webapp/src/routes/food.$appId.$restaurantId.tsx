@@ -7,7 +7,7 @@ import { useBrowseTracking } from "@/lib/tracking";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/food/$appId/$restaurantId")({
-  head: () => ({ meta: [{ title: "Menu — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Menu — SELFly" }] }),
   component: RestaurantMenu,
 });
 

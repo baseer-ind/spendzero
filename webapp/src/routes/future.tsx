@@ -9,7 +9,7 @@ import { amountInWords, parseAmount } from "@/lib/money";
 export const Route = createFileRoute("/future")({
   head: () => ({
     meta: [
-      { title: "My Future — Project Future" },
+      { title: "My Future — SELFly" },
       { name: "description", content: "The dreams you're building, one intentional choice at a time." },
     ],
   }),

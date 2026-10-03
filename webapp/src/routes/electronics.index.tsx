@@ -10,7 +10,7 @@ import { EL_CATEGORIES, ELECTRONICS_APP, PRODUCTS, deals, discountPct, trending 
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/electronics/")({
-  head: () => ({ meta: [{ title: "TechBazaar — Project Future" }] }),
+  head: () => ({ meta: [{ title: "TechBazaar — SELFly" }] }),
   component: ElectronicsHome,
 });
 

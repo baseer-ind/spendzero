@@ -15,7 +15,7 @@ function initials(name: string): string {
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Me — Project Future" },
+      { title: "Me — SELFly" },
       { name: "description", content: "Who you are becoming." },
     ],
   }),
@@ -123,7 +123,7 @@ function ProfileScreen() {
 
       <div className="mt-8 px-6 text-center">
         <p className="font-display italic text-[13px] text-foreground/40">
-          Project Future · v1.0.0-rc1
+          SELFly · v1.0.0-rc1
         </p>
         <Link to="/" className="mt-3 inline-block text-[11px] uppercase tracking-[0.22em] text-gold/70">
           ← back to today

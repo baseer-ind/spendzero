@@ -44,6 +44,16 @@
 :root {
   --radius: 1.25rem;
 
+  /* SELFly brand palette (source hex) — Midnight + Champagne premium system */
+  --selfly-midnight: #0F1419;
+  --selfly-charcoal: #1E2328;
+  --selfly-stone: #6B645C;
+  --selfly-sand: #D9CDBD;
+  --selfly-champagne: #C9A988;
+  --selfly-sage: #2EA03F;
+  --selfly-blush: #F7EEE8;
+  --selfly-white: #FFFFFF;
+
   /* Midnight palette */
   --background: oklch(0.16 0.008 260);          /* #0A0B0E ish */
   --foreground: oklch(0.97 0.005 90);

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/pause")({
     from: typeof s.from === "string" ? s.from : "",
     cat: typeof s.cat === "string" ? s.cat : "Food",
   }),
-  head: () => ({ meta: [{ title: "A moment — Project Future" }] }),
+  head: () => ({ meta: [{ title: "A moment — SELFly" }] }),
   component: PauseScreen,
 });
 

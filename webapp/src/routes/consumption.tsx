@@ -6,7 +6,7 @@ import { formatINR, useStore } from "@/lib/store";
 export const Route = createFileRoute("/consumption")({
   head: () => ({
     meta: [
-      { title: "My Consumption — Project Future" },
+      { title: "My Consumption — SELFly" },
       { name: "description", content: "How your attention and your money actually move." },
     ],
   }),
@@ -215,7 +215,7 @@ function ConsumptionScreen() {
       )}
 
       <p className="mx-6 mt-8 text-[11px] text-foreground/35">
-        Project Future measures only your activity inside this app. Awareness of time spent in other apps (Amazon,
+        SELFly measures only your activity inside this app. Awareness of time spent in other apps (Amazon,
         Flipkart, etc.) is a separate, permission-based capability — see the roadmap.
       </p>
 

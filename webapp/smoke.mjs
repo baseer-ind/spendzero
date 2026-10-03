@@ -395,7 +395,7 @@ try {
 
   // 10b) FEEDBACK + SUGGESTIONS
   await go("/feedback");
-  const fbHead = await page.getByText("Help shape Project Future", { exact: false }).count();
+  const fbHead = await page.getByText("Help shape SELFly", { exact: false }).count();
   log(`feedback screen: ${fbHead > 0}`);
   if (fbHead === 0) issues.push("FEEDBACK: screen not rendering");
   await page.getByText("Suggest an improvement", { exact: false }).click();

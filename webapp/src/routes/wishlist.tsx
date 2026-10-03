@@ -4,7 +4,7 @@ import { Img } from "@/components/Img";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/wishlist")({
-  head: () => ({ meta: [{ title: "Wishlist — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Wishlist — SELFly" }] }),
   component: WishlistScreen,
 });
 

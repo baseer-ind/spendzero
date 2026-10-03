@@ -19,10 +19,8 @@ function Splash() {
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center">
       <div className="flex flex-col items-center gap-3 animate-rise">
-        <div className="h-14 w-14 rounded-full grid place-items-center ring-1 ring-gold/40 bg-gold/10 text-gold font-display text-[22px]">
-          ✦
-        </div>
-        <p className="font-display text-[20px]">Project Future</p>
+        <img src="/brand/selfly-symbol-white.png" alt="SELFly" className="h-14 w-14 object-contain" />
+        <p className="font-display text-[20px]">SELFly</p>
       </div>
     </div>
   );
@@ -66,7 +64,7 @@ export function AuthScreen() {
             ✦
           </div>
           <p className="mt-7 text-[12px] uppercase tracking-[0.28em] text-muted-foreground">
-            Project Future
+            SELFly
           </p>
           <h1 className="font-display text-[38px] leading-[1.05] mt-3 text-balance">
             {mode === "signup" ? (

@@ -6,7 +6,7 @@ import { formatINR, useStore, type Address } from "@/lib/store";
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Project Future" },
+      { title: "Checkout — SELFly" },
       { name: "description", content: "Review your order before you decide." },
     ],
   }),

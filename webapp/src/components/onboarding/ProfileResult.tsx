@@ -21,7 +21,7 @@ export function ProfileResult({ onContinue }: { onContinue: () => void }) {
 
           <Section label="Your strength" body={a.strength} />
           <Section label="Your opportunity" body={a.opportunity} />
-          <Section label="How Project Future helps" body={a.help} gold />
+          <Section label="How SELFly helps" body={a.help} gold />
 
           <p className="mt-8 text-[12px] text-foreground/40">
             This is a lens, not a label — it can change as you do. You can retake it anytime.

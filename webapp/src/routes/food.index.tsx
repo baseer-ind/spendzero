@@ -3,7 +3,7 @@ import { NavBar, Screen } from "@/components/Shell";
 import { FOOD_APPS } from "@/lib/catalog";
 
 export const Route = createFileRoute("/food/")({
-  head: () => ({ meta: [{ title: "Food — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Food — SELFly" }] }),
   component: FoodApps,
 });
 

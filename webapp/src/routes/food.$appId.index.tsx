@@ -8,7 +8,7 @@ import { ExploreNudge } from "@/components/ExploreNudge";
 import { formatINR } from "@/lib/store";
 
 export const Route = createFileRoute("/food/$appId/")({
-  head: () => ({ meta: [{ title: "Restaurants — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Restaurants — SELFly" }] }),
   component: FoodAppHome,
 });
 

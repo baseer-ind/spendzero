@@ -5,7 +5,7 @@ import { formatINR, useStore } from "@/lib/store";
 export const Route = createFileRoute("/savings")({
   head: () => ({
     meta: [
-      { title: "Money You Kept — Project Future" },
+      { title: "Money You Kept — SELFly" },
       { name: "description", content: "The money you chose not to spend — and where it's going." },
     ],
   }),
@@ -39,7 +39,7 @@ function SavingsScreen() {
         <p className="text-[13px] leading-relaxed text-foreground/60">
           This is the money you <span className="text-foreground/90">chose not to spend</span> and redirected toward your
           dreams — a tally that keeps you honest with yourself. It isn't money transferred into a bank account;
-          Project Future doesn't hold your money.
+          SELFly doesn't hold your money.
         </p>
       </div>
 

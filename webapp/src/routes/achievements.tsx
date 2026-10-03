@@ -4,7 +4,7 @@ import { useStore } from "@/lib/store";
 import { computeAchievements } from "@/lib/achievements";
 
 export const Route = createFileRoute("/achievements")({
-  head: () => ({ meta: [{ title: "Achievements — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Achievements — SELFly" }] }),
   component: AchievementsScreen,
 });
 

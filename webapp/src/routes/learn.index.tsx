@@ -5,7 +5,7 @@ import { CATEGORIES, LESSONS, lessonsForCategory } from "@/lib/learn";
 export const Route = createFileRoute("/learn/")({
   head: () => ({
     meta: [
-      { title: "Future Intelligence — Project Future" },
+      { title: "Future Intelligence — SELFly" },
       { name: "description", content: "Understand how everyday spending decisions really work." },
     ],
   }),
@@ -66,7 +66,7 @@ function LearnHub() {
       </div>
 
       <p className="mx-6 mt-8 mb-4 text-center text-[11px] text-foreground/35">
-        Project Future shares what research has found — not medical or financial advice.
+        SELFly shares what research has found — not medical or financial advice.
       </p>
 
       <BottomNav active="home" />

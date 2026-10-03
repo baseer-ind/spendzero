@@ -9,7 +9,7 @@ import { fmtDuration } from "@/lib/tracking";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Project Future — Build the life you're dreaming of" },
+      { title: "SELFly — Build the life you're dreaming of" },
       { name: "description", content: "Every craving skipped builds a better future. Intentional living, beautifully designed." },
     ],
   }),
@@ -294,12 +294,12 @@ function TopBar() {
   return (
     <div className="flex items-center justify-between px-6 pt-5">
       <div className="flex items-center gap-2.5">
-        <div className="h-9 w-9 rounded-full bg-surface-elevated grid place-items-center ring-1 ring-white/10">
-          <span className="font-display text-[15px] text-gold">✦</span>
+        <div className="h-9 w-9 rounded-full bg-surface-elevated grid place-items-center ring-1 ring-white/10 overflow-hidden">
+          <img src="/brand/selfly-symbol-white.png" alt="SELFly" className="h-6 w-6 object-contain" />
         </div>
         <div className="leading-tight">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Project Future</p>
-          <p className="text-[13px] text-foreground/90">Every craving. Zero spending.</p>
+          <p className="text-[13px] font-display text-foreground/90">SELFly</p>
+          <p className="text-[11px] text-muted-foreground">Choose for your future self.</p>
         </div>
       </div>
       <Link to="/profile" aria-label="Profile" className="h-10 w-10 rounded-full bg-surface-elevated ring-1 ring-white/10 grid place-items-center text-foreground/80">

@@ -9,7 +9,7 @@ import { photoSrc } from "@/lib/productImages";
 import { formatINR, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/market/$vertical/$productId")({
-  head: () => ({ meta: [{ title: "Product — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Product — SELFly" }] }),
   component: MarketProductDetail,
 });
 

@@ -4,7 +4,7 @@ import { MicroFeedback } from "@/components/MicroFeedback";
 import { lesson, research } from "@/lib/learn";
 
 export const Route = createFileRoute("/learn/$lessonId")({
-  head: () => ({ meta: [{ title: "Lesson — Project Future" }] }),
+  head: () => ({ meta: [{ title: "Lesson — SELFly" }] }),
   component: LessonScreen,
 });
 
