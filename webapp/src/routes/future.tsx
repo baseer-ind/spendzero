@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
-import futureSelf from "@/assets/future-self.jpg";
+import { scenicArt } from "@/lib/localImage";
 import { ImagePicker } from "@/components/ImagePicker";
 import { formatINR, useStore, type Dream } from "@/lib/store";
 import { amountInWords, parseAmount } from "@/lib/money";
@@ -134,7 +134,7 @@ function FutureScreen() {
   const [editId, setEditId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Dream | null>(null);
 
-  const heroImg = imageFor(activeDream?.cover) || futureSelf;
+  const heroImg = imageFor(activeDream?.cover) || scenicArt(activeDream?.id ?? "future");
   const editing = dreams.find((d) => d.id === editId) || null;
 
   return (

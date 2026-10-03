@@ -1,10 +1,5 @@
 // India-first fictional marketplace catalogue. Default city: Hyderabad.
 // No real trademarks — fictional brands only. See docs/INDIA_CATALOGUE_GUIDE.md.
-import omakase from "@/assets/dish-omakase.jpg";
-import nigiri from "@/assets/dish-nigiri.jpg";
-import burger from "@/assets/food-burger.jpg";
-import grocery from "@/assets/food-grocery.jpg";
-
 export const DEFAULT_CITY = "Hyderabad";
 export const CITIES = ["Hyderabad", "Bengaluru", "Mumbai", "Delhi", "Chennai", "Pune", "Kolkata"];
 
@@ -131,6 +126,3 @@ export function restaurantsForApp(appId: string): Restaurant[] {
 export function restaurant(id: string) {
   return RESTAURANTS.find((r) => r.id === id);
 }
-
-// Retained bundled assets available for curated covers etc.
-export const BUNDLED = { omakase, nigiri, burger, grocery };

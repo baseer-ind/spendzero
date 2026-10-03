@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Screen, StatusBar } from "@/components/Shell";
-import journeyBg from "@/assets/journey-bg.jpg";
+import { scenicArt } from "@/lib/localImage";
 import { MicroFeedback } from "@/components/MicroFeedback";
 import { formatINR, useStore } from "@/lib/store";
 
@@ -24,7 +24,7 @@ function ContinueScreen() {
   return (
     <Screen>
       <div className="relative overflow-hidden">
-        <img src={journeyBg} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />
+        <img src={scenicArt("reward")} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-60" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
 
         <div className="relative">

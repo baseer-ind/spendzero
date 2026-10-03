@@ -23,12 +23,22 @@ async function go(path) {
 }
 
 try {
-  // 1) STORY
+  // 1) STORY — 3-screen SELFly intro (Idea → Problem → Transformation)
   await go("/");
-  const story = await page.getByText("Skip", { exact: false }).count();
-  log(`story shown: ${story > 0}`);
-  if (story === 0) issues.push("STORY: not shown on first launch");
-  await page.getByText("Skip", { exact: false }).first().click();
+  const s1 = await page.getByText("Small choices today.", { exact: false }).count();
+  log(`intro screen 1 (idea) shown: ${s1 > 0}`);
+  if (s1 === 0) issues.push("STORY: screen 1 'Small choices today.' not shown on first launch");
+  await page.getByRole("button", { name: "See how it works", exact: true }).click();
+  await page.waitForTimeout(250);
+  const s2 = await page.getByText("Not every craving deserves your money.", { exact: false }).count();
+  log(`intro screen 2 (problem) shown: ${s2 > 0}`);
+  if (s2 === 0) issues.push("STORY: screen 2 problem copy not shown");
+  await page.getByRole("button", { name: "Show me", exact: true }).click();
+  await page.waitForTimeout(250);
+  const s3 = await page.getByText("Turn small pauses into a bigger future.", { exact: false }).count();
+  log(`intro screen 3 (transformation) shown: ${s3 > 0}`);
+  if (s3 === 0) issues.push("STORY: screen 3 transformation copy not shown");
+  await page.getByRole("button", { name: "Let's begin", exact: true }).click();
   await page.waitForTimeout(400);
 
   // 2) REGISTER

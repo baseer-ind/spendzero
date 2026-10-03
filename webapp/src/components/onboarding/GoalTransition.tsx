@@ -23,9 +23,11 @@ export function GoalTransition() {
         <p className="mt-4 font-display text-[22px] text-foreground/85 animate-rise">
           {formatINR(goal.saved)} <span className="text-foreground/40">/ {formatINR(goal.target)}</span>
         </p>
-        <p className="mt-5 text-[15px] leading-relaxed text-foreground/60 max-w-[32ch] animate-rise">
-          Now let's see how today's choices can change tomorrow. Browse like you normally would —
-          we'll add the pause when it's time to decide.
+        <p className="mt-5 text-[15px] leading-relaxed text-foreground/70 max-w-[32ch] animate-rise">
+          This is what you're choosing for.
+        </p>
+        <p className="mt-2 text-[15px] leading-relaxed text-foreground/55 max-w-[32ch] animate-rise">
+          Now browse like you normally would — we'll add the pause when it's time to decide.
         </p>
 
         <div className="mt-9 space-y-3 animate-rise">

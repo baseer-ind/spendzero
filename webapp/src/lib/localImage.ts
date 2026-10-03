@@ -93,3 +93,32 @@ ${label ? `<text x="400" y="520" font-size="34" fill="#ffffff" fill-opacity="0.7
 export function glyphForKeyword(keyword: string): string {
   return glyphFor(keyword);
 }
+
+/**
+ * SELFly brand "scenic" background: a calm Midnight→Charcoal field with a soft
+ * champagne glow and a rising path curve (the SELF→FLY / today→future metaphor).
+ * Offline, gender-neutral, no Japan/stock imagery. Used for aspirational
+ * backgrounds (home/future heroes, dream fallbacks, onboarding) and seeded so
+ * each surface is stable but varied. A real photo can replace it via <img src>.
+ */
+export function scenicArt(seed: string): string {
+  const h = hash(seed || "selfly");
+  const glowX = 30 + (h % 40); // 30–70%
+  const curveLift = 120 + ((h >> 4) % 140); // how high the path rises
+  const gid = `s${h % 100000}`;
+  const champagne = "#C9A988";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141b22"/><stop offset="0.55" stop-color="#0F1419"/><stop offset="1" stop-color="#0b0e12"/></linearGradient>
+<radialGradient id="${gid}g" cx="${glowX}%" cy="26%" r="55%"><stop offset="0" stop-color="${champagne}" stop-opacity="0.34"/><stop offset="0.5" stop-color="${champagne}" stop-opacity="0.08"/><stop offset="1" stop-color="${champagne}" stop-opacity="0"/></radialGradient>
+<linearGradient id="${gid}p" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="${champagne}" stop-opacity="0.15"/><stop offset="1" stop-color="${champagne}" stop-opacity="0.85"/></linearGradient>
+</defs>
+<rect width="800" height="600" fill="url(#${gid})"/>
+<rect width="800" height="600" fill="url(#${gid}g)"/>
+<path d="M-20 560 Q 300 ${560 - curveLift} 840 ${300 - (curveLift >> 1)}" fill="none" stroke="url(#${gid}p)" stroke-width="3"/>
+<path d="M-20 600 Q 320 ${600 - curveLift} 840 ${360 - (curveLift >> 1)}" fill="none" stroke="${champagne}" stroke-opacity="0.08" stroke-width="40"/>
+<circle cx="700" cy="${300 - (curveLift >> 1)}" r="6" fill="${champagne}"/>
+<circle cx="700" cy="${300 - (curveLift >> 1)}" r="16" fill="${champagne}" fill-opacity="0.18"/>
+</svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
