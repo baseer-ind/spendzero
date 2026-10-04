@@ -1,21 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BottomNav, NavBar, Screen } from "@/components/Shell";
 import { useStore } from "@/lib/store";
+import { scenicArt } from "@/lib/localImage";
 
 export const Route = createFileRoute("/today")({
   head: () => ({ meta: [{ title: "Today — SELFly" }] }),
   component: TodayScreen,
 });
 
+// Image-led category tiles. A real hero photo at public/brand/categories/<id>.webp
+// is used when present; otherwise an on-brand generated backdrop (never a broken
+// image, never a claim of product photography). See public/brand/categories/README.
 const CATEGORIES = [
-  { emoji: "🍔", name: "Food", to: "/food", live: true, tint: "from-[#E2443A]/30" },
-  { emoji: "📱", name: "Electronics", to: "/electronics", live: true, tint: "from-blue-500/25" },
-  { emoji: "🛒", name: "Grocery", to: "/market/grocery", live: true, tint: "from-emerald-500/25" },
-  { emoji: "👕", name: "Shopping", to: "/market/shopping", live: true, tint: "from-fuchsia-500/25" },
-  { emoji: "✈️", name: "Travel", to: "/market/travel", live: true, tint: "from-cyan-500/25" },
-  { emoji: "🎬", name: "Entertainment", to: "/market/entertainment", live: true, tint: "from-violet-500/25" },
-  { emoji: "💄", name: "Beauty", to: "/market/beauty", live: true, tint: "from-pink-500/25" },
-  { emoji: "🏠", name: "Home", to: "/market/home", live: true, tint: "from-amber-500/25" },
+  { id: "food", name: "Food", tagline: "Explore cravings", to: "/food" },
+  { id: "electronics", name: "Electronics", tagline: "See what's tempting", to: "/electronics" },
+  { id: "grocery", name: "Grocery", tagline: "Everyday essentials", to: "/market/grocery" },
+  { id: "shopping", name: "Shopping", tagline: "Browse the latest", to: "/market/shopping" },
+  { id: "travel", name: "Travel", tagline: "Where to next?", to: "/market/travel" },
+  { id: "entertainment", name: "Entertainment", tagline: "A night out", to: "/market/entertainment" },
+  { id: "beauty", name: "Beauty", tagline: "Treat yourself", to: "/market/beauty" },
+  { id: "home", name: "Home", tagline: "For your space", to: "/market/home" },
 ];
 
 function TodayScreen() {
@@ -38,22 +42,34 @@ function TodayScreen() {
       </div>
 
       <div className="mt-7 grid grid-cols-2 gap-3 px-6">
-        {CATEGORIES.map((c) => {
-          const card = (
-            <div className={`relative overflow-hidden rounded-3xl border border-white/8 bg-gradient-to-br ${c.tint} to-transparent p-5 h-32 flex flex-col justify-between ${c.live ? "" : "opacity-60"}`}>
-              <div className="text-[30px]">{c.emoji}</div>
-              <div className="flex items-center justify-between">
-                <span className="font-display text-[18px]">{c.name}</span>
-                {!c.live && <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-foreground/60">Soon</span>}
+        {CATEGORIES.map((c) => (
+          <Link key={c.id} to={c.to} className="animate-rise group">
+            <div className="relative h-44 overflow-hidden rounded-3xl border border-white/8 ring-1 ring-white/5">
+              <img
+                src={`/brand/categories/${c.id}.webp`}
+                alt=""
+                aria-hidden
+                loading="lazy"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (img.dataset.fb) return;
+                  img.dataset.fb = "1";
+                  img.src = scenicArt(`cat-${c.id}`);
+                }}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-active:scale-105"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{ background: "linear-gradient(180deg, rgba(15,20,25,0.1) 0%, rgba(15,20,25,0.15) 40%, rgba(15,20,25,0.82) 100%)" }}
+              />
+              <div className="absolute inset-x-0 bottom-0 p-4">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-white/60">{c.tagline}</p>
+                <p className="mt-0.5 font-display text-[20px] text-white">{c.name}</p>
               </div>
             </div>
-          );
-          return c.live && c.to ? (
-            <Link key={c.name} to={c.to} className="animate-rise">{card}</Link>
-          ) : (
-            <div key={c.name} className="animate-rise cursor-default" aria-disabled>{card}</div>
-          );
-        })}
+          </Link>
+        ))}
       </div>
 
       <p className="px-6 mt-8 text-center text-[12px] text-foreground/40">
