@@ -23,6 +23,7 @@ export const GENERATED_PHOTOS: Record<string, ProductMedia> = {
   "sh-jeans": { type: "local", src: "/products/shopping/sh-jeans.webp" },
   "sh-saree": { type: "local", src: "/products/shopping/sh-saree.webp" },
   "sh-kurti": { type: "local", src: "/products/shopping/sh-kurti.webp" },
+  "sh-shoes": { type: "local", src: "/products/shopping/sh-shoes.webp" },
   "sh-bag": { type: "local", src: "/products/shopping/sh-bag.webp" },
   "sh-backpack": { type: "local", src: "/products/shopping/sh-backpack.webp" },
   "dz-chk-bir": { type: "local", src: "/products/food/dz-chk-bir.webp" },
