@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { BottomNav, NavBar, Screen } from "@/components/Shell";
 import { useStore } from "@/lib/store";
 import { scenicArt } from "@/lib/localImage";
+import { photoSrc } from "@/lib/productImages";
 
 export const Route = createFileRoute("/today")({
   head: () => ({ meta: [{ title: "Today — SELFly" }] }),
@@ -11,15 +12,19 @@ export const Route = createFileRoute("/today")({
 // Image-led category tiles. A real hero photo at public/brand/categories/<id>.webp
 // is used when present; otherwise an on-brand generated backdrop (never a broken
 // image, never a claim of product photography). See public/brand/categories/README.
+// `rep` points a category tile at a representative launch product photo, so the
+// moment real product photography is registered, Today shows it automatically
+// (biryani for Food, earbuds for Electronics, etc.). Falls back to a category
+// hero file, then an on-brand generated backdrop — never a broken image.
 const CATEGORIES = [
-  { id: "food", name: "Food", tagline: "Explore cravings", to: "/food" },
-  { id: "electronics", name: "Electronics", tagline: "See what's tempting", to: "/electronics" },
-  { id: "grocery", name: "Grocery", tagline: "Everyday essentials", to: "/market/grocery" },
-  { id: "shopping", name: "Shopping", tagline: "Browse the latest", to: "/market/shopping" },
-  { id: "travel", name: "Travel", tagline: "Where to next?", to: "/market/travel" },
-  { id: "entertainment", name: "Entertainment", tagline: "A night out", to: "/market/entertainment" },
-  { id: "beauty", name: "Beauty", tagline: "Treat yourself", to: "/market/beauty" },
-  { id: "home", name: "Home", tagline: "For your space", to: "/market/home" },
+  { id: "food", name: "Food", tagline: "Explore cravings", to: "/food", rep: { v: "food", id: "dz-chk-bir" } },
+  { id: "electronics", name: "Electronics", tagline: "See what's tempting", to: "/electronics", rep: { v: "electronics", id: "soniq-airbuds-pro" } },
+  { id: "grocery", name: "Grocery", tagline: "Everyday essentials", to: "/market/grocery", rep: { v: "grocery", id: "gr-banana" } },
+  { id: "shopping", name: "Shopping", tagline: "Browse the latest", to: "/market/shopping", rep: { v: "shopping", id: "sh-shoes" } },
+  { id: "travel", name: "Travel", tagline: "Where to next?", to: "/market/travel", rep: null },
+  { id: "entertainment", name: "Entertainment", tagline: "A night out", to: "/market/entertainment", rep: null },
+  { id: "beauty", name: "Beauty", tagline: "Treat yourself", to: "/market/beauty", rep: null },
+  { id: "home", name: "Home", tagline: "For your space", to: "/market/home", rep: null },
 ];
 
 function TodayScreen() {
@@ -46,7 +51,7 @@ function TodayScreen() {
           <Link key={c.id} to={c.to} className="animate-rise group">
             <div className="relative h-44 overflow-hidden rounded-3xl border border-white/8 ring-1 ring-white/5">
               <img
-                src={`/brand/categories/${c.id}.webp`}
+                src={(c.rep && photoSrc(c.rep.v, c.rep.id)) || `/brand/categories/${c.id}.webp`}
                 alt=""
                 aria-hidden
                 loading="lazy"

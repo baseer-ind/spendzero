@@ -89,7 +89,17 @@ console.log(`Illustration fallback: ${tailIll}`);
 
 const allIds = Object.values(byVertical).flat().map(([id]) => id);
 console.log(`\nTOTAL catalogue: ${allIds.length} products. Photographs: ${launchPhotos + tailPhoto}. Illustration: ${allIds.length - launchPhotos - tailPhoto}.`);
-if (launchMissing > 0) {
-  console.log(`\nLAUNCH NOT COMPLETE: ${launchMissing} launch product(s) still need a real photo.`);
-}
 console.log("\n(SVG/illustration is never counted as a photograph.)");
+
+// Hard acceptance gate: launch readiness requires 34/34 real photos, 0 fallback.
+console.log("\n==== LAUNCH IMAGE GATE ====");
+console.log(`Launch products: ${launchTotal}`);
+console.log(`Real photographic assets: ${launchPhotos}/${launchTotal}`);
+console.log(`Illustration fallback (launch): ${launchMissing}/${launchTotal}`);
+if (launchMissing > 0) {
+  console.log(`\n❌ LAUNCH NOT READY: ${launchMissing} launch product(s) still need a real photo.`);
+  console.log("   Drop files in public/products/<vertical>/<id>.webp, then:");
+  console.log("   node scripts/register-local.mjs && node scripts/image-audit.mjs");
+  process.exit(1);
+}
+console.log("\n✅ LAUNCH IMAGES READY: 34/34 real photographs, 0 illustration fallback.");

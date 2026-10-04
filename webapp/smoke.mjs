@@ -97,8 +97,8 @@ try {
   await page.waitForURL("**/today", { timeout: 8000 });
 
   // 5c) FLOATING FEEDBACK — visible once onboarded
-  const fab = await page.getByRole("link", { name: "Send feedback", exact: true }).count();
-  log(`floating feedback button visible on app: ${fab > 0}`);
+  const fab = await page.getByRole("button", { name: "Send feedback", exact: true }).count();
+  log(`floating feedback icon visible on app: ${fab > 0}`);
   if (fab === 0) issues.push("FEEDBACK FAB: not visible after onboarding");
 
   // 6) TODAY HUB → FOOD deep flow (India-first)
