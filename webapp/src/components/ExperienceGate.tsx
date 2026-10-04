@@ -15,10 +15,10 @@ import { FeedbackFab } from "./FeedbackFab";
  * SSR-safe: renders a stable splash before hydration.
  */
 export function ExperienceGate({ children }: { children: ReactNode }) {
-  const { hydrated, authed, storySeen, profile, dreams, postGoalSeen } = useStore();
+  const { hydrated, booting, authed, storySeen, profile, dreams, postGoalSeen } = useStore();
   const [showResult, setShowResult] = useState(false);
 
-  if (!hydrated) return <Splash />;
+  if (!hydrated || booting) return <Splash />;
   if (!storySeen) return <Story />;
   if (!authed) return <AuthScreen />;
   if (!profile) return <Assessment onDone={() => setShowResult(true)} />;

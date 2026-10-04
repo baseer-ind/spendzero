@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
 import { APP_VERSION } from "@/lib/feedback";
+import { cloudEnabled } from "@/lib/supabase";
+import { currentSession, deleteAllCloudData, cloudSignOut } from "@/lib/cloud";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — SELFly" }] }),
@@ -12,6 +14,8 @@ const APP_KEYS = [
   "project_future_state_v1",
   "project_future_creds_v1",
   "project_future_feedback_v1",
+  "project_future_images_v1",
+  "selfly_sim_ack_v1",
 ];
 
 function SettingsScreen() {
@@ -37,7 +41,15 @@ function SettingsScreen() {
     }
   }
 
-  function deleteData() {
+  async function deleteData() {
+    // Remove cloud data first (best effort), then clear this device and sign out.
+    if (cloudEnabled) {
+      try {
+        const sess = await currentSession();
+        if (sess) await deleteAllCloudData(sess.uid);
+        await cloudSignOut();
+      } catch { /* best effort */ }
+    }
     try { for (const k of APP_KEYS) localStorage.removeItem(k); } catch { /* ignore */ }
     window.location.href = "/";
   }
@@ -49,7 +61,7 @@ function SettingsScreen() {
 
       <div className="px-6 pt-2">
         <h1 className="font-display text-[26px]">Settings & privacy</h1>
-        <p className="mt-1 text-[13px] text-foreground/55">Your data stays on this device. You're in control of it.</p>
+        <p className="mt-1 text-[13px] text-foreground/55">Your account is secured in the cloud; some data stays on this device. You're in control of it.</p>
       </div>
 
       {/* Data controls */}
@@ -82,7 +94,7 @@ function SettingsScreen() {
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55" onClick={() => setConfirming(false)}>
           <div className="w-full max-w-[440px] rounded-t-3xl border-t border-white/10 bg-background p-6 pb-8" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-display text-[20px]">Delete all your data?</h3>
-            <p className="mt-2 text-[13px] text-foreground/60">This permanently removes your account, dreams, savings tally, activity and feedback from this device. This can't be undone.</p>
+            <p className="mt-2 text-[13px] text-foreground/60">This permanently removes your dreams, savings tally, activity and feedback from your cloud account and this device, and signs you out. This can't be undone.</p>
             <div className="mt-5 flex gap-3">
               <button onClick={() => setConfirming(false)} className="flex-1 rounded-full border border-white/15 py-3 text-[14px] text-foreground/75">Cancel</button>
               <button onClick={deleteData} className="flex-1 rounded-full bg-destructive py-3 text-[14px] font-medium text-white">Delete everything</button>
@@ -119,10 +131,12 @@ const LEGAL = {
     title: "Privacy Policy",
     body: [
       "This is a plain-language summary of how SELFly handles your information today.",
-      "SELFly stores your data on your device only (your browser's local storage): your name/email for the local account, your dreams, your virtual savings tally, your in-app browsing activity, and any feedback you send. We do not currently run a server that collects this data.",
-      "Photos you add (dream covers, profile photo) stay on your device and are never uploaded.",
-      "We never ask for real card or bank details. Checkout is a simulation; no real payment is taken.",
-      "You can export or permanently delete all of your data at any time from Settings.",
+      "Your account (email and password) is managed securely by Supabase, our authentication provider. We never see or store your raw password.",
+      "When you have an account, your profile, dreams, virtual savings tally and decisions are stored in your private cloud account so they're there when you return — on any device. Access is restricted so only you can read your own data.",
+      "Profile and dream-cover photos are stored in secure cloud file storage, in a private folder only you can access.",
+      "Some things stay only on this device and are never uploaded: your shopping cart, the one-time 'simulation' notices you've dismissed, and temporary screen state.",
+      "Shopping, prices, carts and checkout are entirely simulated. We never ask for real card or bank details, no real order or payment is ever made, and your savings are a virtual tally — SELFly is not a bank and never holds money.",
+      "You can export or permanently delete your data at any time from Settings.",
     ],
   },
   terms: {

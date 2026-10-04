@@ -4,10 +4,16 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import type { Profile } from "./assessment";
+import { cloudEnabled } from "./supabase";
+import {
+  cloudSignUp, cloudSignIn, cloudSignOut, cloudRecover, currentSession,
+  pullSnapshot, hasCloudData, pushProfile, pushDream, pushDecision, deleteDreamCloud,
+} from "./cloud";
 
 /**
  * Local-first app state for SELFly.
@@ -185,9 +191,13 @@ type Ctx = State & {
   recordDecision: (d: { category: string; amount: number; trigger: string; choice: "enjoyed" | "redirected"; dreamId?: string }) => void;
   setPostGoalSeen: () => void;
   setName: (n: string) => void;
-  register: (d: { name: string; email: string; password: string }) => AuthResult;
-  login: (d: { email: string; password: string }) => AuthResult;
+  register: (d: { name: string; email: string; password: string }) => Promise<AuthResult>;
+  login: (d: { email: string; password: string }) => Promise<AuthResult>;
   logout: () => void;
+  recoverPassword: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  cloudEnabled: boolean;
+  syncing: boolean;
+  booting: boolean;
   addDream: (d: { name: string; emoji?: string; target: number; cover?: string }) => string;
   updateDream: (id: string, patch: { name?: string; emoji?: string; target?: number; cover?: string | null }) => void;
   deleteDream: (id: string) => void;
@@ -235,6 +245,76 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // User images (dream covers, profile photo) live in their OWN store, keyed by a
   // short id, so a large photo can never block the main state from persisting.
   const [images, setImages] = useState<Record<string, string>>({});
+  const [syncing, setSyncing] = useState(false);
+  // True during the initial cloud-session restore so the gate shows the splash
+  // instead of flashing the auth screen for a returning user.
+  const [booting, setBooting] = useState(cloudEnabled);
+
+  // Refs so fire-and-forget cloud pushes can read the latest state/images/uid
+  // without being in every callback's dependency list.
+  const uidRef = useRef<string | null>(null);
+  const stateRef = useRef<State>(state);
+  const imagesRef = useRef<Record<string, string>>(images);
+  useEffect(() => { stateRef.current = state; }, [state]);
+  useEffect(() => { imagesRef.current = images; }, [images]);
+
+  const resolveRef = useCallback((ref?: string | null): string | undefined => {
+    if (!ref) return undefined;
+    return ref.startsWith("u_") ? imagesRef.current[ref] : ref;
+  }, []);
+
+  // ---- fire-and-forget cloud pushes (no-ops unless cloud + authed) ----
+  const cloudReady = () => cloudEnabled && !!uidRef.current;
+  const pushDreamCloud = useCallback((d: Dream) => {
+    if (!cloudReady()) return;
+    void pushDream(uidRef.current!, { id: d.id, name: d.name, emoji: d.emoji, target: d.target, saved: d.saved, cover: resolveRef(d.cover) });
+  }, [resolveRef]);
+  const pushProfileCloud = useCallback(() => {
+    if (!cloudReady()) return;
+    const s = stateRef.current;
+    void pushProfile(uidRef.current!, {
+      name: s.name, email: s.account?.email ?? "", profile: s.profile,
+      profilePhoto: resolveRef(s.profilePhoto) ?? undefined,
+      storySeen: s.storySeen, postGoalSeen: s.postGoalSeen,
+    });
+  }, [resolveRef]);
+  const pushDecisionCloud = useCallback((d: Decision) => {
+    if (!cloudReady()) return;
+    void pushDecision(uidRef.current!, { id: d.id, category: d.category, amount: d.amount, trigger: d.trigger, choice: d.choice, dreamId: d.dreamId, at: d.at });
+  }, []);
+
+  // Push the whole local snapshot to the cloud (first-time migration / first sync).
+  const migrateUp = useCallback(async (uid: string) => {
+    const s = stateRef.current;
+    await pushProfile(uid, {
+      name: s.name, email: s.account?.email ?? "", profile: s.profile,
+      profilePhoto: resolveRef(s.profilePhoto) ?? undefined,
+      storySeen: s.storySeen, postGoalSeen: s.postGoalSeen,
+    });
+    for (const d of s.dreams) {
+      await pushDream(uid, { id: d.id, name: d.name, emoji: d.emoji, target: d.target, saved: d.saved, cover: resolveRef(d.cover) });
+    }
+    for (const d of s.decisionLog) {
+      await pushDecision(uid, { id: d.id, category: d.category, amount: d.amount, trigger: d.trigger, choice: d.choice, dreamId: d.dreamId, at: d.at });
+    }
+  }, [resolveRef]);
+
+  // Replace the in-session user data with the cloud snapshot (returning user).
+  const applySnapshot = useCallback((uid: string, name: string, email: string, snap: NonNullable<Awaited<ReturnType<typeof pullSnapshot>>>) => {
+    setState((s) => ({
+      ...s,
+      account: { name: snap.name || name, email },
+      name: snap.name || name,
+      profile: snap.profile,
+      profilePhoto: snap.profilePhoto,
+      dreams: snap.dreams.map((d) => ({ id: d.id, name: d.name, emoji: d.emoji, target: d.target, saved: d.saved, createdAt: Date.now(), cover: d.cover })),
+      activeDreamId: snap.dreams[0]?.id ?? null,
+      decisionLog: snap.decisionLog.map((d) => ({ id: d.id, category: d.category, amount: d.amount, trigger: d.trigger, choice: d.choice, dreamId: d.dreamId, at: d.at })),
+      decisions: snap.decisionLog.length,
+      storySeen: snap.storySeen,
+      postGoalSeen: snap.postGoalSeen,
+    }));
+  }, []);
 
   useEffect(() => {
     try {
@@ -283,6 +363,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [images, hydrated, state.dreams, state.profilePhoto]);
 
+  // After local hydration, restore a cloud session (if any) and pull the account's
+  // data. With cloud enabled but no session, a prior device-local "account" is
+  // cleared so the user signs in/up (their local dreams still migrate on signup).
+  useEffect(() => {
+    if (!hydrated || !cloudEnabled) return;
+    let cancelled = false;
+    // Never let a slow/unreachable backend trap the user on the splash.
+    const guard = setTimeout(() => { if (!cancelled) setBooting(false); }, 4000);
+    (async () => {
+      const sess = await currentSession();
+      if (cancelled) return;
+      if (!sess) {
+        setState((s) => (s.account ? { ...s, account: null } : s));
+        setBooting(false);
+        return;
+      }
+      uidRef.current = sess.uid;
+      setSyncing(true);
+      const snap = await pullSnapshot(sess.uid);
+      if (cancelled) { setSyncing(false); setBooting(false); return; }
+      if (snap && (snap.dreams.length || snap.profile)) {
+        applySnapshot(sess.uid, sess.name, sess.email, snap);
+      } else {
+        // session but no cloud data yet — adopt the session and push what we have
+        setState((s) => ({ ...s, account: { name: sess.name || s.name || "", email: sess.email } }));
+        await migrateUp(sess.uid);
+      }
+      setSyncing(false);
+      setBooting(false);
+    })();
+    return () => { cancelled = true; clearTimeout(guard); };
+  }, [hydrated, applySnapshot, migrateUp]);
+
   // Store a chosen image and return a ref id; pass through URLs/SVG/existing ids.
   const putImg = useCallback((val?: string | null): string | undefined => {
     if (!val) return undefined;
@@ -305,64 +418,108 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setName = useCallback((n: string) => {
     setState((s) => ({ ...s, name: n.trim() || null }));
-  }, []);
+    setTimeout(() => pushProfileCloud(), 0);
+  }, [pushProfileCloud]);
 
-  const register = useCallback((d: { name: string; email: string; password: string }): AuthResult => {
+  const register = useCallback(async (d: { name: string; email: string; password: string }): Promise<AuthResult> => {
     const email = d.email.trim().toLowerCase();
     const name = d.name.trim();
     if (!name) return { ok: false, error: "Enter your name." };
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: "Enter a valid email." };
     if (d.password.length < 6) return { ok: false, error: "Password must be at least 6 characters." };
+
+    if (cloudEnabled) {
+      setSyncing(true);
+      const res = await cloudSignUp(name, email, d.password);
+      if (!res.ok) { setSyncing(false); return { ok: false, error: res.error }; }
+      uidRef.current = res.uid;
+      setState((s) => ({ ...s, account: { name, email }, name }));
+      // migrate any existing local data into the new account (best effort)
+      try { await migrateUp(res.uid); } catch { /* keep local data; recoverable */ }
+      setSyncing(false);
+      return { ok: true };
+    }
+
+    // local-only fallback (no cloud configured)
     const creds = readCreds();
     if (creds[email]) return { ok: false, error: "An account with this email already exists. Sign in instead." };
     creds[email] = { name, pass: hash(d.password) };
     writeCreds(creds);
     setState((s) => ({ ...s, account: { name, email }, name }));
     return { ok: true };
-  }, []);
+  }, [migrateUp]);
 
-  const login = useCallback((d: { email: string; password: string }): AuthResult => {
+  const login = useCallback(async (d: { email: string; password: string }): Promise<AuthResult> => {
     const email = d.email.trim().toLowerCase();
+
+    if (cloudEnabled) {
+      setSyncing(true);
+      const res = await cloudSignIn(email, d.password);
+      if (!res.ok) { setSyncing(false); return { ok: false, error: res.error }; }
+      uidRef.current = res.uid;
+      const existing = await hasCloudData(res.uid);
+      if (existing) {
+        const snap = await pullSnapshot(res.uid);
+        if (snap) applySnapshot(res.uid, snap.name || "", email, snap);
+        else setState((s) => ({ ...s, account: { name: s.name || "", email } }));
+      } else {
+        setState((s) => ({ ...s, account: { name: s.name || "", email } }));
+        try { await migrateUp(res.uid); } catch { /* recoverable */ }
+      }
+      setSyncing(false);
+      return { ok: true };
+    }
+
     const creds = readCreds();
     const rec = creds[email];
     if (!rec || rec.pass !== hash(d.password)) return { ok: false, error: "Wrong email or password." };
     setState((s) => ({ ...s, account: { name: rec.name, email }, name: rec.name }));
     return { ok: true };
-  }, []);
+  }, [applySnapshot, migrateUp]);
 
   const logout = useCallback(() => {
-    setState((s) => ({ ...s, account: null }));
+    if (cloudEnabled) void cloudSignOut();
+    uidRef.current = null;
+    setImages({});
+    setState(EMPTY);
+  }, []);
+
+  const recoverPassword = useCallback(async (email: string): Promise<{ ok: boolean; error?: string }> => {
+    const e = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return { ok: false, error: "Enter a valid email." };
+    if (!cloudEnabled) return { ok: false, error: "Password recovery needs the cloud account system." };
+    return await cloudRecover(e);
   }, []);
 
   const addDream = useCallback(
     (d: { name: string; emoji?: string; target: number; cover?: string }) => {
       const id = uid();
       const coverRef = putImg(d.cover);
+      const newDream: Dream = {
+        id,
+        name: d.name.trim(),
+        emoji: d.emoji || "✨",
+        target: Math.max(1, Math.round(d.target)),
+        saved: 0,
+        createdAt: Date.now(),
+        cover: coverRef,
+      };
       setState((s) => ({
         ...s,
-        dreams: [
-          ...s.dreams,
-          {
-            id,
-            name: d.name.trim(),
-            emoji: d.emoji || "✨",
-            target: Math.max(1, Math.round(d.target)),
-            saved: 0,
-            createdAt: Date.now(),
-            cover: coverRef,
-          },
-        ],
+        dreams: [...s.dreams, newDream],
         activeDreamId: s.activeDreamId ?? id,
       }));
+      pushDreamCloud(newDream);
       return id;
     },
-    [putImg],
+    [putImg, pushDreamCloud],
   );
 
   const updateDream = useCallback(
     (id: string, patch: { name?: string; emoji?: string; target?: number; cover?: string | null }) => {
       // Convert a new cover to a stored ref; null clears it; undefined leaves it.
       const coverRef = patch.cover === undefined ? undefined : patch.cover === null ? null : putImg(patch.cover);
+      let updated: Dream | null = null;
       setState((s) => ({
         ...s,
         dreams: s.dreams.map((d) => {
@@ -372,11 +529,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           if (patch.emoji) next.emoji = patch.emoji;
           if (patch.target !== undefined && patch.target > 0) next.target = Math.max(1, Math.round(patch.target));
           if (patch.cover !== undefined) next.cover = coverRef === null ? undefined : coverRef;
+          updated = next;
           return next;
         }),
       }));
+      if (updated) pushDreamCloud(updated);
     },
-    [putImg],
+    [putImg, pushDreamCloud],
   );
 
   const deleteDream = useCallback((id: string) => {
@@ -385,6 +544,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const activeDreamId = s.activeDreamId === id ? (dreams[0]?.id ?? null) : s.activeDreamId;
       return { ...s, dreams, activeDreamId };
     });
+    if (cloudEnabled && uidRef.current) void deleteDreamCloud(id);
   }, []);
 
   const setActiveDream = useCallback((id: string) => {
@@ -402,7 +562,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setProfilePhoto = useCallback((url: string | null) => {
     const ref = url === null ? null : putImg(url) ?? null;
     setState((s) => ({ ...s, profilePhoto: ref }));
-  }, [putImg]);
+    // push after state ref updates on next tick
+    setTimeout(() => pushProfileCloud(), 0);
+  }, [putImg, pushProfileCloud]);
 
   const saveAddress = useCallback((a: Address) => {
     setState((s) => ({ ...s, address: a }));
@@ -464,8 +626,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       };
       return { ...s, dreams, events: [event, ...s.events].slice(0, 200) };
     });
+    if (updated) pushDreamCloud(updated);
     return updated;
-  }, []);
+  }, [pushDreamCloud]);
 
   const addToCart = useCallback((item: { id: string; name: string; price: number; image?: string; vertical?: string }) => {
     setState((s) => {
@@ -492,18 +655,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, cart: [] }));
   }, []);
 
-  const setStorySeen = useCallback(() => setState((s) => ({ ...s, storySeen: true })), []);
-  const setProfile = useCallback((p: Profile) => setState((s) => ({ ...s, profile: p })), []);
+  const setStorySeen = useCallback(() => {
+    setState((s) => ({ ...s, storySeen: true }));
+    setTimeout(() => pushProfileCloud(), 0);
+  }, [pushProfileCloud]);
+  const setProfile = useCallback((p: Profile) => {
+    setState((s) => ({ ...s, profile: p }));
+    setTimeout(() => pushProfileCloud(), 0);
+  }, [pushProfileCloud]);
   const recordDecision = useCallback(
-    (d: { category: string; amount: number; trigger: string; choice: "enjoyed" | "redirected"; dreamId?: string }) =>
+    (d: { category: string; amount: number; trigger: string; choice: "enjoyed" | "redirected"; dreamId?: string }) => {
+      const decision: Decision = { id: uid(), at: Date.now(), ...d };
       setState((s) => ({
         ...s,
         decisions: s.decisions + 1,
-        decisionLog: [{ id: uid(), at: Date.now(), ...d }, ...s.decisionLog].slice(0, 300),
-      })),
-    [],
+        decisionLog: [decision, ...s.decisionLog].slice(0, 300),
+      }));
+      pushDecisionCloud(decision);
+    },
+    [pushDecisionCloud],
   );
-  const setPostGoalSeen = useCallback(() => setState((s) => ({ ...s, postGoalSeen: true })), []);
+  const setPostGoalSeen = useCallback(() => {
+    setState((s) => ({ ...s, postGoalSeen: true }));
+    setTimeout(() => pushProfileCloud(), 0);
+  }, [pushProfileCloud]);
 
   const reset = useCallback(() => setState(EMPTY), []);
 
@@ -620,6 +795,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     register,
     login,
     logout,
+    recoverPassword,
+    cloudEnabled,
+    syncing,
+    booting,
     addDream,
     updateDream,
     deleteDream,

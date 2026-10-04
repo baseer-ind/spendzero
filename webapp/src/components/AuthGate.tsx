@@ -28,24 +28,38 @@ function Splash() {
 }
 
 export function AuthScreen() {
-  const { register, login } = useStore();
+  const { register, login, recoverPassword, cloudEnabled } = useStore();
   const [mode, setMode] = useState<"signup" | "signin">("signup");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  function submit() {
+  async function submit() {
+    if (busy) return;
     setBusy(true);
     setError(null);
+    setNotice(null);
     const res =
       mode === "signup"
-        ? register({ name, email, password })
-        : login({ email, password });
+        ? await register({ name, email, password })
+        : await login({ email, password });
     setBusy(false);
     if (!res.ok) setError(res.error);
     // on success the gate re-renders into the app automatically
+  }
+
+  async function forgot() {
+    setError(null);
+    setNotice(null);
+    if (!cloudEnabled) { setError("Password recovery needs the cloud account system."); return; }
+    setBusy(true);
+    const res = await recoverPassword(email);
+    setBusy(false);
+    if (res.ok) setNotice("Check your email for a link to reset your password.");
+    else setError(res.error ?? "Couldn't send the reset email.");
   }
 
   return (
@@ -81,7 +95,7 @@ export function AuthScreen() {
             )}
           </h1>
           <p className="mt-4 text-[14px] leading-relaxed text-muted-foreground max-w-[32ch]">
-            Every craving you skip moves real money toward your dreams.
+            Every craving you skip moves the money you'd have spent toward your dreams.
           </p>
         </div>
 
@@ -114,6 +128,7 @@ export function AuthScreen() {
           />
 
           {error && <p className="mt-4 text-[13px] text-destructive">{error}</p>}
+          {notice && <p className="mt-4 text-[13px] text-gold">{notice}</p>}
 
           <button
             onClick={submit}
@@ -123,13 +138,20 @@ export function AuthScreen() {
               background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))",
             }}
           >
-            {mode === "signup" ? "Create my account" : "Sign in"}
+            {busy ? "One moment…" : mode === "signup" ? "Create my account" : "Sign in"}
           </button>
+
+          {mode === "signin" && cloudEnabled && (
+            <button onClick={forgot} disabled={busy} className="mt-4 w-full text-center text-[12px] text-foreground/45">
+              Forgot password? <span className="text-gold">Reset it</span>
+            </button>
+          )}
 
           <button
             onClick={() => {
               setMode(mode === "signup" ? "signin" : "signup");
               setError(null);
+              setNotice(null);
             }}
             className="mt-5 w-full text-center text-[13px] text-foreground/60"
           >
@@ -141,7 +163,9 @@ export function AuthScreen() {
           </button>
 
           <p className="mt-8 text-center text-[11px] leading-relaxed text-foreground/35">
-            Your account is stored on this device for now. No real money ever moves.
+            {cloudEnabled
+              ? "Your account is secured by Supabase. No real money ever moves — shopping is simulated."
+              : "Your account is stored on this device for now. No real money ever moves."}
           </p>
         </div>
       </div>
