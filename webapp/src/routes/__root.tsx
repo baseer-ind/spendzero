@@ -74,6 +74,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+// Public site URL. Set VITE_SITE_URL in Vercel when the real domain is connected
+// (e.g. https://selfly.app) — canonical + absolute OG/Twitter image update with
+// no code change. Falls back to the current Vercel URL.
+const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, "")
+  || "https://spendzero-five.vercel.app";
+const OG_IMAGE = `${SITE_URL}/brand/selfly-logo-light.png`;
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
@@ -91,13 +98,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "SELFly — Choose for your future self." },
       { property: "og:description", content: "Notice the craving. Pause. Decide. Redirect the money toward something you care about." },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "/brand/selfly-logo-light.png" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: OG_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "SELFly — Choose for your future self." },
       { name: "twitter:description", content: "Notice the craving. Pause. Decide. Build your future." },
-      { name: "twitter:image", content: "/brand/selfly-logo-light.png" },
+      { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [
+      { rel: "canonical", href: SITE_URL },
       { rel: "icon", type: "image/png", href: "/brand/selfly-app-icon.png" },
       { rel: "apple-touch-icon", href: "/brand/selfly-app-icon.png" },
       { rel: "stylesheet", href: appCss },
