@@ -34,7 +34,7 @@ export function ProfileResult({ onContinue }: { onContinue: () => void }) {
             className="h-13 w-full rounded-full py-4 text-center font-medium text-background"
             style={{ background: "linear-gradient(135deg, oklch(0.92 0.09 84), oklch(0.72 0.12 80))" }}
           >
-            Now, what are we building?
+            Save my profile
           </button>
         </div>
       </div>

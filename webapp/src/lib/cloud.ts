@@ -104,7 +104,9 @@ export async function cloudSignUp(name: string, email: string, password: string)
   if (error) {
     const msg = /registered|exists/i.test(error.message)
       ? "An account with this email already exists. Sign in instead."
-      : error.message;
+      : /rate limit/i.test(error.message)
+        ? "Too many sign-up emails just now. Please wait a minute and try again."
+        : error.message;
     return { ok: false, error: msg };
   }
   const uid = data.user?.id;

@@ -46,25 +46,13 @@ try {
   await page.getByRole("button", { name: "Let's begin", exact: true }).click();
   await page.waitForTimeout(400);
 
-  // 2) REGISTER
-  const auth = await page.getByText("Create my account", { exact: false }).count();
-  log(`auth shown after story: ${auth > 0}`);
-  if (auth === 0) issues.push("AUTH: not shown after story");
-  await page.getByPlaceholder("Aarav").fill("Test User");
-  await page.getByPlaceholder("you@email.com").fill("test@future.app");
-  await page.getByPlaceholder("At least 6 characters").fill("secret123");
-  await page.getByText("Create my account", { exact: true }).click();
-  await page.waitForTimeout(600);
-
-  // 3) ASSESSMENT — scenario-based, taps auto-advance (no Continue)
+  // 2) ASSESSMENT — scenario-based, BEFORE signup; taps auto-advance (no Continue)
   const assess = await page.getByText("What would you do?", { exact: false }).count();
-  log(`scenario assessment shown after register: ${assess > 0}`);
-  if (assess === 0) issues.push("ASSESSMENT: scenario not shown after register");
-  // there must be NO Continue button in the assessment
+  log(`scenario assessment shown after intro (pre-signup): ${assess > 0}`);
+  if (assess === 0) issues.push("ASSESSMENT: scenario not shown after intro");
   const noContinue = (await page.getByRole("button", { name: "Continue", exact: true }).count()) === 0;
   log(`no Continue button in assessment: ${noContinue}`);
   if (!noContinue) issues.push("ASSESSMENT: Continue button still present (should auto-advance)");
-  // answer all 10 scenarios by tapping the first choice card; each auto-advances (~780ms)
   for (let i = 0; i < 10; i++) {
     await page.getByText("What would you do?", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
     await page.getByRole("button").first().click().catch(() => {});
@@ -72,12 +60,22 @@ try {
   }
   await page.waitForTimeout(400);
 
-  // 4) PROFILE RESULT
+  // 3) PROFILE RESULT
   const prof = await page.getByText("Your pattern", { exact: false }).count();
   log(`profile result shown: ${prof > 0}`);
   if (prof === 0) issues.push("PROFILE: result not shown after assessment");
-  await page.getByText("what are we building", { exact: false }).click();
+  await page.getByRole("button", { name: "Save my profile", exact: true }).click();
   await page.waitForTimeout(400);
+
+  // 4) REGISTER — now AFTER the survey + profile reveal
+  const auth = await page.getByText("Create my account", { exact: false }).count();
+  log(`signup shown after profile reveal: ${auth > 0}`);
+  if (auth === 0) issues.push("AUTH: signup not shown after profile reveal");
+  await page.getByPlaceholder("Aarav").fill("Test User");
+  await page.getByPlaceholder("you@email.com").fill("test@future.app");
+  await page.getByPlaceholder("At least 6 characters").fill("secret123");
+  await page.getByText("Create my account", { exact: true }).click();
+  await page.waitForTimeout(600);
 
   // 5) FIRST GOAL (India-first category)
   const goal = await page.getByText("feel worth it", { exact: false }).count();

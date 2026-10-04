@@ -20,9 +20,11 @@ export function ExperienceGate({ children }: { children: ReactNode }) {
 
   if (!hydrated || booting) return <Splash />;
   if (!storySeen) return <Story />;
-  if (!authed) return <AuthScreen />;
+  // Survey first — let people experience SELFly and see their pattern…
   if (!profile) return <Assessment onDone={() => setShowResult(true)} />;
   if (showResult) return <ProfileResult onContinue={() => setShowResult(false)} />;
+  // …then ask them to create an account to save it.
+  if (!authed) return <AuthScreen />;
   if (dreams.length === 0) return <FirstGoal />;
   if (!postGoalSeen) return <GoalTransition />;
   return (

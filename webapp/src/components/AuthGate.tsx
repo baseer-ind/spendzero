@@ -87,9 +87,9 @@ export function AuthScreen() {
           <h1 className="font-display text-[38px] leading-[1.05] mt-3 text-balance">
             {mode === "signup" ? (
               <>
-                Start building the
+                Save your
                 <br />
-                <span className="italic text-shimmer-gold">future you want.</span>
+                <span className="italic text-shimmer-gold">SELFly profile.</span>
               </>
             ) : (
               <>
@@ -100,7 +100,9 @@ export function AuthScreen() {
             )}
           </h1>
           <p className="mt-4 text-[14px] leading-relaxed text-muted-foreground max-w-[32ch]">
-            Every craving you skip moves the money you'd have spent toward your dreams.
+            {mode === "signup"
+              ? "Create an account to keep your pattern, your dreams and your progress — on any device."
+              : "Every craving you skip moves the money you'd have spent toward your dreams."}
           </p>
         </div>
 
