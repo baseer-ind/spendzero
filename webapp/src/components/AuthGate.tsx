@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useStore } from "@/lib/store";
-import { SelflyMark, SelflyGlyph } from "@/components/brand/SelflyMark";
+import { SelflyLockup } from "@/components/brand/SelflyMark";
 
 /**
  * Gates the whole app behind account creation / sign-in. Until the viewer has
@@ -20,8 +20,7 @@ function Splash() {
   return (
     <div className="min-h-screen bg-background text-foreground grid place-items-center">
       <div className="flex flex-col items-center gap-4 animate-rise">
-        <SelflyGlyph size={52} />
-        <SelflyMark size={26} showSpark={false} />
+        <SelflyLockup height={104} />
       </div>
     </div>
   );
@@ -80,10 +79,7 @@ export function AuthScreen() {
         />
 
         <div className="px-7 pt-20 pb-8">
-          <SelflyGlyph size={46} />
-          <div className="mt-6">
-            <SelflyMark size={18} showSpark={false} />
-          </div>
+          <SelflyLockup height={72} />
           <h1 className="font-display text-[38px] leading-[1.05] mt-3 text-balance">
             {mode === "signup" ? (
               <>

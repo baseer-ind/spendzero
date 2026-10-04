@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { onboardingScene } from "@/lib/localImage";
-import { SelflyMark } from "@/components/brand/SelflyMark";
+import { SelflyGlyph } from "@/components/brand/SelflyMark";
 
 /**
  * SELFly first-impression intro — a concise 3-screen story shown BEFORE the
@@ -90,7 +90,7 @@ export function Story() {
 
         {/* Top bar: brand + progress + skip */}
         <div className="relative z-10 flex items-center justify-between px-6 pt-7">
-          <SelflyMark size={22} showSpark={false} />
+          <SelflyGlyph size={30} />
           <button
             onClick={setStorySeen}
             className="text-[12px] uppercase tracking-[0.2em] text-white/55 hover:text-white/80 transition-colors"

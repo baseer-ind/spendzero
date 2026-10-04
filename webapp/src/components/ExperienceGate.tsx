@@ -6,7 +6,7 @@ import { Assessment } from "./onboarding/Assessment";
 import { ProfileResult } from "./onboarding/ProfileResult";
 import { FirstGoal } from "./onboarding/FirstGoal";
 import { GoalTransition } from "./onboarding/GoalTransition";
-import { SelflyMark, SelflyGlyph } from "./brand/SelflyMark";
+import { SelflyLockup } from "./brand/SelflyMark";
 import { FeedbackFab } from "./FeedbackFab";
 
 /**
@@ -38,10 +38,9 @@ export function ExperienceGate({ children }: { children: ReactNode }) {
 function Splash() {
   return (
     <div className="min-h-screen bg-[#0F1419] text-white grid place-items-center">
-      <div className="flex flex-col items-center gap-5 animate-rise px-8 text-center">
-        <SelflyGlyph size={56} />
-        <SelflyMark size={32} showSpark={false} />
-        <p className="mt-1 text-[13px] text-white/55">Choose for your future self.</p>
+      <div className="flex flex-col items-center gap-6 animate-rise px-8 text-center">
+        <SelflyLockup height={132} />
+        <p className="text-[13px] text-white/55">Choose for your future self.</p>
       </div>
     </div>
   );
