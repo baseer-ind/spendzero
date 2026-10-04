@@ -56,22 +56,21 @@ try {
   await page.getByText("Create my account", { exact: true }).click();
   await page.waitForTimeout(600);
 
-  // 3) ASSESSMENT
-  const assess = await page.getByText("A quick read", { exact: false }).count();
-  log(`assessment shown after register: ${assess > 0}`);
-  if (assess === 0) issues.push("ASSESSMENT: not shown after register");
-  let sawInsight = false;
+  // 3) ASSESSMENT — scenario-based, taps auto-advance (no Continue)
+  const assess = await page.getByText("What would you do?", { exact: false }).count();
+  log(`scenario assessment shown after register: ${assess > 0}`);
+  if (assess === 0) issues.push("ASSESSMENT: scenario not shown after register");
+  // there must be NO Continue button in the assessment
+  const noContinue = (await page.getByRole("button", { name: "Continue", exact: true }).count()) === 0;
+  log(`no Continue button in assessment: ${noContinue}`);
+  if (!noContinue) issues.push("ASSESSMENT: Continue button still present (should auto-advance)");
+  // answer all 10 scenarios by tapping the first choice card; each auto-advances (~780ms)
   for (let i = 0; i < 10; i++) {
-    await page.getByRole("button", { name: "Sometimes", exact: true }).click();
-    await page.waitForTimeout(140);
-    if (i === 0) sawInsight = (await page.getByText("worth noticing", { exact: false }).count()) > 0;
-    const label = i < 9 ? "Continue" : "See my profile";
-    await page.getByRole("button", { name: label, exact: true }).click();
-    await page.waitForTimeout(140);
+    await page.getByText("What would you do?", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
+    await page.getByRole("button").first().click().catch(() => {});
+    await page.waitForTimeout(1000); // micro-reaction + auto-advance
   }
-  log(`assessment shows insight + Continue: ${sawInsight}`);
-  if (!sawInsight) issues.push("ASSESSMENT: insight step not shown after selecting an answer");
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(400);
 
   // 4) PROFILE RESULT
   const prof = await page.getByText("Your pattern", { exact: false }).count();
