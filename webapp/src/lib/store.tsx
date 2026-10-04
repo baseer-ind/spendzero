@@ -171,7 +171,7 @@ export function formatINR(n: number): string {
   return `₹${rest},${last3}`;
 }
 
-type AuthResult = { ok: true } | { ok: false; error: string };
+type AuthResult = { ok: true; pendingVerification?: boolean } | { ok: false; error: string };
 
 type Ctx = State & {
   hydrated: boolean;
@@ -432,6 +432,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setSyncing(true);
       const res = await cloudSignUp(name, email, d.password);
       if (!res.ok) { setSyncing(false); return { ok: false, error: res.error }; }
+      if (!res.hasSession) {
+        // Email confirmation is on: no session yet. Do not log in or migrate;
+        // the user verifies by email, then signs in (migration runs then).
+        setSyncing(false);
+        return { ok: true, pendingVerification: true };
+      }
       uidRef.current = res.uid;
       setState((s) => ({ ...s, account: { name, email }, name }));
       // migrate any existing local data into the new account (best effort)

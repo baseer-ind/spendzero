@@ -412,7 +412,7 @@ try {
   // 10a2) SETTINGS: data export/delete + legal present
   await go("/settings");
   const exp = await page.getByText("Export my data", { exact: false }).count();
-  const del = await page.getByText("Delete my data", { exact: false }).count();
+  const del = await page.getByText("Delete my account", { exact: false }).count();
   const priv = await page.getByText("Privacy Policy", { exact: false }).count();
   log(`settings: export=${exp > 0} delete=${del > 0} privacy=${priv > 0}`);
   if (exp === 0 || del === 0 || priv === 0) issues.push("TRUST: settings data/legal controls missing");

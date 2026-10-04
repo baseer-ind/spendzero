@@ -34,3 +34,8 @@ dist-ssr
 # Vercel build output
 .vercel
 .output
+
+# Local env (secrets / config live in Vercel for production)
+.env
+.env.local
+.env.*.local

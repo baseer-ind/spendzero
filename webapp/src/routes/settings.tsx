@@ -3,7 +3,7 @@ import { useState } from "react";
 import { BottomNav, NavBar, Screen, StatusBar } from "@/components/Shell";
 import { APP_VERSION } from "@/lib/feedback";
 import { cloudEnabled } from "@/lib/supabase";
-import { currentSession, deleteAllCloudData, cloudSignOut } from "@/lib/cloud";
+import { deleteAccountCloud } from "@/lib/cloud";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — SELFly" }] }),
@@ -42,13 +42,9 @@ function SettingsScreen() {
   }
 
   async function deleteData() {
-    // Remove cloud data first (best effort), then clear this device and sign out.
+    // Server-side deletes data + media + the Auth user, then we clear the device.
     if (cloudEnabled) {
-      try {
-        const sess = await currentSession();
-        if (sess) await deleteAllCloudData(sess.uid);
-        await cloudSignOut();
-      } catch { /* best effort */ }
+      try { await deleteAccountCloud(); } catch { /* best effort */ }
     }
     try { for (const k of APP_KEYS) localStorage.removeItem(k); } catch { /* ignore */ }
     window.location.href = "/";
@@ -71,7 +67,7 @@ function SettingsScreen() {
           <span className="text-[12px] text-foreground/45">JSON ›</span>
         </button>
         <button onClick={() => setConfirming(true)} className="flex w-full items-center justify-between px-5 py-4 text-left">
-          <span className="text-[14px] text-destructive">🗑 Delete my data</span>
+          <span className="text-[14px] text-destructive">🗑 Delete my account</span>
           <span className="text-[12px] text-foreground/45">›</span>
         </button>
       </div>
@@ -93,7 +89,7 @@ function SettingsScreen() {
       {confirming && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55" onClick={() => setConfirming(false)}>
           <div className="w-full max-w-[440px] rounded-t-3xl border-t border-white/10 bg-background p-6 pb-8" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-display text-[20px]">Delete all your data?</h3>
+            <h3 className="font-display text-[20px]">Delete your account?</h3>
             <p className="mt-2 text-[13px] text-foreground/60">This permanently removes your dreams, savings tally, activity and feedback from your cloud account and this device, and signs you out. This can't be undone.</p>
             <div className="mt-5 flex gap-3">
               <button onClick={() => setConfirming(false)} className="flex-1 rounded-full border border-white/15 py-3 text-[14px] text-foreground/75">Cancel</button>

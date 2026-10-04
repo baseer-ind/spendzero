@@ -47,7 +47,12 @@ export function AuthScreen() {
         ? await register({ name, email, password })
         : await login({ email, password });
     setBusy(false);
-    if (!res.ok) setError(res.error);
+    if (!res.ok) { setError(res.error); return; }
+    if (res.ok && res.pendingVerification) {
+      setMode("signin");
+      setNotice("Almost there — we've emailed you a verification link. Verify, then sign in.");
+      return;
+    }
     // on success the gate re-renders into the app automatically
   }
 

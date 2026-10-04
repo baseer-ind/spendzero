@@ -53,6 +53,12 @@ function isStoragePath(v?: string | null): boolean {
   return !!v && !/^(data:|https?:|<svg|u_)/i.test(v);
 }
 
+// Remember the Storage PATH behind each image so that re-pushing a dream/profile
+// (e.g. after a save) stores the durable path again — never a signed URL. The
+// local state only holds a (signed) display URL after a pull; this bridges back.
+const coverPathById = new Map<string, string>();
+let profilePhotoPath: string | null = null;
+
 /** Upload a data: image to the user's private media folder; return its path. */
 async function uploadImage(uid: string, folder: string, name: string, dataUri: string): Promise<string | null> {
   if (!supabase) return null;
@@ -78,20 +84,11 @@ async function signed(path: string): Promise<string | null> {
   }
 }
 
-/**
- * Resolve a local image ref to something storable in the DB:
- * - data: image  → upload to Storage, return its path
- * - URL / SVG / undefined → pass through unchanged
- */
-async function coverToStored(uid: string, folder: string, name: string, resolved?: string): Promise<string | null> {
-  if (!resolved) return null;
-  if (/^data:image/i.test(resolved)) return await uploadImage(uid, folder, name, resolved);
-  return resolved; // remote URL or SVG illustration
-}
-
 // ---- Auth ----
 
-export type CloudAuthResult = { ok: true; uid: string } | { ok: false; error: string };
+export type CloudAuthResult =
+  | { ok: true; uid: string; hasSession: boolean }
+  | { ok: false; error: string };
 
 export async function cloudSignUp(name: string, email: string, password: string): Promise<CloudAuthResult> {
   if (!supabase) return { ok: false, error: "Cloud not configured." };
@@ -112,9 +109,14 @@ export async function cloudSignUp(name: string, email: string, password: string)
   }
   const uid = data.user?.id;
   if (!uid) return { ok: false, error: "Could not create the account. Try again." };
-  // ensure a profile row exists (no reliance on a DB trigger)
-  try { await supabase.from("profiles").upsert({ user_id: uid, name, email }, { onConflict: "user_id" }); } catch { /* best effort */ }
-  return { ok: true, uid };
+  const hasSession = !!data.session;
+  // When a session exists (email confirmation off), ensure a profile row exists.
+  // When confirmation is on there is no session yet; the row is created on first
+  // authenticated sign-in instead.
+  if (hasSession) {
+    try { await supabase.from("profiles").upsert({ user_id: uid, name, email }, { onConflict: "user_id" }); } catch { /* best effort */ }
+  }
+  return { ok: true, uid, hasSession };
 }
 
 export async function cloudSignIn(email: string, password: string): Promise<CloudAuthResult> {
@@ -127,9 +129,17 @@ export async function cloudSignIn(email: string, password: string): Promise<Clou
   } catch {
     return { ok: false, error: "Couldn't reach the server. Check your connection and try again." };
   }
-  if (error) return { ok: false, error: /invalid/i.test(error.message) ? "Wrong email or password." : error.message };
+  if (error) {
+    const m = /invalid login/i.test(error.message) ? "Wrong email or password."
+      : /not confirmed/i.test(error.message) ? "Please verify your email first — check your inbox for the link."
+      : error.message;
+    return { ok: false, error: m };
+  }
   const uid = data.user?.id;
-  return uid ? { ok: true, uid } : { ok: false, error: "Sign in failed. Try again." };
+  if (!uid) return { ok: false, error: "Sign in failed. Try again." };
+  // make sure a profile row exists (covers accounts created with confirmation on)
+  try { await supabase.from("profiles").upsert({ user_id: uid, name: (data.user?.user_metadata?.name as string) || "", email }, { onConflict: "user_id" }); } catch { /* best effort */ }
+  return { ok: true, uid, hasSession: true };
 }
 
 export async function cloudSignOut(): Promise<void> {
@@ -165,7 +175,14 @@ export async function pushProfile(uid: string, p: {
   if (!supabase) return;
   let photo_path: string | null | undefined = undefined;
   if (p.profilePhoto !== undefined) {
-    photo_path = await coverToStored(uid, "profile", "avatar", p.profilePhoto);
+    if (p.profilePhoto && /^data:image/i.test(p.profilePhoto)) {
+      photo_path = await uploadImage(uid, "profile", "avatar", p.profilePhoto);
+      if (photo_path) profilePhotoPath = photo_path;
+    } else if (p.profilePhoto && /^https?:/i.test(p.profilePhoto) && profilePhotoPath) {
+      photo_path = profilePhotoPath; // pulled signed URL → keep the durable path
+    } else {
+      photo_path = p.profilePhoto ?? null;
+    }
   }
   const row: Record<string, unknown> = {
     user_id: uid,
@@ -182,7 +199,15 @@ export async function pushProfile(uid: string, p: {
 
 export async function pushDream(uid: string, d: CloudDream): Promise<void> {
   if (!supabase) return;
-  const cover_path = await coverToStored(uid, "dreams", d.id, d.cover);
+  let cover_path: string | null;
+  if (d.cover && /^data:image/i.test(d.cover)) {
+    cover_path = await uploadImage(uid, "dreams", d.id, d.cover);
+    if (cover_path) coverPathById.set(d.id, cover_path);
+  } else if (d.cover && /^https?:/i.test(d.cover) && coverPathById.has(d.id)) {
+    cover_path = coverPathById.get(d.id)!; // pulled signed URL → keep the durable path
+  } else {
+    cover_path = d.cover ?? null; // external URL / SVG / none
+  }
   try {
     await supabase.from("dreams").upsert({
       id: d.id, user_id: uid, name: d.name, emoji: d.emoji,
@@ -221,12 +246,18 @@ export async function pullSnapshot(uid: string): Promise<CloudSnapshot | null> {
     const outDreams: CloudDream[] = [];
     for (const d of dreams ?? []) {
       let cover: string | undefined = d.cover_path ?? undefined;
-      if (isStoragePath(d.cover_path)) cover = (await signed(d.cover_path)) ?? undefined;
+      if (isStoragePath(d.cover_path)) {
+        coverPathById.set(d.id, d.cover_path);
+        cover = (await signed(d.cover_path)) ?? undefined;
+      }
       outDreams.push({ id: d.id, name: d.name, emoji: d.emoji ?? "✨", target: Number(d.target), saved: Number(d.saved), cover });
     }
 
     let profilePhoto: string | null = prof?.photo_path ?? null;
-    if (isStoragePath(prof?.photo_path)) profilePhoto = (await signed(prof!.photo_path)) ?? null;
+    if (isStoragePath(prof?.photo_path)) {
+      profilePhotoPath = prof!.photo_path;
+      profilePhoto = (await signed(prof!.photo_path)) ?? null;
+    }
 
     const prefs = (prof?.prefs ?? {}) as { storySeen?: boolean; postGoalSeen?: boolean };
     return {
@@ -266,6 +297,26 @@ export async function deleteAllCloudData(uid: string): Promise<void> {
     }
   } catch {
     /* best effort */
+  }
+}
+
+/**
+ * Fully delete the signed-in user's account: data, media, and the Auth user
+ * itself (via the server-side `delete-account` Edge Function, which holds the
+ * service-role key — never the browser). Returns ok on success.
+ */
+export async function deleteAccountCloud(): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) return { ok: true }; // local-only: nothing in the cloud
+  try {
+    const { error } = await withTimeout(
+      supabase.functions.invoke("delete-account", { method: "POST" }) as Promise<{ error: unknown }>,
+      15000, "Delete account",
+    );
+    if (error) return { ok: false, error: "Couldn't delete your account. Try again." };
+    try { await supabase.auth.signOut(); } catch { /* already gone */ }
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't reach the server to delete your account." };
   }
 }
 
