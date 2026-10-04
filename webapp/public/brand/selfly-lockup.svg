@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 56" role="img" aria-label="SELFly">
+  <!-- Horizontal lockup: mark + wordmark, for headers and marketing. -->
+  <defs>
+    <linearGradient id="lk-m" x1="12" y1="46" x2="44" y2="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B8946E"/><stop offset="0.5" stop-color="#C9A988"/><stop offset="1" stop-color="#EAD4AF"/>
+    </linearGradient>
+    <linearGradient id="lk-w" x1="150" y1="40" x2="220" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C9A988"/><stop offset="1" stop-color="#EAD4AF"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4,4)">
+    <path d="M30 14 C 18 12 16 22 24 24.5 C 32 27 30 37 18 35" fill="none" stroke="url(#lk-m)" stroke-width="4.4" stroke-linecap="round"/>
+    <path d="M30 14 C 33 12 35 10 38 7.5" fill="none" stroke="url(#lk-m)" stroke-width="4.4" stroke-linecap="round"/>
+    <circle cx="39.5" cy="6.5" r="3.3" fill="#EAD4AF"/>
+  </g>
+  <text x="62" y="39" font-family="Fraunces, Georgia, serif" font-size="34" font-weight="500" letter-spacing="-1" fill="#FFFFFF">SEL</text>
+  <text x="147" y="39" font-family="Fraunces, Georgia, serif" font-size="34" font-weight="500" font-style="italic" letter-spacing="-1" fill="url(#lk-w)">Fly</text>
+</svg>

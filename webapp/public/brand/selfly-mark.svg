@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="SELFly">
+  <!-- SELF + FLY (V1 flow mark): a confident S formed by two balanced curves —
+       the self, grounded below — that releases upward into a rising spark — the
+       future. Gender-neutral, minimal, premium; reads on dark and light. -->
+  <defs>
+    <linearGradient id="selfly-g" x1="10" y1="40" x2="40" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B8946E"/>
+      <stop offset="0.5" stop-color="#C9A988"/>
+      <stop offset="1" stop-color="#EAD4AF"/>
+    </linearGradient>
+  </defs>
+  <path d="M30 14 C 18 12 16 22 24 24.5 C 32 27 30 37 18 35"
+        fill="none" stroke="url(#selfly-g)" stroke-width="4.4"
+        stroke-linecap="round"/>
+  <path d="M30 14 C 33 12 35 10 38 7.5"
+        fill="none" stroke="url(#selfly-g)" stroke-width="4.4" stroke-linecap="round"/>
+  <circle cx="39.5" cy="6.5" r="3.3" fill="#EAD4AF"/>
+</svg>

@@ -5,6 +5,7 @@ import { Img } from "@/components/Img";
 import { ProductImage } from "@/components/ProductImage";
 import { photoSrc } from "@/lib/productImages";
 import { ExploreNudge } from "@/components/ExploreNudge";
+import { SimDisclaimer } from "@/components/SimDisclaimer";
 import { useBrowseTracking } from "@/lib/tracking";
 import { EL_CATEGORIES, ELECTRONICS_APP, PRODUCTS, deals, discountPct, trending } from "@/lib/electronics";
 import { formatINR, useStore } from "@/lib/store";
@@ -53,6 +54,7 @@ function ElectronicsHome() {
 
   return (
     <Screen>
+      <SimDisclaimer vertical="electronics" />
       <NavBar title={ELECTRONICS_APP.name} back="/today" />
 
       <div className="px-6 pt-2">

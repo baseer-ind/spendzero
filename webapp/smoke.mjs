@@ -16,6 +16,11 @@ page.on("console", (m) => { if (m.type() === "error") consoleErrors.push(m.text(
 page.on("pageerror", (e) => issues.push(`PAGEERROR: ${e.message}`));
 
 const shot = (n) => page.screenshot({ path: `${OUT}_${n}.png` });
+async function dismissSim() {
+  await page.waitForTimeout(220);
+  const b = page.getByRole("button", { name: "Got it, let's explore", exact: true });
+  if (await b.count()) { await b.click(); await page.waitForTimeout(160); }
+}
 async function go(path) {
   const res = await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 20000 });
   if (!res || res.status() >= 400) issues.push(`ROUTE ${path} -> ${res ? res.status() : "none"}`);
@@ -105,6 +110,12 @@ try {
   log(`today hub shown: ${mood > 0}`);
   await page.getByText("Food", { exact: true }).click();
   await page.waitForURL("**/food", { timeout: 8000 });
+  // simulator disclaimer appears on first entry to a vertical
+  await page.waitForTimeout(260);
+  const simShown = await page.getByText("You're exploring a simulation", { exact: false }).count();
+  log(`simulator disclaimer shown on first vertical entry: ${simShown > 0}`);
+  if (simShown === 0) issues.push("SIM: disclaimer not shown on first vertical entry");
+  await dismissSim();
   await page.getByText("ZaikaGo", { exact: false }).first().click();
   await page.waitForURL("**/food/zaikago", { timeout: 8000 });
   // search for an Indian dish
@@ -155,29 +166,23 @@ try {
   await page.waitForURL("**/pause**", { timeout: 8000 });
   log("cart → checkout → place order → pause: true");
 
-  // 8) DECISION MOMENT → BUILD MY FUTURE → CONTINUE
+  // 8) DECISION MOMENT → MOVE TO FUTURE → micro-transition → auto home
   await page.waitForTimeout(250);
-  const spendLead = await page.getByText("about to spend", { exact: false }).count();
-  log(`decision leads with amount ("about to spend"): ${spendLead > 0}`);
-  if (spendLead === 0) issues.push("DECISION: amount not leading the screen");
-  const twoDirections = await page.getByText("One choice. Two directions", { exact: false }).count();
-  if (twoDirections === 0) issues.push("DECISION: 'One choice. Two directions' copy missing");
-  const dreamAtDecide = await page.getByText("India Trip", { exact: false }).count();
-  log(`dream visible with amount at decision: ${dreamAtDecide > 0}`);
-  if (dreamAtDecide === 0) issues.push("DECISION: active dream not visible at decision");
-  // trigger is optional now — pick one to verify it still records
-  await page.getByText("I'm hungry", { exact: false }).first().click().catch(() => {});
-  await page.getByRole("button", { name: /Build my future/i }).click();
-  await page.waitForTimeout(300);
+  const choiceLead = await page.getByText("your choice", { exact: false }).count();
+  log(`decision leads with "your choice" + amount: ${choiceLead > 0}`);
+  if (choiceLead === 0) issues.push("DECISION: 'your choice' + amount not leading the screen");
+  const moveBtn = await page.getByRole("button", { name: /Move it to/i }).count();
+  log(`decision offers 'Move it to <dream>' + Enjoy it: ${moveBtn > 0}`);
+  if (moveBtn === 0) issues.push("DECISION: 'Move it to' direction missing");
+  await page.getByRole("button", { name: /Move it to/i }).click();
+  // micro-transition: "moved toward" + dream + "+₹… closer", then auto-continues
+  await page.getByText("moved toward", { exact: false }).first().waitFor({ timeout: 4000 }).catch(() => {});
+  const moved = await page.getByText("moved toward", { exact: false }).count();
   const closer = await page.getByText("closer", { exact: false }).count();
-  log(`goal choice shows before→after ("…closer"): ${closer > 0}`);
-  if (closer === 0) issues.push("DECISION: before/after goal card missing");
-  await page.getByText("India Trip", { exact: false }).first().click();
-  await page.waitForURL("**/continue", { timeout: 8000 });
-  await page.getByText("craving ends here", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
-  const cravingEnds = await page.getByText("craving ends here", { exact: false }).count();
-  log(`continue screen ("craving ends here"): ${cravingEnds > 0}`);
-  await shot("continue");
+  log(`micro-transition shows "moved toward … closer": ${moved > 0 && closer > 0}`);
+  if (moved === 0 || closer === 0) issues.push("DECISION: micro-transition (moved toward/closer) missing");
+  await shot("moved");
+  await page.waitForURL(`${BASE}/`, { timeout: 4000 }).catch(() => {});
 
   // 9) BUY PATH (enjoy it) — go through food again quickly
   await go("/food/zaikago/udupi-grand");
@@ -195,9 +200,10 @@ try {
   await page.waitForTimeout(250);
   await page.getByRole("button", { name: /Enjoy it/i }).click();
   await page.waitForTimeout(400);
-  const enjoy = await page.getByText("You made the choice consciously", { exact: false }).count();
-  log(`buy path → "Enjoy it": ${enjoy > 0}`);
-  if (enjoy === 0) issues.push("PAUSE: buy path did not reach Enjoy it");
+  const enjoy = await page.getByText("chose this consciously", { exact: false }).count();
+  log(`buy path → "Enjoy it" micro-ack: ${enjoy > 0}`);
+  if (enjoy === 0) issues.push("PAUSE: buy path did not reach Enjoy it acknowledgement");
+  await page.waitForURL(`${BASE}/`, { timeout: 4000 }).catch(() => {});
 
   // 9b) MONEY YOU KEPT
   await go("/savings");
@@ -242,16 +248,17 @@ try {
   await page.waitForTimeout(250);
   const hasTrip = await page.getByText("India Trip", { exact: false }).count();
   const hasHome = await page.getByText("Dream Home", { exact: false }).count();
-  log(`both dreams shown at decision: trip=${hasTrip > 0} home=${hasHome > 0}`);
+  log(`both dreams selectable at decision: trip=${hasTrip > 0} home=${hasHome > 0}`);
   if (hasTrip === 0 || hasHome === 0) issues.push("DECISION: not all dreams shown with multiple goals");
-  await page.getByRole("button", { name: /Build my future/i }).click();
-  await page.waitForTimeout(300);
-  // choose the second goal specifically
-  await page.getByText("Dream Home", { exact: false }).first().click();
-  await page.waitForURL("**/continue", { timeout: 8000 });
+  // pick the second goal via the quiet destination switch, then move it
+  await page.getByRole("button", { name: /Dream Home/i }).first().click();
+  await page.waitForTimeout(150);
+  await page.getByRole("button", { name: /Move it to Dream Home/i }).click();
+  await page.getByText("moved toward", { exact: false }).first().waitFor({ timeout: 4000 }).catch(() => {});
   const movedHome = await page.getByText("Dream Home", { exact: false }).count();
   log(`redirect routed to chosen goal (Dream Home): ${movedHome > 0}`);
   if (movedHome === 0) issues.push("DECISION: redirect did not route to the chosen goal");
+  await page.waitForURL(`${BASE}/`, { timeout: 4000 }).catch(() => {});
 
   // 9e) ELECTRONICS vertical (browse-heavy) + tracking
   log("\n-- electronics vertical --");
@@ -260,6 +267,7 @@ try {
   log(`electronics live on today: ${elLive > 0}`);
   await page.getByText("Electronics", { exact: true }).click();
   await page.waitForURL("**/electronics", { timeout: 8000 });
+  await dismissSim();
   await page.getByText("Deals of the day", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
   const deals = await page.getByText("Deals of the day", { exact: false }).count();
   log(`techbazaar deals rail: ${deals > 0}`);
@@ -363,6 +371,7 @@ try {
   // deep-test Grocery end to end
   await page.getByText("Grocery", { exact: true }).click();
   await page.waitForURL("**/market/grocery", { timeout: 8000 });
+  await dismissSim();
   await page.getByText("Top deals", { exact: false }).first().waitFor({ timeout: 6000 }).catch(() => {});
   const gHub = await page.getByText("Top deals", { exact: false }).count();
   log(`grocery storefront loads: ${gHub > 0}`);

@@ -286,7 +286,17 @@ function StatusBar() {
   return null;
 }
 
+function homeInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "Y";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 function TopBar() {
+  const { account, name, profilePhoto, imageFor } = useStore();
+  const photo = imageFor(profilePhoto);
+  const displayName = account?.name || name || "You";
   return (
     <div className="flex items-center justify-between px-6 pt-5">
       <div className="flex items-center gap-2.5">
@@ -296,8 +306,12 @@ function TopBar() {
           <p className="text-[11px] text-muted-foreground">Choose for your future self.</p>
         </div>
       </div>
-      <Link to="/profile" aria-label="Profile" className="h-10 w-10 rounded-full bg-surface-elevated ring-1 ring-white/10 grid place-items-center text-foreground/80">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="3.4" stroke="currentColor" strokeWidth="1.5" /><path d="M4.5 20c1.6-3.6 4.6-5.5 7.5-5.5s5.9 1.9 7.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+      <Link to="/profile" aria-label="Profile" className="h-11 w-11 overflow-hidden rounded-full ring-1 ring-white/12 grid place-items-center bg-surface-elevated">
+        {photo ? (
+          <img src={photo} alt={displayName} className="h-full w-full object-cover" />
+        ) : (
+          <span className="font-display text-[15px] text-gold">{homeInitials(displayName)}</span>
+        )}
       </Link>
     </div>
   );

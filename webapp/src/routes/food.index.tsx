@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { NavBar, Screen } from "@/components/Shell";
+import { SimDisclaimer } from "@/components/SimDisclaimer";
 import { FOOD_APPS } from "@/lib/catalog";
 
 export const Route = createFileRoute("/food/")({
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/food/")({
 function FoodApps() {
   return (
     <Screen>
+      <SimDisclaimer vertical="food" />
       <NavBar title="Food Delivery" back="/today" />
       <div className="px-6 pt-4 animate-rise">
         <p className="text-[11px] uppercase tracking-[0.28em] text-gold/80">order from top apps</p>

@@ -5,6 +5,7 @@ import { Img } from "@/components/Img";
 import { ProductImage } from "@/components/ProductImage";
 import { photoSrc } from "@/lib/productImages";
 import { ExploreNudge } from "@/components/ExploreNudge";
+import { SimDisclaimer } from "@/components/SimDisclaimer";
 import { useBrowseTracking } from "@/lib/tracking";
 import { dealsFor, discountPct, vertical } from "@/lib/market";
 import { formatINR, useStore } from "@/lib/store";
@@ -64,6 +65,7 @@ function MarketHome() {
 
   return (
     <Screen>
+      <SimDisclaimer vertical={(v.label ?? v.name).toLowerCase()} />
       <NavBar title={v.name} back="/today" />
 
       <div className="px-6 pt-2">

@@ -57,8 +57,13 @@ export function SelflyMark({
   );
 }
 
-/** Compact symbol-only mark (the rising spark in a soft champagne ring). */
+/**
+ * The SELFly symbol (V1 flow mark): a confident S — the self, grounded —
+ * releasing upward into a rising spark — the future. Primary recognisable mark;
+ * used for the app icon, splash, and headers. Renders on dark and light.
+ */
 export function SelflyGlyph({ size = 36, className = "" }: { size?: number; className?: string }) {
+  const gid = `sg${Math.round(size * 100)}`;
   return (
     <svg
       width={size}
@@ -68,9 +73,28 @@ export function SelflyGlyph({ size = 36, className = "" }: { size?: number; clas
       aria-label="SELFly"
       role="img"
     >
-      <circle cx="24" cy="24" r="22" fill="none" stroke="#C9A988" strokeOpacity="0.35" strokeWidth="1.5" />
-      <path d="M12 36 Q 26 32 38 12" fill="none" stroke="#C9A988" strokeWidth="2.4" strokeLinecap="round" />
-      <circle cx="38" cy="12" r="3.4" fill="#E3CBA5" />
+      <defs>
+        <linearGradient id={gid} x1="10" y1="40" x2="40" y2="8" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#B8946E" />
+          <stop offset="0.5" stopColor="#C9A988" />
+          <stop offset="1" stopColor="#EAD4AF" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M30 14 C 18 12 16 22 24 24.5 C 32 27 30 37 18 35"
+        fill="none"
+        stroke={`url(#${gid})`}
+        strokeWidth="4.4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M30 14 C 33 12 35 10 38 7.5"
+        fill="none"
+        stroke={`url(#${gid})`}
+        strokeWidth="4.4"
+        strokeLinecap="round"
+      />
+      <circle cx="39.5" cy="6.5" r="3.3" fill="#EAD4AF" />
     </svg>
   );
 }
